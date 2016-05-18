@@ -1,0 +1,18 @@
+{
+	"ImportPath": "github.com/tsaikd/go-raml-parser",
+	"GoVersion": "go1.6",
+	"Deps": [
+		{
+			"ImportPath": "github.com/advance512/yaml",
+			"Rev": "e401b2b026855a4fa8e7014d553ae5bdfccb21cd"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Rev": "9eaa109385513bdfeb82ae6bb7f89211fec97134"
+		},
+		{
+			"ImportPath": "github.com/tsaikd/KDGoLib",
+			"Rev": "b89d09672d2326fb2b355bb74099cfe7bec3b909"
+		}
+	]
+}

@@ -1,0 +1,3 @@
+[submodule "parser/raml-examples"]
+	path = parser/raml-examples
+	url = https://github.com/raml-org/raml-examples
