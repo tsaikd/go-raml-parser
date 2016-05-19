@@ -42,3 +42,27 @@ func (t *Example) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	t.Type = "object"
 	return
 }
+
+// IsEmpty return true if Example is empty
+func (t Example) IsEmpty() bool {
+	if t.String != "" {
+		return false
+	}
+	if len(t.Map) > 0 {
+		return false
+	}
+	return true
+}
+
+// PostProcess for fill default example by type if not set
+func (t *Example) PostProcess(rootdoc RootDocument, exampleType string) (err error) {
+	if !t.IsEmpty() {
+		return
+	}
+
+	if rootType, exist := rootdoc.Types[exampleType]; exist {
+		*t = rootType.Example
+	}
+
+	return
+}

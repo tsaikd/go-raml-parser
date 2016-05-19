@@ -72,3 +72,15 @@ type RootDocument struct {
 	// For example, /users and /{groupId}.
 	Resources Resources `yaml:",regexp:/.*" json:"resources,omitempty"`
 }
+
+// PostProcess for fill some field from RootDocument default config
+func (t *RootDocument) PostProcess() (err error) {
+	rootdoc := *t
+	if err = t.Types.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Resources.PostProcess(rootdoc); err != nil {
+		return
+	}
+	return
+}

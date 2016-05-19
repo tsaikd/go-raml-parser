@@ -31,3 +31,8 @@ type ObjectType struct {
 	// Default: The name of the type
 	DiscriminatorValue Unimplement `yaml:"discriminatorValue" json:"discriminatorValue,omitempty"`
 }
+
+// PostProcess for fill some field from RootDocument default config
+func (t *ObjectType) PostProcess(rootdoc RootDocument) (err error) {
+	return
+}

@@ -1,7 +1,17 @@
 package parser
 
 // Resources map of Resource
-type Resources map[string]Resource
+type Resources map[string]*Resource
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Resources) PostProcess(rootdoc RootDocument) (err error) {
+	for _, resource := range *t {
+		if err = resource.PostProcess(rootdoc); err != nil {
+			return
+		}
+	}
+	return
+}
 
 // Resource is identified by its relative URI, which MUST begin with a slash
 // ("/"). Every node whose key begins with a slash, and is either at the root
@@ -51,4 +61,33 @@ type Resource struct {
 	// A nested resource, which is identified as any node whose name begins
 	// with a slash ("/"), and is therefore treated as a relative URI.
 	Resources Resources `yaml:",regexp:/.*" json:"resources,omitempty"`
+}
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Resource) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.Get.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Patch.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Put.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Post.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Delete.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Options.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Head.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Resources.PostProcess(rootdoc); err != nil {
+		return
+	}
+	return
 }

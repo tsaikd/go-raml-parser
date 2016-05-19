@@ -63,3 +63,8 @@ type TypeDeclaration struct {
 	// The capability to configure XML serialization of this type instance.
 	XML Unimplement `yaml:"xml" json:"xml,omitempty"`
 }
+
+// PostProcess for fill default example by type if not set
+func (t *TypeDeclaration) PostProcess(rootdoc RootDocument) (err error) {
+	return t.Example.PostProcess(rootdoc, t.Type)
+}

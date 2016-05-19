@@ -3,7 +3,7 @@ package parser
 import "strings"
 
 // Properties map of Property
-type Properties map[string]Property
+type Properties map[string]*Property
 
 // Property of a object type
 type Property struct {
@@ -36,5 +36,13 @@ func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error
 		return
 	}
 
+	return
+}
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Property) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.TypeDeclaration.PostProcess(rootdoc); err != nil {
+		return
+	}
 	return
 }

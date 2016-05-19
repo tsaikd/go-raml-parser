@@ -79,6 +79,13 @@ func (t parserImpl) ParseData(data []byte) (rootdoc RootDocument, err error) {
 		}
 	}
 
-	err = yaml.Unmarshal(data, &rootdoc)
+	if err = yaml.Unmarshal(data, &rootdoc); err != nil {
+		return
+	}
+
+	if err = rootdoc.PostProcess(); err != nil {
+		return
+	}
+
 	return
 }

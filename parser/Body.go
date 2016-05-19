@@ -27,7 +27,17 @@ type Bodies struct {
 	// Resources CAN have alternate representations. For example, an API
 	// might support both JSON and XML representations. This is the map
 	// between MIME-type and the body definition related to it.
-	ForMIMEType map[string]Body `yaml:",regexp:.*"`
+	ForMIMEType map[string]*Body `yaml:",regexp:.*"`
+}
+
+// PostProcess for fill default example by type if not set
+func (t *Bodies) PostProcess(rootdoc RootDocument) (err error) {
+	for _, body := range t.ForMIMEType {
+		if err = body.PostProcess(rootdoc); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // Body used for Bodies.
@@ -38,4 +48,12 @@ type Bodies struct {
 // support both JSON and XML representations.
 type Body struct {
 	APIType
+}
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Body) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.APIType.PostProcess(rootdoc); err != nil {
+		return
+	}
+	return
 }

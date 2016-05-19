@@ -3,7 +3,7 @@ package parser
 import "encoding/json"
 
 // Responses map of Response
-type Responses map[HTTPCode]Response
+type Responses map[HTTPCode]*Response
 
 // MarshalJSON marshal to json
 func (t Responses) MarshalJSON() ([]byte, error) {
@@ -12,6 +12,16 @@ func (t Responses) MarshalJSON() ([]byte, error) {
 		data[k.String()] = v
 	}
 	return json.Marshal(data)
+}
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Responses) PostProcess(rootdoc RootDocument) (err error) {
+	for _, response := range *t {
+		if err = response.PostProcess(rootdoc); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // Response The value of a response declaration is a map that can contain any
@@ -32,4 +42,12 @@ type Response struct {
 
 	// The body of the response
 	Bodies Bodies `yaml:"body"`
+}
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Response) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.Bodies.PostProcess(rootdoc); err != nil {
+		return
+	}
+	return
 }

@@ -49,3 +49,11 @@ type Method struct {
 	// The security schemes that apply to this method.
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`
 }
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Method) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.Responses.PostProcess(rootdoc); err != nil {
+		return
+	}
+	return
+}
