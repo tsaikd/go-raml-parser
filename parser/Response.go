@@ -7,6 +7,10 @@ type Responses map[HTTPCode]*Response
 
 // MarshalJSON marshal to json
 func (t Responses) MarshalJSON() ([]byte, error) {
+	if t.IsEmpty() {
+		return json.Marshal(nil)
+	}
+
 	data := map[string]interface{}{}
 	for k, v := range t {
 		data[k.String()] = v
@@ -24,6 +28,11 @@ func (t *Responses) PostProcess(rootdoc RootDocument) (err error) {
 	return
 }
 
+// IsEmpty return true if Responses has no element
+func (t Responses) IsEmpty() bool {
+	return len(t) < 1
+}
+
 // Response The value of a response declaration is a map that can contain any
 // of the following key-value pairs:
 type Response struct {
@@ -38,14 +47,17 @@ type Response struct {
 	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// Detailed information about any response headers returned by this method
-	Headers Unimplement `yaml:"headers" json:"headers,omitempty"`
+	Headers Headers `yaml:"headers" json:"headers,omitempty"`
 
 	// The body of the response
-	Bodies Bodies `yaml:"body"`
+	Bodies Bodies `yaml:"body" json:"body,omitempty"`
 }
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Response) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.Headers.PostProcess(rootdoc); err != nil {
+		return
+	}
 	if err = t.Bodies.PostProcess(rootdoc); err != nil {
 		return
 	}

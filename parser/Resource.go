@@ -22,11 +22,11 @@ type Resource struct {
 	// node is not defined for a resource, documentation tools SHOULD refer to
 	// the resource by its key, which acts as the resource name. For example,
 	// tools should refer to the relative URI /jobs.
-	DisplayName Unimplement `yaml:"displayName" json:"displayName,omitempty"`
+	DisplayName string `yaml:"displayName" json:"displayName,omitempty"`
 
 	// A substantial, human-friendly description of a resource. Its value is a
 	// string and MAY be formatted using markdown.
-	Description Unimplement `yaml:"description" json:"description,omitempty"`
+	Description string `yaml:"description" json:"description,omitempty"`
 
 	// Annotations to be applied to this API. An annotation is a map having
 	// a key that begins with "(" and ends with ")" where the text enclosed in

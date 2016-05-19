@@ -10,11 +10,11 @@ type Method struct {
 	// An alternate, human-friendly method name in the context of the resource.
 	// If the displayName node is not defined for a method, documentation tools
 	// SHOULD refer to the resource by its key, which acts as the method name.
-	DisplayName Unimplement `yaml:"displayName" json:"displayName,omitempty"`
+	DisplayName string `yaml:"displayName" json:"displayName,omitempty"`
 
 	// A longer, human-friendly description of the method in the context of the
 	// resource. Its value is a string and MAY be formatted using markdown.
-	Description Unimplement `yaml:"description" json:"description,omitempty"`
+	Description string `yaml:"description" json:"description,omitempty"`
 
 	// Annotations to be applied to this API. An annotation is a map having
 	// a key that begins with "(" and ends with ")" where the text enclosed in
@@ -27,7 +27,7 @@ type Method struct {
 	QueryParameters Unimplement `yaml:"queryParameters" json:"queryParameters,omitempty"`
 
 	// Detailed information about any request headers needed by this method.
-	Headers Unimplement `yaml:"headers" json:"headers,omitempty"`
+	Headers Headers `yaml:"headers" json:"headers,omitempty"`
 
 	// The query string needed by this method. Mutually exclusive with queryParameters.
 	QueryString Unimplement `yaml:"queryString" json:"queryString,omitempty"`
@@ -36,7 +36,7 @@ type Method struct {
 	Responses Responses `yaml:"responses"`
 
 	// A request body that the method admits.
-	Body Unimplement `yaml:"body" json:"body,omitempty"`
+	Bodies Bodies `yaml:"body" json:"body,omitempty"`
 
 	// Explicitly specify the protocol(s) used to invoke a method, thereby
 	// overriding the protocols set elsewhere, for example in the baseUri
@@ -52,8 +52,18 @@ type Method struct {
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Method) PostProcess(rootdoc RootDocument) (err error) {
+	if err = t.Headers.PostProcess(rootdoc); err != nil {
+		return
+	}
 	if err = t.Responses.PostProcess(rootdoc); err != nil {
 		return
 	}
 	return
+}
+
+// IsEmpty return true if Method is empty
+func (t *Method) IsEmpty() bool {
+	return t.Headers.IsEmpty() &&
+		t.Responses.IsEmpty() &&
+		t.Bodies.IsEmpty()
 }

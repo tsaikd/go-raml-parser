@@ -40,6 +40,11 @@ func (t *Bodies) PostProcess(rootdoc RootDocument) (err error) {
 	return
 }
 
+// IsEmpty return true if Bodies is empty
+func (t Bodies) IsEmpty() bool {
+	return len(t.ForMIMEType) < 1
+}
+
 // Body used for Bodies.
 // Some method verbs expect the resource to be sent as a request body.
 // For example, to create a resource, the request must include the details of

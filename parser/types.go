@@ -14,3 +14,7 @@ type HTTPCode int // e.g. 200
 func (t HTTPCode) String() string {
 	return strconv.Itoa(int(t))
 }
+
+const typeString = "string"
+const typeNumber = "number"
+const typeObject = "object"

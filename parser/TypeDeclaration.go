@@ -40,7 +40,7 @@ type TypeDeclaration struct {
 	// documentation generators to generate sample values for an object of this
 	// type. The "examples" facet MUST not be available when the "example"
 	// facet is already defined. See section Examples for more information.
-	Examples Unimplement `yaml:"examples" json:"examples,omitempty"`
+	Examples Examples `yaml:"examples" json:"examples,omitempty"`
 
 	// An alternate, human-friendly name for the type
 	DisplayName Unimplement `yaml:"displayName" json:"displayName,omitempty"`
