@@ -19,9 +19,9 @@ func (t Responses) MarshalJSON() ([]byte, error) {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Responses) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Responses) PostProcess(conf PostProcessConfig) (err error) {
 	for _, response := range *t {
-		if err = response.PostProcess(rootdoc); err != nil {
+		if err = response.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -54,11 +54,11 @@ type Response struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Response) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Headers.PostProcess(rootdoc); err != nil {
+func (t *Response) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Headers.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Bodies.PostProcess(rootdoc); err != nil {
+	if err = t.Bodies.PostProcess(conf); err != nil {
 		return
 	}
 	return

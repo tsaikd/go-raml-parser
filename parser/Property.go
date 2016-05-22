@@ -6,9 +6,9 @@ import "strings"
 type Properties map[string]*Property
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Properties) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Properties) PostProcess(conf PostProcessConfig) (err error) {
 	for name, property := range *t {
-		if err = property.PostProcess(rootdoc); err != nil {
+		if err = property.PostProcess(conf); err != nil {
 			return
 		}
 		if strings.HasSuffix(name, "?") {
@@ -50,11 +50,11 @@ func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Property) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.TypeDeclaration.PostProcess(rootdoc); err != nil {
+func (t *Property) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.TypeDeclaration.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.PropertyExtra.PostProcess(rootdoc); err != nil {
+	if err = t.PropertyExtra.PostProcess(conf); err != nil {
 		return
 	}
 	return
@@ -68,6 +68,6 @@ type PropertyExtra struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *PropertyExtra) PostProcess(rootdoc RootDocument) (err error) {
+func (t *PropertyExtra) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }

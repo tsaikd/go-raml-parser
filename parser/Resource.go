@@ -4,9 +4,9 @@ package parser
 type Resources map[string]*Resource
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Resources) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
 	for _, resource := range *t {
-		if err = resource.PostProcess(rootdoc); err != nil {
+		if err = resource.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -64,29 +64,29 @@ type Resource struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Resource) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Get.PostProcess(rootdoc); err != nil {
+func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Get.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Patch.PostProcess(rootdoc); err != nil {
+	if err = t.Patch.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Put.PostProcess(rootdoc); err != nil {
+	if err = t.Put.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Post.PostProcess(rootdoc); err != nil {
+	if err = t.Post.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Delete.PostProcess(rootdoc); err != nil {
+	if err = t.Delete.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Options.PostProcess(rootdoc); err != nil {
+	if err = t.Options.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Head.PostProcess(rootdoc); err != nil {
+	if err = t.Head.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Resources.PostProcess(rootdoc); err != nil {
+	if err = t.Resources.PostProcess(conf); err != nil {
 		return
 	}
 	return

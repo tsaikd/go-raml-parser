@@ -31,9 +31,9 @@ type Bodies struct {
 }
 
 // PostProcess for fill default example by type if not set
-func (t *Bodies) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
 	for _, body := range t.ForMIMEType {
-		if err = body.PostProcess(rootdoc); err != nil {
+		if err = body.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -56,8 +56,8 @@ type Body struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Body) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.APIType.PostProcess(rootdoc); err != nil {
+func (t *Body) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.APIType.PostProcess(conf); err != nil {
 		return
 	}
 	return

@@ -29,10 +29,10 @@ type Parser interface {
 	ParseData(data []byte, workdir string) (rootdoc RootDocument, err error)
 
 	// ParseLibraryFile Parse a RAML library file, referenced by RootDocument
-	ParseLibraryFile(filePath string, rootdoc RootDocument) (library Library, err error)
+	ParseLibraryFile(filePath string, conf PostProcessConfig) (library Library, err error)
 
 	// ParseLibraryData Parse a RAML library data, referenced by RootDocument
-	ParseLibraryData(data []byte, rootdoc RootDocument) (library Library, err error)
+	ParseLibraryData(data []byte, conf PostProcessConfig) (library Library, err error)
 }
 
 type parserImpl struct {
@@ -94,23 +94,24 @@ func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument
 		return
 	}
 
-	if err = rootdoc.PostProcess(&t); err != nil {
+	conf := newPostProcessConfig(rootdoc, rootdoc.Library, &t)
+	if err = rootdoc.PostProcess(conf); err != nil {
 		return
 	}
 
 	return
 }
 
-func (t parserImpl) ParseLibraryFile(filePath string, rootdoc RootDocument) (library Library, err error) {
+func (t parserImpl) ParseLibraryFile(filePath string, conf PostProcessConfig) (library Library, err error) {
 	filedata, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return
 	}
 
-	return t.ParseLibraryData(filedata, rootdoc)
+	return t.ParseLibraryData(filedata, conf)
 }
 
-func (t parserImpl) ParseLibraryData(data []byte, rootdoc RootDocument) (library Library, err error) {
+func (t parserImpl) ParseLibraryData(data []byte, conf PostProcessConfig) (library Library, err error) {
 	if t.checkRAMLVersion {
 		if err = t.CheckRAMLVersion(data); err != nil {
 			return
@@ -121,7 +122,8 @@ func (t parserImpl) ParseLibraryData(data []byte, rootdoc RootDocument) (library
 		return
 	}
 
-	if err = library.PostProcess(rootdoc, &t); err != nil {
+	confWrap := newPostProcessConfig(conf.RootDocument(), library, &t)
+	if err = library.PostProcess(confWrap); err != nil {
 		return
 	}
 

@@ -65,11 +65,11 @@ type TypeDeclaration struct {
 }
 
 // PostProcess for fill default example by type if not set
-func (t *TypeDeclaration) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Example.PostProcess(rootdoc, t.Type); err != nil {
+func (t *TypeDeclaration) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Example.PostProcess(conf, t.Type); err != nil {
 		return
 	}
-	if err = t.Examples.PostProcess(rootdoc, t.Type); err != nil {
+	if err = t.Examples.PostProcess(conf, t.Type); err != nil {
 		return
 	}
 	return

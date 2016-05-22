@@ -90,8 +90,14 @@ func Test_ParseDefiningExamples(t *testing.T) {
 		if assert.Contains(resource.Post.Bodies.ForMIMEType, "application/json") {
 			body := resource.Post.Bodies.ForMIMEType["application/json"]
 			require.Equal("Org", body.Type)
-			require.Equal("Doe Enterprise", body.Example.Value.Map["name"].String)
-			require.Equal("Silver", body.Example.Value.Map["value"].String)
+			if assert.Contains(body.Example.Value.Map, "name") {
+				name := body.Example.Value.Map["name"]
+				require.Equal("Doe Enterprise", name.String)
+			}
+			if assert.Contains(body.Example.Value.Map, "value") {
+				value := body.Example.Value.Map["value"]
+				require.Equal("Silver", value.String)
+			}
 		}
 		require.Equal("Returns an organisation entity.", resource.Get.Description)
 		if assert.Contains(resource.Get.Responses, HTTPCode(201)) {

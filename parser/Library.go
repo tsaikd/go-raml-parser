@@ -6,9 +6,9 @@ import "path/filepath"
 type Libraries map[string]*LibraryWrap
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Libraries) PostProcess(rootdoc RootDocument, parser Parser) (err error) {
+func (t *Libraries) PostProcess(conf PostProcessConfig) (err error) {
 	for _, lib := range *t {
-		if err = lib.PostProcess(rootdoc, parser); err != nil {
+		if err = lib.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -37,16 +37,16 @@ func (t *LibraryWrap) UnmarshalYAML(unmarshaler func(interface{}) error) (err er
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *LibraryWrap) PostProcess(rootdoc RootDocument, parser Parser) (err error) {
+func (t *LibraryWrap) PostProcess(conf PostProcessConfig) (err error) {
 	if t.String != "" {
-		filePath := filepath.Join(rootdoc.WorkingDirectory, t.String)
-		if t.Library, err = parser.ParseLibraryFile(filePath, rootdoc); err != nil {
+		filePath := filepath.Join(conf.RootDocument().WorkingDirectory, t.String)
+		if t.Library, err = conf.Parser().ParseLibraryFile(filePath, conf); err != nil {
 			return
 		}
 		t.String = ""
 	}
 
-	if err = t.Library.PostProcess(rootdoc, parser); err != nil {
+	if err = t.Library.PostProcess(conf); err != nil {
 		return
 	}
 	return
@@ -95,14 +95,15 @@ type Library struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Library) PostProcess(rootdoc RootDocument, parser Parser) (err error) {
-	if err = t.Types.PostProcess(rootdoc); err != nil {
+func (t *Library) PostProcess(conf PostProcessConfig) (err error) {
+	confWrap := newPostProcessConfig(conf.RootDocument(), *t, conf.Parser())
+	if err = t.Types.PostProcess(confWrap); err != nil {
 		return
 	}
-	if err = t.Traits.PostProcess(rootdoc); err != nil {
+	if err = t.Traits.PostProcess(confWrap); err != nil {
 		return
 	}
-	if err = t.Uses.PostProcess(rootdoc, parser); err != nil {
+	if err = t.Uses.PostProcess(confWrap); err != nil {
 		return
 	}
 	return

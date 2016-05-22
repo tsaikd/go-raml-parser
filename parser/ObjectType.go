@@ -33,8 +33,8 @@ type ObjectType struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *ObjectType) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Properties.PostProcess(rootdoc); err != nil {
+func (t *ObjectType) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Properties.PostProcess(conf); err != nil {
 		return
 	}
 	return

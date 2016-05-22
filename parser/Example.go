@@ -1,14 +1,28 @@
 package parser
 
+import (
+	"regexp"
+	"strings"
+
+	"github.com/tsaikd/KDGoLib/errutil"
+)
+
+// errors
+var (
+	ErrorTypeUndefined1         = errutil.NewFactory("Type %q can not find in RAML")
+	ErrorUnexpectedExampleType2 = errutil.NewFactory("Example type expected %q but got %q")
+	ErrorRequiredProperty1      = errutil.NewFactory("Property %q is required but not found")
+)
+
 // Examples The OPTIONAL examples facet can be used to attach multiple examples
 // to a type declaration. Its value is a map of key-value pairs, where each key
 // represents a unique identifier for an example and the value is a single example.
 type Examples map[string]*Example
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Examples) PostProcess(rootdoc RootDocument, exampleType string) (err error) {
+func (t *Examples) PostProcess(conf PostProcessConfig, exampleType string) (err error) {
 	for _, example := range *t {
-		if err = example.PostProcess(rootdoc, exampleType); err != nil {
+		if err = example.PostProcess(conf, exampleType); err != nil {
 			return
 		}
 	}
@@ -75,15 +89,51 @@ func (t *Example) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	return
 }
 
+func checkExampleValueType(typ APIType, value Value) (err error) {
+	switch value.Type {
+	case typeObject:
+		for name, property := range typ.Properties {
+			if property.Required {
+				if _, exist := value.Map[name]; !exist {
+					return ErrorRequiredProperty1.New(nil, name)
+				}
+			}
+		}
+		return
+	default:
+		return ErrorUnexpectedExampleType2.New(nil, typeObject, value.Type)
+	}
+}
+
 // PostProcess for fill default example by type if not set
-func (t *Example) PostProcess(rootdoc RootDocument, exampleType string) (err error) {
-	if !t.IsEmpty() {
+func (t *Example) PostProcess(conf PostProcessConfig, exampleType string) (err error) {
+	typeName := exampleType
+	if strings.HasSuffix(exampleType, "[]") {
+		typeName = exampleType[:len(exampleType)-2]
+	}
+
+	switch typeName {
+	case typeInteger, typeNumber, typeString, typeObject:
+		// no type check for RAML built-in type
+		return
+	default:
+		regValidType := regexp.MustCompile(`^[\w]+(\[\])?$`)
+		if !regValidType.MatchString(typeName) {
+			// no type check if declared by JSON
+			return
+		}
+
+		var typ *APIType
+		var exist bool
+		if typ, exist = conf.Library().Types[typeName]; !exist {
+			return ErrorTypeUndefined1.New(nil, exampleType)
+		}
+
+		if !t.IsEmpty() {
+			return checkExampleValueType(*typ, t.Value)
+		}
+
+		*t = typ.Example
 		return
 	}
-
-	if rootType, exist := rootdoc.Types[exampleType]; exist {
-		*t = rootType.Example
-	}
-
-	return
 }

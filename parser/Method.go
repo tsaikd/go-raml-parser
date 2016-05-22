@@ -51,11 +51,11 @@ type Method struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Method) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Headers.PostProcess(rootdoc); err != nil {
+func (t *Method) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Headers.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Responses.PostProcess(rootdoc); err != nil {
+	if err = t.Responses.PostProcess(conf); err != nil {
 		return
 	}
 	return

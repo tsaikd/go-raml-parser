@@ -4,9 +4,9 @@ package parser
 type Traits map[string]*Trait
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Traits) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Traits) PostProcess(conf PostProcessConfig) (err error) {
 	for _, trait := range *t {
-		if err = trait.PostProcess(rootdoc); err != nil {
+		if err = trait.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -45,11 +45,11 @@ func (t *Trait) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Trait) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Method.PostProcess(rootdoc); err != nil {
+func (t *Trait) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Method.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.TraitExtra.PostProcess(rootdoc); err != nil {
+	if err = t.TraitExtra.PostProcess(conf); err != nil {
 		return
 	}
 	return
@@ -76,6 +76,6 @@ type TraitExtra struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *TraitExtra) PostProcess(rootdoc RootDocument) (err error) {
+func (t *TraitExtra) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }

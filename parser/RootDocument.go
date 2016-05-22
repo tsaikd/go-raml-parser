@@ -24,12 +24,12 @@ func (t *RootDocument) UnmarshalYAML(unmarshaler func(interface{}) error) (err e
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *RootDocument) PostProcess(parser Parser) (err error) {
-	rootdoc := *t
-	if err = t.LibraryWrap.PostProcess(rootdoc, parser); err != nil {
+func (t *RootDocument) PostProcess(conf PostProcessConfig) (err error) {
+	confWrap := newPostProcessConfig(*t, t.Library, conf.Parser())
+	if err = t.LibraryWrap.PostProcess(confWrap); err != nil {
 		return
 	}
-	if err = t.RootDocumentExtra.PostProcess(rootdoc); err != nil {
+	if err = t.RootDocumentExtra.PostProcess(confWrap); err != nil {
 		return
 	}
 	return
@@ -76,8 +76,8 @@ type RootDocumentExtra struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *RootDocumentExtra) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Resources.PostProcess(rootdoc); err != nil {
+func (t *RootDocumentExtra) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.Resources.PostProcess(conf); err != nil {
 		return
 	}
 	return

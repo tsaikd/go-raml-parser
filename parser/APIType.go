@@ -4,9 +4,9 @@ package parser
 type APITypes map[string]*APIType
 
 // PostProcess for fill some field from RootDocument default config
-func (t *APITypes) PostProcess(rootdoc RootDocument) (err error) {
+func (t *APITypes) PostProcess(conf PostProcessConfig) (err error) {
 	for _, apitype := range *t {
-		if err = apitype.PostProcess(rootdoc); err != nil {
+		if err = apitype.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -32,11 +32,11 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *APIType) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.TypeDeclaration.PostProcess(rootdoc); err != nil {
+func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
+	if err = t.TypeDeclaration.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.ObjectType.PostProcess(rootdoc); err != nil {
+	if err = t.ObjectType.PostProcess(conf); err != nil {
 		return
 	}
 	return

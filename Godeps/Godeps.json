@@ -7,12 +7,8 @@
 			"Rev": "e401b2b026855a4fa8e7014d553ae5bdfccb21cd"
 		},
 		{
-			"ImportPath": "github.com/codegangsta/cli",
-			"Rev": "9eaa109385513bdfeb82ae6bb7f89211fec97134"
-		},
-		{
 			"ImportPath": "github.com/tsaikd/KDGoLib",
-			"Rev": "b89d09672d2326fb2b355bb74099cfe7bec3b909"
+			"Rev": "bdbc367f11989c4f4da38ad76a7df95e8fc094b5"
 		}
 	]
 }
