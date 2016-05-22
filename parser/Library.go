@@ -1,12 +1,14 @@
 package parser
 
+import "path/filepath"
+
 // Libraries map of LibraryWrap
 type Libraries map[string]*LibraryWrap
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Libraries) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Libraries) PostProcess(rootdoc RootDocument, parser Parser) (err error) {
 	for _, lib := range *t {
-		if err = lib.PostProcess(rootdoc); err != nil {
+		if err = lib.PostProcess(rootdoc, parser); err != nil {
 			return
 		}
 	}
@@ -35,8 +37,16 @@ func (t *LibraryWrap) UnmarshalYAML(unmarshaler func(interface{}) error) (err er
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *LibraryWrap) PostProcess(rootdoc RootDocument) (err error) {
-	if err = t.Library.PostProcess(rootdoc); err != nil {
+func (t *LibraryWrap) PostProcess(rootdoc RootDocument, parser Parser) (err error) {
+	if t.String != "" {
+		filePath := filepath.Join(rootdoc.WorkingDirectory, t.String)
+		if t.Library, err = parser.ParseLibraryFile(filePath, rootdoc); err != nil {
+			return
+		}
+		t.String = ""
+	}
+
+	if err = t.Library.PostProcess(rootdoc, parser); err != nil {
 		return
 	}
 	return
@@ -63,7 +73,7 @@ type Library struct {
 	Types APITypes `yaml:"types" json:"types,omitempty"`
 
 	// Declarations of traits for use within the API.
-	Traits Unimplement `yaml:"traits" json:"traits,omitempty"`
+	Traits Traits `yaml:"traits" json:"traits,omitempty"`
 
 	// Declarations of resource types for use within the API.
 	ResourceTypes Unimplement `yaml:"resourceTypes" json:"resourceTypes,omitempty"`
@@ -85,11 +95,14 @@ type Library struct {
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Library) PostProcess(rootdoc RootDocument) (err error) {
+func (t *Library) PostProcess(rootdoc RootDocument, parser Parser) (err error) {
 	if err = t.Types.PostProcess(rootdoc); err != nil {
 		return
 	}
-	if err = t.Uses.PostProcess(rootdoc); err != nil {
+	if err = t.Traits.PostProcess(rootdoc); err != nil {
+		return
+	}
+	if err = t.Uses.PostProcess(rootdoc, parser); err != nil {
 		return
 	}
 	return

@@ -7,6 +7,9 @@ package parser
 type RootDocument struct {
 	LibraryWrap
 	RootDocumentExtra
+
+	// directory of RAML file
+	WorkingDirectory string
 }
 
 // UnmarshalYAML unmarshal RootDocument from YAML
@@ -21,9 +24,9 @@ func (t *RootDocument) UnmarshalYAML(unmarshaler func(interface{}) error) (err e
 }
 
 // PostProcess for fill some field from RootDocument default config
-func (t *RootDocument) PostProcess() (err error) {
+func (t *RootDocument) PostProcess(parser Parser) (err error) {
 	rootdoc := *t
-	if err = t.LibraryWrap.PostProcess(rootdoc); err != nil {
+	if err = t.LibraryWrap.PostProcess(rootdoc, parser); err != nil {
 		return
 	}
 	if err = t.RootDocumentExtra.PostProcess(rootdoc); err != nil {

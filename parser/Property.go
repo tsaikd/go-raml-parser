@@ -24,10 +24,7 @@ func (t *Properties) PostProcess(rootdoc RootDocument) (err error) {
 // Property of a object type
 type Property struct {
 	TypeDeclaration
-
-	// Specifies that the property is required or not.
-	// Default: true.
-	Required bool `yaml:"required" json:"required"`
+	PropertyExtra
 }
 
 // UnmarshalYAML implement yaml unmarshaler
@@ -45,6 +42,9 @@ func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error
 	if err = unmarshaler(&t.TypeDeclaration); err != nil {
 		return
 	}
+	if err = unmarshaler(&t.PropertyExtra); err != nil {
+		return
+	}
 
 	return
 }
@@ -54,5 +54,20 @@ func (t *Property) PostProcess(rootdoc RootDocument) (err error) {
 	if err = t.TypeDeclaration.PostProcess(rootdoc); err != nil {
 		return
 	}
+	if err = t.PropertyExtra.PostProcess(rootdoc); err != nil {
+		return
+	}
+	return
+}
+
+// PropertyExtra contain fields no in TypeDeclaration
+type PropertyExtra struct {
+	// Specifies that the property is required or not.
+	// Default: true.
+	Required bool `yaml:"required" json:"required"`
+}
+
+// PostProcess for fill some field from RootDocument default config
+func (t *PropertyExtra) PostProcess(rootdoc RootDocument) (err error) {
 	return
 }

@@ -26,7 +26,7 @@ func Test_Parse(t *testing.T) {
 	err = parser.Config(parserConfig.CheckRAMLVersion, true)
 	require.NoError(err)
 
-	_, err = parser.ParseData([]byte("#%RAML 0.8\n"))
+	_, err = parser.ParseData([]byte("#%RAML 0.8\n"), ".")
 	require.Error(err)
 	require.True(ErrorUnexpectedRAMLVersion2.Match(err))
 }
@@ -159,7 +159,61 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 	require.Equal("http://localhost:8081/api", rootdoc.BaseURI)
 	if assert.Contains(rootdoc.Uses, "assets") {
 		use := rootdoc.Uses["assets"]
-		require.Equal("assets-lib.raml", use.String)
+		if assert.Contains(use.Types, "ProductItem") {
+			typ := use.Types["ProductItem"]
+			require.Equal(typeObject, typ.Type)
+			if assert.Contains(typ.Properties, "product_id") {
+				property := typ.Properties["product_id"]
+				require.Equal(typeString, property.Type)
+			}
+			if assert.Contains(typ.Properties, "quantity") {
+				property := typ.Properties["quantity"]
+				require.Equal(typeInteger, property.Type)
+			}
+		}
+		if assert.Contains(use.Types, "Order") {
+			typ := use.Types["Order"]
+			require.Equal(typeObject, typ.Type)
+			if assert.Contains(typ.Properties, "order_id") {
+				property := typ.Properties["order_id"]
+				require.Equal(typeString, property.Type)
+			}
+			if assert.Contains(typ.Properties, "creation_date") {
+				property := typ.Properties["creation_date"]
+				require.Equal(typeString, property.Type)
+			}
+			if assert.Contains(typ.Properties, "items") {
+				property := typ.Properties["items"]
+				require.Equal("ProductItem[]", property.Type)
+			}
+		}
+		if assert.Contains(use.Types, "Orders") {
+			typ := use.Types["Orders"]
+			require.Equal(typeObject, typ.Type)
+			if assert.Contains(typ.Properties, "orders") {
+				property := typ.Properties["orders"]
+				require.Equal("Order[]", property.Type)
+			}
+		}
+		if assert.Contains(use.Traits, "paging") {
+			trait := use.Traits["paging"]
+			if assert.Contains(trait.QueryParameters, "size") {
+				qp := trait.QueryParameters["size"]
+				require.Equal("the amount of elements of each result page", qp.Description)
+				require.Equal(typeInteger, qp.Type)
+				require.False(qp.Required)
+				require.Equal(typeInteger, qp.Example.Value.Type)
+				require.EqualValues(10, qp.Example.Value.Integer)
+			}
+			if assert.Contains(trait.QueryParameters, "page") {
+				qp := trait.QueryParameters["page"]
+				require.Equal("the page number", qp.Description)
+				require.Equal(typeInteger, qp.Type)
+				require.False(qp.Required)
+				require.Equal(typeInteger, qp.Example.Value.Type)
+				require.EqualValues(0, qp.Example.Value.Integer)
+			}
+		}
 	}
 	if assert.Contains(rootdoc.Resources, "/orders") {
 		resource := rootdoc.Resources["/orders"]
