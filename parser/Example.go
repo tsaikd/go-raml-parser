@@ -5,6 +5,16 @@ package parser
 // represents a unique identifier for an example and the value is a single example.
 type Examples map[string]*Example
 
+// PostProcess for fill some field from RootDocument default config
+func (t *Examples) PostProcess(rootdoc RootDocument, exampleType string) (err error) {
+	for _, example := range *t {
+		if err = example.PostProcess(rootdoc, exampleType); err != nil {
+			return
+		}
+	}
+	return
+}
+
 // IsEmpty return true if Examples is empty
 func (t Examples) IsEmpty() bool {
 	return len(t) < 1

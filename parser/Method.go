@@ -24,7 +24,7 @@ type Method struct {
 
 	// Detailed information about any query parameters needed by this method.
 	// Mutually exclusive with queryString.
-	QueryParameters Unimplement `yaml:"queryParameters" json:"queryParameters,omitempty"`
+	QueryParameters QueryParameters `yaml:"queryParameters" json:"queryParameters,omitempty"`
 
 	// Detailed information about any request headers needed by this method.
 	Headers Headers `yaml:"headers" json:"headers,omitempty"`
@@ -44,7 +44,7 @@ type Method struct {
 	Protocols Unimplement `yaml:"protocols" json:"protocols,omitempty"`
 
 	// A list of the traits to apply to this method.
-	Is Unimplement `yaml:"is" json:"is,omitempty"`
+	Is []*Trait `yaml:"is" json:"is,omitempty"`
 
 	// The security schemes that apply to this method.
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`

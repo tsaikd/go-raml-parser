@@ -43,11 +43,11 @@ type TypeDeclaration struct {
 	Examples Examples `yaml:"examples" json:"examples,omitempty"`
 
 	// An alternate, human-friendly name for the type
-	DisplayName Unimplement `yaml:"displayName" json:"displayName,omitempty"`
+	DisplayName string `yaml:"displayName" json:"displayName,omitempty"`
 
 	// A substantial, human-friendly description of the type. Its value is a
 	// string and MAY be formatted using markdown.
-	Description Unimplement `yaml:"description" json:"description,omitempty"`
+	Description string `yaml:"description" json:"description,omitempty"`
 
 	// Annotations to be applied to this API. An annotation is a map having a
 	// key that begins with "(" and ends with ")" where the text enclosed in
@@ -66,5 +66,11 @@ type TypeDeclaration struct {
 
 // PostProcess for fill default example by type if not set
 func (t *TypeDeclaration) PostProcess(rootdoc RootDocument) (err error) {
-	return t.Example.PostProcess(rootdoc, t.Type)
+	if err = t.Example.PostProcess(rootdoc, t.Type); err != nil {
+		return
+	}
+	if err = t.Examples.PostProcess(rootdoc, t.Type); err != nil {
+		return
+	}
+	return
 }

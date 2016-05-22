@@ -46,7 +46,7 @@ type Resource struct {
 	// A list of traits to apply to all methods declared (implicitly or
 	// explicitly) for this resource. Individual methods can override this
 	// declaration.
-	Is Unimplement `yaml:"is" json:"is,omitempty"`
+	Is []*Trait `yaml:"is" json:"is,omitempty"`
 
 	// The resource type that this resource inherits.
 	Type Unimplement `yaml:"type" json:"type,omitempty"`

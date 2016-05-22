@@ -35,11 +35,10 @@ type Property struct {
 func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	t.Required = true
 
-	err = unmarshaler(&t.Type)
-	if err == nil {
+	if err = unmarshaler(&t.Type); err == nil {
 		return
 	}
-	if !strings.Contains(err.Error(), "into string") {
+	if !isErrorYAMLIntoString(err) {
 		return
 	}
 
