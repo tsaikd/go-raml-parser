@@ -10,5 +10,5 @@ WARNING: *Lots of features are not implemented yet.*
 * [parser](parser) provide a go library for parse RAML file
 
 ## Reference:
-* https://github.com/raml-org/raml-spec/blob/raml-10/versions/raml-10/raml-10.md
+* https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md
 * https://github.com/go-raml/raml
