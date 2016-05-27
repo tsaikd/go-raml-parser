@@ -5,6 +5,9 @@ type Headers map[string]*Header
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Headers) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	for _, header := range *t {
 		if err = header.PostProcess(conf); err != nil {
 			return

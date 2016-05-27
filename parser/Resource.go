@@ -5,6 +5,9 @@ type Resources map[string]*Resource
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	for _, resource := range *t {
 		if err = resource.PostProcess(conf); err != nil {
 			return
@@ -65,6 +68,9 @@ type Resource struct {
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	if err = t.Get.PostProcess(conf); err != nil {
 		return
 	}

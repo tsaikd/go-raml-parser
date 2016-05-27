@@ -5,6 +5,9 @@ type Traits map[string]*Trait
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Traits) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	for _, trait := range *t {
 		if err = trait.PostProcess(conf); err != nil {
 			return
@@ -46,6 +49,9 @@ func (t *Trait) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Trait) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	if err = t.Method.PostProcess(conf); err != nil {
 		return
 	}

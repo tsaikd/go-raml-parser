@@ -7,6 +7,9 @@ type Properties map[string]*Property
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Properties) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	for name, property := range *t {
 		if err = property.PostProcess(conf); err != nil {
 			return
@@ -51,6 +54,9 @@ func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Property) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	if err = t.TypeDeclaration.PostProcess(conf); err != nil {
 		return
 	}

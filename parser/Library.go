@@ -7,6 +7,9 @@ type Libraries map[string]*LibraryWrap
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Libraries) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	for _, lib := range *t {
 		if err = lib.PostProcess(conf); err != nil {
 			return
@@ -38,6 +41,9 @@ func (t *LibraryWrap) UnmarshalYAML(unmarshaler func(interface{}) error) (err er
 
 // PostProcess for fill some field from RootDocument default config
 func (t *LibraryWrap) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	if t.String != "" {
 		filePath := filepath.Join(conf.RootDocument().WorkingDirectory, t.String)
 		if t.Library, err = conf.Parser().ParseLibraryFile(filePath, conf); err != nil {
@@ -96,6 +102,9 @@ type Library struct {
 
 // PostProcess for fill some field from RootDocument default config
 func (t *Library) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	confWrap := newPostProcessConfig(conf.RootDocument(), *t, conf.Parser())
 	if err = t.Types.PostProcess(confWrap); err != nil {
 		return

@@ -5,6 +5,9 @@ type QueryParameters map[string]*QueryParameter
 
 // PostProcess for fill some field from RootDocument default config
 func (t *QueryParameters) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	for _, qp := range *t {
 		if err = qp.PostProcess(conf); err != nil {
 			return

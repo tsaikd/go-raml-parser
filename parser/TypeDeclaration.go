@@ -66,6 +66,9 @@ type TypeDeclaration struct {
 
 // PostProcess for fill default example by type if not set
 func (t *TypeDeclaration) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
 	if err = t.Example.PostProcess(conf, t.Type); err != nil {
 		return
 	}
