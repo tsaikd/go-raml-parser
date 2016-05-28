@@ -18,6 +18,18 @@ func (t *Libraries) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t Libraries) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // LibraryWrap wrap Library because Library may be a string for external library file
 type LibraryWrap struct {
 	String string
@@ -58,6 +70,12 @@ func (t *LibraryWrap) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t LibraryWrap) IsEmpty() bool {
+	return t.String == "" &&
+		t.Library.IsEmpty()
+}
+
 // Library RAML libraries are used to combine any collection of data type
 // declarations, resource type declarations, trait declarations, and security
 // scheme declarations into modular, externalized, reusable groups.
@@ -85,13 +103,13 @@ type Library struct {
 	ResourceTypes Unimplement `yaml:"resourceTypes" json:"resourceTypes,omitempty"`
 
 	// Declarations of annotation types for use by annotations.
-	AnnotationTypes Unimplement `yaml:"annotationTypes" json:"annotationTypes,omitempty"`
+	AnnotationTypes AnnotationTypes `yaml:"annotationTypes" json:"annotationTypes,omitempty"`
 
 	// Annotations to be applied to this API. An annotation is a map having
 	// a key that begins with "(" and ends with ")" where the text enclosed
 	// in parentheses is the annotation name, and the value is an instance of
 	// that annotation.
-	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
+	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// Declarations of security schemes for use within the API.
 	SecuritySchemes Unimplement `yaml:"securitySchemes" json:"securitySchemes,omitempty"`
@@ -106,14 +124,42 @@ func (t *Library) PostProcess(conf PostProcessConfig) (err error) {
 		return
 	}
 	confWrap := newPostProcessConfig(conf.RootDocument(), *t, conf.Parser())
+	if err = t.Schemas.PostProcess(confWrap); err != nil {
+		return
+	}
 	if err = t.Types.PostProcess(confWrap); err != nil {
 		return
 	}
 	if err = t.Traits.PostProcess(confWrap); err != nil {
 		return
 	}
+	if err = t.ResourceTypes.PostProcess(confWrap); err != nil {
+		return
+	}
+	if err = t.AnnotationTypes.PostProcess(confWrap); err != nil {
+		return
+	}
+	if err = t.Annotations.PostProcess(confWrap); err != nil {
+		return
+	}
+	if err = t.SecuritySchemes.PostProcess(confWrap); err != nil {
+		return
+	}
 	if err = t.Uses.PostProcess(confWrap); err != nil {
 		return
 	}
 	return
+}
+
+// IsEmpty return true if it is empty
+func (t Library) IsEmpty() bool {
+	return t.Usage == "" &&
+		t.Schemas.IsEmpty() &&
+		t.Types.IsEmpty() &&
+		t.Traits.IsEmpty() &&
+		t.ResourceTypes.IsEmpty() &&
+		t.AnnotationTypes.IsEmpty() &&
+		t.Annotations.IsEmpty() &&
+		t.SecuritySchemes.IsEmpty() &&
+		t.Uses.IsEmpty()
 }

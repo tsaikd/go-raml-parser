@@ -31,9 +31,16 @@ func (t *Responses) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
-// IsEmpty return true if Responses has no element
+// IsEmpty return true if it is empty
 func (t Responses) IsEmpty() bool {
-	return len(t) < 1
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Response The value of a response declaration is a map that can contain any
@@ -47,7 +54,7 @@ type Response struct {
 	// a key that begins with "(" and ends with ")" where the text enclosed
 	// in parentheses is the annotation name, and the value is an instance of
 	// that annotation.
-	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
+	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// Detailed information about any response headers returned by this method
 	Headers Headers `yaml:"headers" json:"headers,omitempty"`
@@ -61,6 +68,9 @@ func (t *Response) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
+	if err = t.Annotations.PostProcess(conf); err != nil {
+		return
+	}
 	if err = t.Headers.PostProcess(conf); err != nil {
 		return
 	}
@@ -68,4 +78,12 @@ func (t *Response) PostProcess(conf PostProcessConfig) (err error) {
 		return
 	}
 	return
+}
+
+// IsEmpty return true if it is empty
+func (t Response) IsEmpty() bool {
+	return t.Description == "" &&
+		t.Annotations.IsEmpty() &&
+		t.Headers.IsEmpty() &&
+		t.Bodies.IsEmpty()
 }

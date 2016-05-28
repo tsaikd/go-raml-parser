@@ -16,6 +16,18 @@ func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t Resources) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // Resource is identified by its relative URI, which MUST begin with a slash
 // ("/"). Every node whose key begins with a slash, and is either at the root
 // of the API definition or is the child node of a resource node, is such
@@ -35,7 +47,7 @@ type Resource struct {
 	// a key that begins with "(" and ends with ")" where the text enclosed in
 	// parentheses is the annotation name, and the value is an instance of that
 	// annotation.
-	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
+	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// The object describing the method.
 	Get     Method `yaml:"get" json:"get,omitempty"`
@@ -71,6 +83,9 @@ func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
+	if err = t.Annotations.PostProcess(conf); err != nil {
+		return
+	}
 	if err = t.Get.PostProcess(conf); err != nil {
 		return
 	}
@@ -92,8 +107,36 @@ func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
 	if err = t.Head.PostProcess(conf); err != nil {
 		return
 	}
+	if err = t.Type.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.SecuredBy.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.URIParameters.PostProcess(conf); err != nil {
+		return
+	}
 	if err = t.Resources.PostProcess(conf); err != nil {
 		return
 	}
 	return
+}
+
+// IsEmpty return true if it is empty
+func (t Resource) IsEmpty() bool {
+	return t.DisplayName == "" &&
+		t.Description == "" &&
+		t.Annotations.IsEmpty() &&
+		t.Get.IsEmpty() &&
+		t.Patch.IsEmpty() &&
+		t.Put.IsEmpty() &&
+		t.Post.IsEmpty() &&
+		t.Delete.IsEmpty() &&
+		t.Options.IsEmpty() &&
+		t.Head.IsEmpty() &&
+		len(t.Is) < 1 &&
+		t.Type.IsEmpty() &&
+		t.SecuredBy.IsEmpty() &&
+		t.URIParameters.IsEmpty() &&
+		t.Resources.IsEmpty()
 }

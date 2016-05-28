@@ -1,5 +1,7 @@
 package parser
 
+import "encoding/json"
+
 // Bodies contains Body types, necessary because of technical reasons.
 type Bodies struct {
 	// Instead of using a simple map[HTTPHeader]Body for the body
@@ -30,6 +32,15 @@ type Bodies struct {
 	ForMIMEType map[string]*Body `yaml:",regexp:.*"`
 }
 
+// MarshalJSON marshal to json
+func (t Bodies) MarshalJSON() ([]byte, error) {
+	if t.IsEmpty() {
+		return json.Marshal(nil)
+	}
+
+	return json.Marshal(t.ForMIMEType)
+}
+
 // PostProcess for fill default example by type if not set
 func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
@@ -43,9 +54,16 @@ func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
-// IsEmpty return true if Bodies is empty
+// IsEmpty return true if it is empty
 func (t Bodies) IsEmpty() bool {
-	return len(t.ForMIMEType) < 1
+	for _, elem := range t.ForMIMEType {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Body used for Bodies.

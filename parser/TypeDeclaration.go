@@ -53,7 +53,7 @@ type TypeDeclaration struct {
 	// key that begins with "(" and ends with ")" where the text enclosed in
 	// parentheses is the annotation name, and the value is an instance of
 	// that annotation.
-	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
+	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// A map of additional, user-defined restrictions that will be inherited
 	// and applied by any extending subtype. See section User-defined Facets
@@ -69,11 +69,43 @@ func (t *TypeDeclaration) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
+	if err = t.Default.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.Schema.PostProcess(conf); err != nil {
+		return
+	}
 	if err = t.Example.PostProcess(conf, t.Type); err != nil {
 		return
 	}
 	if err = t.Examples.PostProcess(conf, t.Type); err != nil {
 		return
 	}
+	if err = t.Annotations.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.Facets.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.XML.PostProcess(conf); err != nil {
+		return
+	}
 	return
+}
+
+// IsEmpty return true if it is empty
+func (t *TypeDeclaration) IsEmpty() bool {
+	if t == nil {
+		return true
+	}
+	return t.Default.IsEmpty() &&
+		t.Schema.IsEmpty() &&
+		t.Type == "" &&
+		t.Example.IsEmpty() &&
+		t.Examples.IsEmpty() &&
+		t.DisplayName == "" &&
+		t.Description == "" &&
+		t.Annotations.IsEmpty() &&
+		t.Facets.IsEmpty() &&
+		t.XML.IsEmpty()
 }

@@ -31,6 +31,67 @@ func Test_Parse(t *testing.T) {
 	require.True(ErrorUnexpectedRAMLVersion2.Match(err))
 }
 
+func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./raml-examples/annotations/simple-annotations.raml")
+	require.NoError(err)
+	require.NotZero(rootdoc)
+
+	require.Equal("Illustrating annotations", rootdoc.Title)
+	require.Equal("application/json", rootdoc.MediaType)
+	if assert.Contains(rootdoc.AnnotationTypes, "testHarness") {
+		annotationType := rootdoc.AnnotationTypes["testHarness"]
+		require.Equal(typeString, annotationType.Type)
+	}
+	if assert.Contains(rootdoc.AnnotationTypes, "badge") {
+		annotationType := rootdoc.AnnotationTypes["badge"]
+		require.Equal(typeString, annotationType.Type)
+	}
+	if assert.Contains(rootdoc.AnnotationTypes, "clearanceLevel") {
+		annotationType := rootdoc.AnnotationTypes["clearanceLevel"]
+		require.Equal(typeObject, annotationType.Type)
+		if assert.Contains(annotationType.Properties, "level") {
+			property := annotationType.Properties["level"]
+			require.Len(property.Enum, 3)
+			require.True(property.Required)
+		}
+		if assert.Contains(annotationType.Properties, "signature") {
+			property := annotationType.Properties["signature"]
+			require.Equal("\\d{3}-\\w{12}", property.Pattern)
+			require.True(property.Required)
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/users") {
+		resource := rootdoc.Resources["/users"]
+		if assert.Contains(resource.Annotations, "(testHarness)") {
+			annotation := resource.Annotations["(testHarness)"]
+			require.Equal("usersTest", annotation.String)
+		}
+		if assert.Contains(resource.Annotations, "(badge)") {
+			annotation := resource.Annotations["(badge)"]
+			require.Equal("tested.gif", annotation.String)
+		}
+		if assert.Contains(resource.Annotations, "(clearanceLevel)") {
+			annotation := resource.Annotations["(clearanceLevel)"]
+			if assert.Contains(annotation.Map, "level") {
+				value := annotation.Map["level"]
+				require.Equal("high", value.String)
+			}
+			if assert.Contains(annotation.Map, "signature") {
+				value := annotation.Map["signature"]
+				require.Equal("230-ghtwvfrs1itr", value.String)
+			}
+		}
+	}
+}
+
 func Test_ParseDefiningExamples(t *testing.T) {
 	assert := assert.New(t)
 	assert.NotNil(assert)

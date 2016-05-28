@@ -20,7 +20,7 @@ type Method struct {
 	// a key that begins with "(" and ends with ")" where the text enclosed in
 	// parentheses is the annotation name, and the value is an instance of
 	// that annotation.
-	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
+	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// Detailed information about any query parameters needed by this method.
 	// Mutually exclusive with queryString.
@@ -55,18 +55,44 @@ func (t *Method) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
+	if err = t.Annotations.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.QueryParameters.PostProcess(conf); err != nil {
+		return
+	}
 	if err = t.Headers.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.QueryString.PostProcess(conf); err != nil {
 		return
 	}
 	if err = t.Responses.PostProcess(conf); err != nil {
 		return
 	}
+	if err = t.Bodies.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.Protocols.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.SecuredBy.PostProcess(conf); err != nil {
+		return
+	}
 	return
 }
 
-// IsEmpty return true if Method is empty
-func (t *Method) IsEmpty() bool {
-	return t.Headers.IsEmpty() &&
+// IsEmpty return true if it is empty
+func (t Method) IsEmpty() bool {
+	return t.DisplayName == "" &&
+		t.Description == "" &&
+		t.Annotations.IsEmpty() &&
+		t.QueryParameters.IsEmpty() &&
+		t.Headers.IsEmpty() &&
+		t.QueryString.IsEmpty() &&
 		t.Responses.IsEmpty() &&
-		t.Bodies.IsEmpty()
+		t.Bodies.IsEmpty() &&
+		t.Protocols.IsEmpty() &&
+		len(t.Is) < 1 &&
+		t.SecuredBy.IsEmpty()
 }

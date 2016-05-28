@@ -38,6 +38,13 @@ func (t *RootDocument) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t RootDocument) IsEmpty() bool {
+	return t.LibraryWrap.IsEmpty() &&
+		t.RootDocumentExtra.IsEmpty() &&
+		t.WorkingDirectory == ""
+}
+
 // RootDocumentExtra contain fields no in Library
 type RootDocumentExtra struct {
 	// A short, plain-text label for the API. Its value is a string.
@@ -63,7 +70,7 @@ type RootDocumentExtra struct {
 
 	// The default media types to use for request and response bodies
 	// (payloads), for example "application/json".
-	MediaType Unimplement `yaml:"mediaType" json:"mediaType,omitempty"`
+	MediaType string `yaml:"mediaType" json:"mediaType,omitempty"`
 
 	// Additional overall documentation for the API.
 	Documentation Unimplement `yaml:"documentation" json:"documentation,omitempty"`
@@ -87,4 +94,18 @@ func (t *RootDocumentExtra) PostProcess(conf PostProcessConfig) (err error) {
 		return
 	}
 	return
+}
+
+// IsEmpty return true if it is empty
+func (t RootDocumentExtra) IsEmpty() bool {
+	return t.Title == "" &&
+		t.Description == "" &&
+		t.Version == "" &&
+		t.BaseURI == "" &&
+		t.BaseURIParameters.IsEmpty() &&
+		t.Protocols.IsEmpty() &&
+		t.MediaType == "" &&
+		t.Documentation.IsEmpty() &&
+		t.SecuredBy.IsEmpty() &&
+		t.Resources.IsEmpty()
 }

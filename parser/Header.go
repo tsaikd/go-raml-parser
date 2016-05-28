@@ -16,9 +16,16 @@ func (t *Headers) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
-// IsEmpty return true if Headers is empty
+// IsEmpty return true if it is empty
 func (t Headers) IsEmpty() bool {
-	return len(t) < 1
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Header An API's methods can support or require various HTTP headers.

@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -32,9 +33,16 @@ func (t *Examples) PostProcess(conf PostProcessConfig, exampleType string) (err 
 	return
 }
 
-// IsEmpty return true if Examples is empty
+// IsEmpty return true if it is empty
 func (t Examples) IsEmpty() bool {
-	return len(t) < 1
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // SingleExample The OPTIONAL example facet can be used to attach an example of
@@ -76,6 +84,15 @@ func (t SingleExample) IsEmpty() bool {
 // Example wrap SingleExample for unmarshal YAML
 type Example struct {
 	SingleExample
+}
+
+// MarshalJSON marshal to json
+func (t Example) MarshalJSON() ([]byte, error) {
+	if t.SingleExample.IsEmpty() {
+		return json.Marshal(nil)
+	}
+
+	return json.Marshal(t.SingleExample)
 }
 
 // UnmarshalYAML unmarshal an Example which MIGHT be a simple string or a

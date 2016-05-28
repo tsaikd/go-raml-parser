@@ -16,6 +16,18 @@ func (t *Traits) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t Traits) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // Trait like a method, can provide method-level nodes such as description,
 // headers, query string parameters, and responses. Methods that use one or
 // more traits inherit nodes of those traits. A resource and resource type
@@ -61,6 +73,13 @@ func (t *Trait) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t Trait) IsEmpty() bool {
+	return t.String == "" &&
+		t.Method.IsEmpty() &&
+		t.TraitExtra.IsEmpty()
+}
+
 // TraitExtra contain fields no in Method
 type TraitExtra struct {
 	// The OPTIONAL usage node of a resource type or trait provides
@@ -84,4 +103,12 @@ type TraitExtra struct {
 // PostProcess for fill some field from RootDocument default config
 func (t *TraitExtra) PostProcess(conf PostProcessConfig) (err error) {
 	return
+}
+
+// IsEmpty return true if it is empty
+func (t TraitExtra) IsEmpty() bool {
+	return t.Usage == "" &&
+		t.ResourcePath == "" &&
+		t.ResourcePathName == "" &&
+		t.MethodName == ""
 }

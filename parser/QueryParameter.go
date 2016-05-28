@@ -16,6 +16,18 @@ func (t *QueryParameters) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
+// IsEmpty return true if it is empty
+func (t QueryParameters) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // QueryParameter The queryParameters node specifies the set of query
 // parameters from which the query string is composed. When applying the
 // restrictions defined by the API, processors MUST regard the query string

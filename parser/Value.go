@@ -58,6 +58,11 @@ func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	return
 }
 
+// PostProcess for fill some field from RootDocument default config
+func (t *Value) PostProcess(conf PostProcessConfig) (err error) {
+	return
+}
+
 // IsEmpty return true if Example is empty
 func (t Value) IsEmpty() bool {
 	return t.Integer == 0 &&
