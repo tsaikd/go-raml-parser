@@ -44,7 +44,7 @@ type Method struct {
 	Protocols Unimplement `yaml:"protocols" json:"protocols,omitempty"`
 
 	// A list of the traits to apply to this method.
-	Is []*Trait `yaml:"is" json:"is,omitempty"`
+	Is IsTraits `yaml:"is" json:"is,omitempty"`
 
 	// The security schemes that apply to this method.
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`
@@ -76,6 +76,9 @@ func (t *Method) PostProcess(conf PostProcessConfig) (err error) {
 	if err = t.Protocols.PostProcess(conf); err != nil {
 		return
 	}
+	if err = t.Is.PostProcess(conf); err != nil {
+		return
+	}
 	if err = t.SecuredBy.PostProcess(conf); err != nil {
 		return
 	}
@@ -93,6 +96,6 @@ func (t Method) IsEmpty() bool {
 		t.Responses.IsEmpty() &&
 		t.Bodies.IsEmpty() &&
 		t.Protocols.IsEmpty() &&
-		len(t.Is) < 1 &&
+		t.Is.IsEmpty() &&
 		t.SecuredBy.IsEmpty()
 }

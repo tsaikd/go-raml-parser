@@ -28,6 +28,34 @@ func (t Traits) IsEmpty() bool {
 	return true
 }
 
+// IsTraits slice of Trait
+type IsTraits []*Trait
+
+// PostProcess for fill some field from RootDocument default config
+func (t *IsTraits) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
+	for _, trait := range *t {
+		if err = trait.PostProcess(conf); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// IsEmpty return true if it is empty
+func (t IsTraits) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // Trait like a method, can provide method-level nodes such as description,
 // headers, query string parameters, and responses. Methods that use one or
 // more traits inherit nodes of those traits. A resource and resource type
