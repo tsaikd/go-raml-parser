@@ -42,11 +42,20 @@ type Property struct {
 	PropertyExtra
 }
 
+// BeforeUnmarshalYAML implement yaml Initiator
+func (t *Property) BeforeUnmarshalYAML() (err error) {
+	if err = t.APIType.BeforeUnmarshalYAML(); err != nil {
+		return
+	}
+	if err = t.PropertyExtra.BeforeUnmarshalYAML(); err != nil {
+		return
+	}
+	return
+}
+
 // UnmarshalYAML implement yaml unmarshaler
 // a Property which MIGHT be a simple string or a map[string]interface{}
 func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
-	t.Required = true
-
 	if err = unmarshaler(&t.Type); err == nil {
 		return
 	}
@@ -89,6 +98,12 @@ type PropertyExtra struct {
 	// Specifies that the property is required or not.
 	// Default: true.
 	Required bool `yaml:"required" json:"required"`
+}
+
+// BeforeUnmarshalYAML implement yaml Initiator
+func (t *PropertyExtra) BeforeUnmarshalYAML() (err error) {
+	t.Required = true
+	return
 }
 
 // PostProcess for fill some field from RootDocument default config

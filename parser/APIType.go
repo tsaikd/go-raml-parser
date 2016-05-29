@@ -36,9 +36,19 @@ type APIType struct {
 	String
 }
 
+// BeforeUnmarshalYAML implement yaml Initiator
+func (t *APIType) BeforeUnmarshalYAML() (err error) {
+	if err = t.ObjectType.BeforeUnmarshalYAML(); err != nil {
+		return
+	}
+	if err = t.String.BeforeUnmarshalYAML(); err != nil {
+		return
+	}
+	return
+}
+
 // UnmarshalYAML implement yaml unmarshaler
 func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
-	t.AdditionalProperties = true
 	if err = unmarshaler(&t.TypeDeclaration); err != nil {
 		return
 	}

@@ -14,29 +14,9 @@ type String struct {
 	MaxLength int64 `yaml:"maxLength" json:"maxLength,omitempty"`
 }
 
-// UnmarshalYAML implement yaml unmarshaler
-func (t *String) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+// BeforeUnmarshalYAML implement yaml Initiator
+func (t *String) BeforeUnmarshalYAML() (err error) {
 	t.MaxLength = 2147483647
-
-	buf := struct {
-		Pattern   *string `yaml:"pattern" json:"pattern,omitempty"`
-		MinLength *int64  `yaml:"minLength" json:"minLength,omitempty"`
-		MaxLength *int64  `yaml:"maxLength" json:"maxLength,omitempty"`
-	}{}
-	if err = unmarshaler(&buf); err != nil {
-		return
-	}
-
-	if buf.Pattern != nil {
-		t.Pattern = *buf.Pattern
-	}
-	if buf.MinLength != nil {
-		t.MinLength = *buf.MinLength
-	}
-	if buf.MaxLength != nil {
-		t.MaxLength = *buf.MaxLength
-	}
-
 	return
 }
 

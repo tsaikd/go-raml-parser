@@ -63,7 +63,7 @@ func (t IsTraits) IsEmpty() bool {
 // to all methods of the resource and resource type. Traits are related to
 // methods through a mixing pattern.
 type Trait struct {
-	String string
+	String string `json:",omitempty"`
 	Method
 	TraitExtra
 }

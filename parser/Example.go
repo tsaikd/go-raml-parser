@@ -63,7 +63,7 @@ type SingleExample struct {
 	// key that begins with "(" and ends with ")" where the text enclosed in
 	// parentheses is the annotation name, and the value is an instance of
 	// that annotation.
-	Annotations map[string]Unimplement `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
+	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// The actual example of a type instance.
 	Value Value `yaml:"value" json:"value"`

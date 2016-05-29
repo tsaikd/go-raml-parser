@@ -32,7 +32,7 @@ func (t Libraries) IsEmpty() bool {
 
 // LibraryWrap wrap Library because Library may be a string for external library file
 type LibraryWrap struct {
-	String string
+	String string `json:",omitempty"`
 	Library
 }
 

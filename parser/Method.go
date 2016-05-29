@@ -33,7 +33,7 @@ type Method struct {
 	QueryString Unimplement `yaml:"queryString" json:"queryString,omitempty"`
 
 	// Information about the expected responses to a request.
-	Responses Responses `yaml:"responses"`
+	Responses Responses `yaml:"responses" json:"responses,omitempty"`
 
 	// A request body that the method admits.
 	Bodies Bodies `yaml:"body" json:"body,omitempty"`

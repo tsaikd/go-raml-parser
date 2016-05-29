@@ -3,8 +3,8 @@
 	"GoVersion": "go1.6",
 	"Deps": [
 		{
-			"ImportPath": "github.com/advance512/yaml",
-			"Rev": "e401b2b026855a4fa8e7014d553ae5bdfccb21cd"
+			"ImportPath": "github.com/tsaikd/yaml",
+			"Rev": "7ee83f49867aaa58e61b27b3ad6691372ffaa510"
 		},
 		{
 			"ImportPath": "github.com/tsaikd/KDGoLib",

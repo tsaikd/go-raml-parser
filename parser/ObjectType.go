@@ -32,6 +32,12 @@ type ObjectType struct {
 	DiscriminatorValue Unimplement `yaml:"discriminatorValue" json:"discriminatorValue,omitempty"`
 }
 
+// BeforeUnmarshalYAML implement yaml Initiator
+func (t *ObjectType) BeforeUnmarshalYAML() (err error) {
+	t.AdditionalProperties = true
+	return
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *ObjectType) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

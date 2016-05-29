@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/advance512/yaml"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
+	"github.com/tsaikd/yaml"
 )
 
 // NewParser create Parser instance

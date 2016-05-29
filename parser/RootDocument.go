@@ -9,7 +9,7 @@ type RootDocument struct {
 	RootDocumentExtra
 
 	// directory of RAML file
-	WorkingDirectory string
+	WorkingDirectory string `json:",omitempty"`
 }
 
 // UnmarshalYAML unmarshal RootDocument from YAML
