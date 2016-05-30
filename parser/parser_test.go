@@ -142,39 +142,45 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	}
 	if assert.Contains(rootdoc.Resources, "/organisation") {
 		resource := rootdoc.Resources["/organisation"]
-		if assert.Contains(resource.Post.Headers, "UserID") {
-			header := resource.Post.Headers["UserID"]
-			require.Equal("the identifier for the user that posts a new organisation", header.Description)
-			require.Equal(typeString, header.Type)
-			require.Equal("SWED-123", header.Example.Value.String)
-		}
-		if assert.Contains(resource.Post.Bodies.ForMIMEType, "application/json") {
-			body := resource.Post.Bodies.ForMIMEType["application/json"]
-			require.Equal("Org", body.Type)
-			if assert.Contains(body.Example.Value.Map, "name") {
-				name := body.Example.Value.Map["name"]
-				require.Equal("Doe Enterprise", name.String)
+		if assert.Contains(resource.Methods, "post") {
+			method := resource.Methods["post"]
+			if assert.Contains(method.Headers, "UserID") {
+				header := method.Headers["UserID"]
+				require.Equal("the identifier for the user that posts a new organisation", header.Description)
+				require.Equal(typeString, header.Type)
+				require.Equal("SWED-123", header.Example.Value.String)
 			}
-			if assert.Contains(body.Example.Value.Map, "value") {
-				value := body.Example.Value.Map["value"]
-				require.Equal("Silver", value.String)
-			}
-		}
-		require.Equal("Returns an organisation entity.", resource.Get.Description)
-		if assert.Contains(resource.Get.Responses, HTTPCode(201)) {
-			response := resource.Get.Responses[201]
-			if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-				body := response.Bodies.ForMIMEType["application/json"]
+			if assert.Contains(method.Bodies.ForMIMEType, "application/json") {
+				body := method.Bodies.ForMIMEType["application/json"]
 				require.Equal("Org", body.Type)
-				if assert.Contains(body.Examples, "acme") {
-					example := body.Examples["acme"]
-					require.Equal("Acme", example.Value.Map["name"].String)
+				if assert.Contains(body.Example.Value.Map, "name") {
+					name := body.Example.Value.Map["name"]
+					require.Equal("Doe Enterprise", name.String)
 				}
-				if assert.Contains(body.Examples, "softwareCorp") {
-					example := body.Examples["softwareCorp"]
-					require.Equal("Software Corp", example.Value.Map["name"].String)
-					require.Equal("35 Central Street", example.Value.Map["address"].String)
-					require.Equal("Gold", example.Value.Map["value"].String)
+				if assert.Contains(body.Example.Value.Map, "value") {
+					value := body.Example.Value.Map["value"]
+					require.Equal("Silver", value.String)
+				}
+			}
+		}
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			require.Equal("Returns an organisation entity.", method.Description)
+			if assert.Contains(method.Responses, HTTPCode(201)) {
+				response := method.Responses[201]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal("Org", body.Type)
+					if assert.Contains(body.Examples, "acme") {
+						example := body.Examples["acme"]
+						require.Equal("Acme", example.Value.Map["name"].String)
+					}
+					if assert.Contains(body.Examples, "softwareCorp") {
+						example := body.Examples["softwareCorp"]
+						require.Equal("Software Corp", example.Value.Map["name"].String)
+						require.Equal("35 Central Street", example.Value.Map["address"].String)
+						require.Equal("Gold", example.Value.Map["value"].String)
+					}
 				}
 			}
 		}
@@ -197,12 +203,15 @@ func Test_ParseHelloworld(t *testing.T) {
 	require.Equal("Hello world", rootdoc.Title)
 	if assert.Contains(rootdoc.Resources, "/helloworld") {
 		resource := rootdoc.Resources["/helloworld"]
-		if assert.Contains(resource.Get.Responses, HTTPCode(200)) {
-			response := resource.Get.Responses[200]
-			if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-				body := response.Bodies.ForMIMEType["application/json"]
-				require.NotEmpty(body.Type)
-				require.NotEmpty(body.Example)
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.NotEmpty(body.Type)
+					require.NotEmpty(body.Example)
+				}
 			}
 		}
 	}
@@ -286,48 +295,51 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 		resource := rootdoc.Resources["/orders"]
 		require.Equal("Orders", resource.DisplayName)
 		require.Equal("Orders collection resource used to create new orders.", resource.Description)
-		if assert.Len(resource.Get.Is, 1) {
-			is := resource.Get.Is[0]
-			require.Equal("assets.paging", is.String)
-		}
-		require.Equal("lists all orders of a specific user", resource.Get.Description)
-		if assert.Contains(resource.Get.QueryParameters, "userId") {
-			qp := resource.Get.QueryParameters["userId"]
-			require.Equal("string", qp.Type)
-			require.Equal("use to query all orders of a user", qp.Description)
-			require.True(qp.Required)
-			require.Equal("1964401a-a8b3-40c1-b86e-d8b9f75b5842", qp.Example.Value.String)
-		}
-		if assert.Contains(resource.Get.Responses, HTTPCode(200)) {
-			response := resource.Get.Responses[200]
-			if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-				body := response.Bodies.ForMIMEType["application/json"]
-				require.Equal("assets.Orders", body.Type)
-				if assert.Contains(body.Examples, "single-order") {
-					example := body.Examples["single-order"]
-					if assert.Contains(example.Value.Map, "orders") {
-						orders := example.Value.Map["orders"]
-						if assert.Len(orders.Array, 1) {
-							order := orders.Array[0]
-							if assert.Contains(order.Map, "order_id") {
-								orderID := order.Map["order_id"]
-								require.Equal("ORDER-437563756", orderID.String)
-							}
-							if assert.Contains(order.Map, "creation_date") {
-								creationDate := order.Map["creation_date"]
-								require.Equal("2016-03-30", creationDate.String)
-							}
-							if assert.Contains(order.Map, "items") {
-								items := order.Map["items"]
-								if assert.Len(items.Array, 2) {
-									item := items.Array[1]
-									if assert.Contains(item.Map, "product_id") {
-										productID := item.Map["product_id"]
-										require.Equal("PRODUCT-2", productID.String)
-									}
-									if assert.Contains(item.Map, "quantity") {
-										quantity := item.Map["quantity"]
-										require.EqualValues(2, quantity.Integer)
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Len(method.Is, 1) {
+				is := method.Is[0]
+				require.Equal("assets.paging", is.String)
+			}
+			require.Equal("lists all orders of a specific user", method.Description)
+			if assert.Contains(method.QueryParameters, "userId") {
+				qp := method.QueryParameters["userId"]
+				require.Equal("string", qp.Type)
+				require.Equal("use to query all orders of a user", qp.Description)
+				require.True(qp.Required)
+				require.Equal("1964401a-a8b3-40c1-b86e-d8b9f75b5842", qp.Example.Value.String)
+			}
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal("assets.Orders", body.Type)
+					if assert.Contains(body.Examples, "single-order") {
+						example := body.Examples["single-order"]
+						if assert.Contains(example.Value.Map, "orders") {
+							orders := example.Value.Map["orders"]
+							if assert.Len(orders.Array, 1) {
+								order := orders.Array[0]
+								if assert.Contains(order.Map, "order_id") {
+									orderID := order.Map["order_id"]
+									require.Equal("ORDER-437563756", orderID.String)
+								}
+								if assert.Contains(order.Map, "creation_date") {
+									creationDate := order.Map["creation_date"]
+									require.Equal("2016-03-30", creationDate.String)
+								}
+								if assert.Contains(order.Map, "items") {
+									items := order.Map["items"]
+									if assert.Len(items.Array, 2) {
+										item := items.Array[1]
+										if assert.Contains(item.Map, "product_id") {
+											productID := item.Map["product_id"]
+											require.Equal("PRODUCT-2", productID.String)
+										}
+										if assert.Contains(item.Map, "quantity") {
+											quantity := item.Map["quantity"]
+											require.EqualValues(2, quantity.Integer)
+										}
 									}
 								}
 							}
@@ -374,11 +386,14 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	}
 	if assert.Contains(rootdoc.Resources, "/users/{id}") {
 		resource := rootdoc.Resources["/users/{id}"]
-		if assert.Contains(resource.Get.Responses, HTTPCode(200)) {
-			response := resource.Get.Responses[200]
-			if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-				body := response.Bodies.ForMIMEType["application/json"]
-				require.Equal(body.Type, "User")
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal(body.Type, "User")
+				}
 			}
 		}
 	}

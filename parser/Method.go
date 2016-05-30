@@ -1,5 +1,33 @@
 package parser
 
+// Methods map of Method
+type Methods map[string]*Method
+
+// PostProcess for fill some field from RootDocument default config
+func (t *Methods) PostProcess(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
+	for _, elem := range *t {
+		if err = elem.PostProcess(conf); err != nil {
+			return
+		}
+	}
+	return
+}
+
+// IsEmpty return true if it is empty
+func (t Methods) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // Method RESTful API methods are operations that are performed on a resource.
 // The OPTIONAL properties get, patch, put, post, delete, head, and options of
 // a resource define its methods; these correspond to the HTTP methods defined

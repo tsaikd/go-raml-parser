@@ -8,8 +8,8 @@ func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
-	for _, resource := range *t {
-		if err = resource.PostProcess(conf); err != nil {
+	for _, elem := range *t {
+		if err = elem.PostProcess(conf); err != nil {
 			return
 		}
 	}
@@ -50,18 +50,12 @@ type Resource struct {
 	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// The object describing the method.
-	Get     Method `yaml:"get" json:"get,omitempty"`
-	Patch   Method `yaml:"patch" json:"patch,omitempty"`
-	Put     Method `yaml:"put" json:"put,omitempty"`
-	Post    Method `yaml:"post" json:"post,omitempty"`
-	Delete  Method `yaml:"delete" json:"delete,omitempty"`
-	Options Method `yaml:"options" json:"options,omitempty"`
-	Head    Method `yaml:"head" json:"head,omitempty"`
+	Methods Methods `yaml:",regexp:(get|patch|put|post|delete|options|head)" json:",omitempty"`
 
 	// A list of traits to apply to all methods declared (implicitly or
 	// explicitly) for this resource. Individual methods can override this
 	// declaration.
-	Is []*Trait `yaml:"is" json:"is,omitempty"`
+	Is IsTraits `yaml:"is" json:"is,omitempty"`
 
 	// The resource type that this resource inherits.
 	Type Unimplement `yaml:"type" json:"type,omitempty"`
@@ -91,25 +85,10 @@ func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
 	if err = t.Annotations.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Get.PostProcess(conf); err != nil {
+	if err = t.Methods.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Patch.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Put.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Post.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Delete.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Options.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Head.PostProcess(conf); err != nil {
+	if err = t.Is.PostProcess(conf); err != nil {
 		return
 	}
 	if err = t.Type.PostProcess(conf); err != nil {
@@ -132,14 +111,8 @@ func (t Resource) IsEmpty() bool {
 	return t.DisplayName == "" &&
 		t.Description == "" &&
 		t.Annotations.IsEmpty() &&
-		t.Get.IsEmpty() &&
-		t.Patch.IsEmpty() &&
-		t.Put.IsEmpty() &&
-		t.Post.IsEmpty() &&
-		t.Delete.IsEmpty() &&
-		t.Options.IsEmpty() &&
-		t.Head.IsEmpty() &&
-		len(t.Is) < 1 &&
+		t.Methods.IsEmpty() &&
+		t.Is.IsEmpty() &&
 		t.Type.IsEmpty() &&
 		t.SecuredBy.IsEmpty() &&
 		t.URIParameters.IsEmpty() &&
