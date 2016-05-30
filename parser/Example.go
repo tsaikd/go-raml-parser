@@ -76,7 +76,7 @@ type SingleExample struct {
 func (t SingleExample) IsEmpty() bool {
 	return t.DisplayName == "" &&
 		t.Description == "" &&
-		len(t.Annotations) < 1 &&
+		t.Annotations.IsEmpty() &&
 		t.Value.IsEmpty()
 }
 

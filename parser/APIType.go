@@ -1,5 +1,7 @@
 package parser
 
+import "strings"
+
 // APITypes map of APIType
 type APITypes map[string]*APIType
 
@@ -34,6 +36,7 @@ type APIType struct {
 	ObjectType
 	ScalarType
 	String
+	ArrayType
 }
 
 // BeforeUnmarshalYAML implement yaml Initiator
@@ -44,6 +47,9 @@ func (t *APIType) BeforeUnmarshalYAML() (err error) {
 	if err = t.String.BeforeUnmarshalYAML(); err != nil {
 		return
 	}
+	if err = t.ArrayType.BeforeUnmarshalYAML(); err != nil {
+		return
+	}
 	return
 }
 
@@ -51,6 +57,11 @@ func (t *APIType) BeforeUnmarshalYAML() (err error) {
 func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	if err = unmarshaler(&t.TypeDeclaration); err != nil {
 		return
+	}
+	if strings.HasSuffix(t.TypeDeclaration.Type, "[]") {
+		if err = unmarshaler(&t.ArrayType); err != nil {
+			return
+		}
 	}
 	if err = unmarshaler(&t.ObjectType); err != nil {
 		return

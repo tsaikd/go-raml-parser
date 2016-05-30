@@ -74,7 +74,7 @@ func (t *Value) PostProcess(conf PostProcessConfig) (err error) {
 	return
 }
 
-// IsEmpty return true if Example is empty
+// IsEmpty return true if it is empty
 func (t Value) IsEmpty() bool {
 	return t.Boolean == false &&
 		t.Integer == 0 &&
