@@ -122,7 +122,7 @@ func checkExampleValueType(typ APIType, value Value) (err error) {
 
 // PostProcess for fill default example by type if not set
 func (t *Example) PostProcess(conf PostProcessConfig, exampleType string) (err error) {
-	if t == nil {
+	if t == nil || t.IsEmpty() {
 		return
 	}
 
@@ -148,11 +148,6 @@ func (t *Example) PostProcess(conf PostProcessConfig, exampleType string) (err e
 			return ErrorTypeUndefined1.New(nil, exampleType)
 		}
 
-		if !t.IsEmpty() {
-			return checkExampleValueType(*typ, t.Value)
-		}
-
-		*t = typ.Example
-		return
+		return checkExampleValueType(*typ, t.Value)
 	}
 }
