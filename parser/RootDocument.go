@@ -53,7 +53,7 @@ func (t RootDocument) IsEmpty() bool {
 // RootDocumentExtra contain fields no in Library
 type RootDocumentExtra struct {
 	// A short, plain-text label for the API. Its value is a string.
-	Title string `yaml:"title"`
+	Title string `yaml:"title" json:"title,omitempty"`
 
 	// A substantial, human-friendly description of the API. Its value is a
 	// string and MAY be formatted using markdown.

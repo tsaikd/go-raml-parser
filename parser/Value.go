@@ -5,6 +5,7 @@ import "encoding/json"
 // Value multiple types value
 type Value struct {
 	Type    string
+	Boolean bool
 	Integer int64
 	String  string
 	Array   []*Value
@@ -14,6 +15,8 @@ type Value struct {
 // MarshalJSON marshal to json
 func (t Value) MarshalJSON() ([]byte, error) {
 	switch t.Type {
+	case typeBoolean:
+		return json.Marshal(t.Boolean)
 	case typeInteger:
 		return json.Marshal(t.Integer)
 	case typeString:
@@ -30,6 +33,14 @@ func (t Value) MarshalJSON() ([]byte, error) {
 // UnmarshalYAML unmarshal an Example which MIGHT be a simple string or a
 // map[string]interface{}
 func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+	if err = unmarshaler(&t.Boolean); err == nil {
+		t.Type = typeBoolean
+		return
+	}
+	if !isErrorYAMLIntoBool(err) {
+		return
+	}
+
 	if err = unmarshaler(&t.Integer); err == nil {
 		t.Type = typeInteger
 		return
@@ -65,7 +76,8 @@ func (t *Value) PostProcess(conf PostProcessConfig) (err error) {
 
 // IsEmpty return true if Example is empty
 func (t Value) IsEmpty() bool {
-	return t.Integer == 0 &&
+	return t.Boolean == false &&
+		t.Integer == 0 &&
 		t.String == "" &&
 		len(t.Array) < 1 &&
 		len(t.Map) < 1

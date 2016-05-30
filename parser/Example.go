@@ -132,7 +132,7 @@ func (t *Example) PostProcess(conf PostProcessConfig, exampleType string) (err e
 	}
 
 	switch typeName {
-	case typeInteger, typeNumber, typeString, typeObject:
+	case typeBoolean, typeInteger, typeNumber, typeString, typeObject:
 		// no type check for RAML built-in type
 		return
 	default:

@@ -56,6 +56,7 @@ func (t postProcessConfigImpl) Parser() Parser {
 	return t.dataParser
 }
 
+const typeBoolean = "boolean"
 const typeInteger = "integer"
 const typeNumber = "number"
 const typeString = "string"

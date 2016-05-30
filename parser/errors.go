@@ -13,6 +13,10 @@ var (
 	ErrorUnexpectedRAMLVersion2        = errutil.NewFactory("RAML version should be %q but got %q")
 )
 
+func isErrorYAMLIntoBool(err error) bool {
+	return strings.Contains(err.Error(), "into bool")
+}
+
 func isErrorYAMLIntoInt64(err error) bool {
 	return strings.Contains(err.Error(), "into int64")
 }
