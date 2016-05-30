@@ -50,6 +50,11 @@ type Method struct {
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`
 }
 
+// MarshalJSON marshal to json
+func (t Method) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *Method) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

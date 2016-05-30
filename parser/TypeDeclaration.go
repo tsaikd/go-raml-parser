@@ -64,6 +64,11 @@ type TypeDeclaration struct {
 	XML Unimplement `yaml:"xml" json:"xml,omitempty"`
 }
 
+// MarshalJSON marshal to json
+func (t TypeDeclaration) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill default example by type if not set
 func (t *TypeDeclaration) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

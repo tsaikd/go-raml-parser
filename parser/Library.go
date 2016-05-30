@@ -51,6 +51,11 @@ func (t *LibraryWrap) UnmarshalYAML(unmarshaler func(interface{}) error) (err er
 	return
 }
 
+// MarshalJSON marshal to json
+func (t LibraryWrap) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *LibraryWrap) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
@@ -116,6 +121,11 @@ type Library struct {
 
 	// Imported external libraries for use within the API.
 	Uses Libraries `yaml:"uses" json:"uses,omitempty"`
+}
+
+// MarshalJSON marshal to json
+func (t Library) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // PostProcess for fill some field from RootDocument default config

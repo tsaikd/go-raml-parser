@@ -10,6 +10,11 @@ type ScalarType struct {
 	Enum []Value `yaml:"enum" json:"enum,omitempty"`
 }
 
+// MarshalJSON marshal to json
+func (t ScalarType) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *ScalarType) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

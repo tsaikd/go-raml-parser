@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -86,15 +85,6 @@ type Example struct {
 	SingleExample
 }
 
-// MarshalJSON marshal to json
-func (t Example) MarshalJSON() ([]byte, error) {
-	if t.SingleExample.IsEmpty() {
-		return json.Marshal(nil)
-	}
-
-	return json.Marshal(t.SingleExample)
-}
-
 // UnmarshalYAML unmarshal an Example which MIGHT be a simple string or a
 // map[string]interface{}
 func (t *Example) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
@@ -107,6 +97,11 @@ func (t *Example) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	}
 
 	return
+}
+
+// MarshalJSON marshal to json
+func (t Example) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 func checkExampleValueType(typ APIType, value Value) (err error) {

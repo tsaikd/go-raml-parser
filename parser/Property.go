@@ -73,6 +73,11 @@ func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error
 	return
 }
 
+// MarshalJSON marshal to json
+func (t Property) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *Property) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
@@ -97,13 +102,18 @@ func (t *Property) IsEmpty() bool {
 type PropertyExtra struct {
 	// Specifies that the property is required or not.
 	// Default: true.
-	Required bool `yaml:"required" json:"required"`
+	Required bool `yaml:"required" json:"required,omitdefault" default:"true"`
 }
 
 // BeforeUnmarshalYAML implement yaml Initiator
 func (t *PropertyExtra) BeforeUnmarshalYAML() (err error) {
 	t.Required = true
 	return
+}
+
+// MarshalJSON marshal to json
+func (t PropertyExtra) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // PostProcess for fill some field from RootDocument default config

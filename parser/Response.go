@@ -63,6 +63,11 @@ type Response struct {
 	Bodies Bodies `yaml:"body" json:"body,omitempty"`
 }
 
+// MarshalJSON marshal to json
+func (t Response) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *Response) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

@@ -78,6 +78,11 @@ type Resource struct {
 	Resources Resources `yaml:",regexp:/.*" json:"resources,omitempty"`
 }
 
+// MarshalJSON marshal to json
+func (t Resource) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

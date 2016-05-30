@@ -14,6 +14,11 @@ func (t HTTPCode) String() string {
 	return strconv.Itoa(int(t))
 }
 
+// SupportToCheckEmpty implement IsEmpty() instance
+type SupportToCheckEmpty interface {
+	IsEmpty() bool
+}
+
 // PostProcessConfig used for PostProcess()
 type PostProcessConfig interface {
 	RootDocument() RootDocument

@@ -68,6 +68,11 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	return nil
 }
 
+// MarshalJSON marshal to json
+func (t APIType) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

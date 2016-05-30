@@ -11,13 +11,18 @@ type String struct {
 
 	// Maximum length of the string. Value MUST be equal to or greater than 0.
 	// Default: 2147483647
-	MaxLength int64 `yaml:"maxLength" json:"maxLength,omitempty"`
+	MaxLength int64 `yaml:"maxLength" json:"maxLength,omitdefault" default:"2147483647"`
 }
 
 // BeforeUnmarshalYAML implement yaml Initiator
 func (t *String) BeforeUnmarshalYAML() (err error) {
 	t.MaxLength = 2147483647
 	return
+}
+
+// MarshalJSON marshal to json
+func (t String) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // PostProcess for fill some field from RootDocument default config

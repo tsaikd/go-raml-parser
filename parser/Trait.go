@@ -87,6 +87,11 @@ func (t *Trait) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	return
 }
 
+// MarshalJSON marshal to json
+func (t Trait) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *Trait) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
@@ -126,6 +131,11 @@ type TraitExtra struct {
 
 	// The name of the method
 	MethodName string `yaml:"methodName" json:"methodName,omitempty"`
+}
+
+// MarshalJSON marshal to json
+func (t TraitExtra) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // PostProcess for fill some field from RootDocument default config

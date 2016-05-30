@@ -23,6 +23,11 @@ func (t *RootDocument) UnmarshalYAML(unmarshaler func(interface{}) error) (err e
 	return
 }
 
+// MarshalJSON marshal to json
+func (t RootDocument) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
+}
+
 // PostProcess for fill some field from RootDocument default config
 func (t *RootDocument) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {

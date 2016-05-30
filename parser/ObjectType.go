@@ -15,7 +15,7 @@ type ObjectType struct {
 
 	// A Boolean that indicates if an object instance has additional properties.
 	// Default: true
-	AdditionalProperties bool `yaml:"additionalProperties" json:"additionalProperties"`
+	AdditionalProperties bool `yaml:"additionalProperties" json:"additionalProperties,omitdefault" default:"true"`
 
 	// Determines the concrete type of an individual object at runtime when,
 	// for example, payloads contain ambiguous types due to unions or
@@ -36,6 +36,11 @@ type ObjectType struct {
 func (t *ObjectType) BeforeUnmarshalYAML() (err error) {
 	t.AdditionalProperties = true
 	return
+}
+
+// MarshalJSON marshal to json
+func (t ObjectType) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // PostProcess for fill some field from RootDocument default config
