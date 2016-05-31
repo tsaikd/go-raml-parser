@@ -97,6 +97,17 @@ func (t *Trait) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
+
+	if t.String != "" {
+		var trait Trait
+		name := t.String
+		if trait, err = conf.Library().GetTrait(name); err != nil {
+			return
+		}
+		*t = trait
+		t.String = name
+	}
+
 	if err = t.Method.PostProcess(conf); err != nil {
 		return
 	}

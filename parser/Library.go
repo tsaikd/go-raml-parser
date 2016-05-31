@@ -1,6 +1,17 @@
 package parser
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/tsaikd/KDGoLib/errutil"
+)
+
+// errors
+var (
+	ErrorTraitNotFound1 = errutil.NewFactory("trait %q not found")
+	ErrorUseNotFound1   = errutil.NewFactory("use %q not found")
+)
 
 // Libraries map of LibraryWrap
 type Libraries map[string]*LibraryWrap
@@ -172,4 +183,25 @@ func (t Library) IsEmpty() bool {
 		t.Annotations.IsEmpty() &&
 		t.SecuritySchemes.IsEmpty() &&
 		t.Uses.IsEmpty()
+}
+
+// GetTrait return trait if found
+func (t Library) GetTrait(name string) (result Trait, err error) {
+	if splits := strings.Split(name, "."); len(splits) == 2 {
+		useName, traitName := splits[0], splits[1]
+		use, ok := t.Uses[useName]
+		if !ok || use == nil {
+			err = ErrorUseNotFound1.New(nil, useName)
+			return
+		}
+		return use.GetTrait(traitName)
+	}
+
+	trait, ok := t.Traits[name]
+	if !ok || trait == nil {
+		err = ErrorTraitNotFound1.New(nil, name)
+		return
+	}
+
+	return *trait, nil
 }
