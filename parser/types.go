@@ -1,6 +1,9 @@
 package parser
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 // Unimplement For extra clarity
 type Unimplement struct {
@@ -62,3 +65,12 @@ const typeNumber = "number"
 const typeString = "string"
 const typeObject = "object"
 const typeArray = "array"
+
+func getTypeName(apiType APIType) (typeName string, isArray bool) {
+	typeName = apiType.Type
+	isArray = strings.HasSuffix(apiType.Type, "[]")
+	if isArray {
+		typeName = apiType.Type[:len(apiType.Type)-2]
+	}
+	return
+}

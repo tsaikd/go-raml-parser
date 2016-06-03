@@ -2,7 +2,6 @@ package parser
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/tsaikd/KDGoLib/errutil"
 )
@@ -116,11 +115,14 @@ func checkExampleValueType(typ APIType, value Value) (err error) {
 		}
 		for name, v := range value.Map {
 			property, exist := typ.Properties[name]
-			if !exist {
+			if exist {
+				if property.Type == typeObject {
+					if err = checkExampleValueType(property.APIType, *v); err != nil {
+						return
+					}
+				}
+			} else {
 				return ErrorPropertyUndefined1.New(nil, name)
-			}
-			if err = checkExampleValueType(property.APIType, *v); err != nil {
-				return
 			}
 		}
 		return
@@ -135,11 +137,7 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 		return
 	}
 
-	typeName := apiType.Type
-	if strings.HasSuffix(apiType.Type, "[]") {
-		typeName = apiType.Type[:len(apiType.Type)-2]
-	}
-
+	typeName, _ := getTypeName(apiType)
 	switch typeName {
 	case typeBoolean, typeInteger, typeNumber, typeString:
 		// no type check for RAML built-in type

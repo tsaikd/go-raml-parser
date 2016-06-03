@@ -398,3 +398,165 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 		}
 	}
 }
+
+func Test_ParseExampleFromType(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./test-examples/example-from-type.raml")
+	require.NoError(err)
+	require.NotZero(rootdoc)
+
+	require.Equal("Example from type", rootdoc.Title)
+	if assert.Contains(rootdoc.Types, "User") {
+		typ := rootdoc.Types["User"]
+		require.Equal(typeObject, typ.Type)
+		if assert.Contains(typ.Properties, "name") {
+			property := typ.Properties["name"]
+			require.True(property.Required)
+			require.Equal(typeString, property.Type)
+		}
+		if assert.Contains(typ.Properties, "email") {
+			property := typ.Properties["email"]
+			require.True(property.Required)
+			require.Equal(typeString, property.Type)
+		}
+		if assert.Contains(typ.Examples, "user1") {
+			example := typ.Examples["user1"]
+			if assert.Contains(example.Value.Map, "name") {
+				value := example.Value.Map["name"]
+				require.Equal("Alice", value.String)
+			}
+			if assert.Contains(example.Value.Map, "email") {
+				value := example.Value.Map["email"]
+				require.Equal("alice@example.com", value.String)
+			}
+		}
+		if assert.Contains(typ.Examples, "user2") {
+			example := typ.Examples["user2"]
+			if assert.Contains(example.Value.Map, "name") {
+				value := example.Value.Map["name"]
+				require.Equal("Bob", value.String)
+			}
+			if assert.Contains(example.Value.Map, "email") {
+				value := example.Value.Map["email"]
+				require.Equal("bob@example.com", value.String)
+			}
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/user") {
+		resource := rootdoc.Resources["/user"]
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal("User", body.Type)
+					if assert.Contains(body.Example.Value.Map, "name") {
+						value := body.Example.Value.Map["name"]
+						require.NotEmpty(value.String)
+					}
+				}
+			}
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/user/wrap") {
+		resource := rootdoc.Resources["/user/wrap"]
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal(typeObject, body.Type)
+					if assert.Contains(body.Properties, "user") {
+						property := body.Properties["user"]
+						require.Equal("User", property.Type)
+					}
+					if assert.Contains(body.Example.Value.Map, "user") {
+						user := body.Example.Value.Map["user"]
+						if assert.Contains(user.Map, "name") {
+							value := user.Map["name"]
+							require.Equal(typeString, value.Type)
+							require.NotEmpty(value.String)
+						}
+						if assert.Contains(user.Map, "email") {
+							value := user.Map["email"]
+							require.Equal(typeString, value.Type)
+							require.NotEmpty(value.String)
+						}
+					}
+				}
+			}
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/users") {
+		resource := rootdoc.Resources["/users"]
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal("User[]", body.Type)
+					if assert.Contains(body.Examples, "user1") {
+						example := body.Examples["user1"]
+						if assert.Contains(example.Value.Map, "name") {
+							value := example.Value.Map["name"]
+							require.Equal("Alice", value.String)
+						}
+						if assert.Contains(example.Value.Map, "email") {
+							value := example.Value.Map["email"]
+							require.Equal("alice@example.com", value.String)
+						}
+					}
+					if assert.Contains(body.Examples, "user2") {
+						example := body.Examples["user2"]
+						if assert.Contains(example.Value.Map, "name") {
+							value := example.Value.Map["name"]
+							require.Equal("Bob", value.String)
+						}
+						if assert.Contains(example.Value.Map, "email") {
+							value := example.Value.Map["email"]
+							require.Equal("bob@example.com", value.String)
+						}
+					}
+				}
+			}
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/users/wrap") {
+		resource := rootdoc.Resources["/users/wrap"]
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
+					body := response.Bodies.ForMIMEType["application/json"]
+					require.Equal(typeObject, body.Type)
+					if assert.Contains(body.Properties, "users") {
+						property := body.Properties["users"]
+						require.Equal("User[]", property.Type)
+					}
+					if assert.Contains(body.Example.Value.Map, "users") {
+						users := body.Example.Value.Map["users"]
+						if assert.Len(users.Array, 2) {
+							user := users.Array[0]
+							if assert.Contains(user.Map, "name") {
+								value := user.Map["name"]
+								require.Equal(typeString, value.Type)
+								require.Equal("Alice", value.String)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
