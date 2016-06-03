@@ -1,9 +1,8 @@
-# go-raml-parser
+# go-raml-parser [![Build Status](https://travis-ci.org/tsaikd/go-raml-parser.svg?branch=master)](https://travis-ci.org/tsaikd/go-raml-parser) [![Report card](https://goreportcard.com/badge/github.com/tsaikd/go-raml-parser)](https://goreportcard.com/report/github.com/tsaikd/go-raml-parser)
+
 RAML (1.0) parser implementation in golang
 
-[![Build Status](https://travis-ci.org/tsaikd/go-raml-parser.svg?branch=master)](https://travis-ci.org/tsaikd/go-raml-parser)
-
-WARNING: *Lots of features are not implemented yet.*
+WARNING: **Lots of features are not implemented yet.**
 
 ## Components
 * [cmd](cmd) provide cli command entry point
