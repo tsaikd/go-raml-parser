@@ -72,7 +72,7 @@ func (t TypeDeclaration) MarshalJSON() ([]byte, error) {
 }
 
 // PostProcess for fill default example by type if not set
-func (t *TypeDeclaration) PostProcess(conf PostProcessConfig) (err error) {
+func (t *TypeDeclaration) PostProcess(conf PostProcessConfig, apiType APIType) (err error) {
 	if t == nil {
 		return
 	}
@@ -115,10 +115,10 @@ func (t *TypeDeclaration) PostProcess(conf PostProcessConfig) (err error) {
 	if err = t.Schema.PostProcess(conf); err != nil {
 		return
 	}
-	if err = t.Example.PostProcess(conf, t.Type); err != nil {
+	if err = t.Example.PostProcess(conf, apiType); err != nil {
 		return
 	}
-	if err = t.Examples.PostProcess(conf, t.Type); err != nil {
+	if err = t.Examples.PostProcess(conf, apiType); err != nil {
 		return
 	}
 	if err = t.Annotations.PostProcess(conf); err != nil {

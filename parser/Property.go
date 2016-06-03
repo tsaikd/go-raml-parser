@@ -16,7 +16,7 @@ func (t *Properties) PostProcess(conf PostProcessConfig) (err error) {
 		}
 		if strings.HasSuffix(name, "?") {
 			property.Required = false
-			trimName := strings.TrimRight(name, "?")
+			trimName := strings.TrimSuffix(name, "?")
 			delete(*t, name)
 			(*t)[trimName] = property
 		}

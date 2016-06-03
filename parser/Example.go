@@ -9,9 +9,9 @@ import (
 
 // errors
 var (
-	ErrorTypeUndefined1         = errutil.NewFactory("Type %q can not find in RAML")
-	ErrorUnexpectedExampleType2 = errutil.NewFactory("Example type expected %q but got %q")
-	ErrorRequiredProperty1      = errutil.NewFactory("Property %q is required but not found")
+	ErrorTypeUndefined1     = errutil.NewFactory("Type %q can not find in RAML")
+	ErrorPropertyUndefined1 = errutil.NewFactory("Property %q can not find in RAML")
+	ErrorRequiredProperty1  = errutil.NewFactory("Property %q is required but not found")
 )
 
 // Examples The OPTIONAL examples facet can be used to attach multiple examples
@@ -20,12 +20,12 @@ var (
 type Examples map[string]*Example
 
 // PostProcess for fill some field from RootDocument default config
-func (t *Examples) PostProcess(conf PostProcessConfig, exampleType string) (err error) {
+func (t *Examples) PostProcess(conf PostProcessConfig, apiType APIType) (err error) {
 	if t == nil {
 		return
 	}
 	for _, example := range *t {
-		if err = example.PostProcess(conf, exampleType); err != nil {
+		if err = example.PostProcess(conf, apiType); err != nil {
 			return
 		}
 	}
@@ -114,27 +114,38 @@ func checkExampleValueType(typ APIType, value Value) (err error) {
 				}
 			}
 		}
+		for name, v := range value.Map {
+			property, exist := typ.Properties[name]
+			if !exist {
+				return ErrorPropertyUndefined1.New(nil, name)
+			}
+			if err = checkExampleValueType(property.APIType, *v); err != nil {
+				return
+			}
+		}
 		return
 	default:
-		return ErrorUnexpectedExampleType2.New(nil, typeObject, value.Type)
+		return
 	}
 }
 
 // PostProcess for fill default example by type if not set
-func (t *Example) PostProcess(conf PostProcessConfig, exampleType string) (err error) {
+func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err error) {
 	if t == nil || t.IsEmpty() {
 		return
 	}
 
-	typeName := exampleType
-	if strings.HasSuffix(exampleType, "[]") {
-		typeName = exampleType[:len(exampleType)-2]
+	typeName := apiType.Type
+	if strings.HasSuffix(apiType.Type, "[]") {
+		typeName = apiType.Type[:len(apiType.Type)-2]
 	}
 
 	switch typeName {
-	case typeBoolean, typeInteger, typeNumber, typeString, typeObject:
+	case typeBoolean, typeInteger, typeNumber, typeString:
 		// no type check for RAML built-in type
 		return
+	case typeObject:
+		return checkExampleValueType(apiType, t.Value)
 	default:
 		regValidType := regexp.MustCompile(`^[\w]+(\[\])?$`)
 		if !regValidType.MatchString(typeName) {
@@ -145,7 +156,7 @@ func (t *Example) PostProcess(conf PostProcessConfig, exampleType string) (err e
 		var typ *APIType
 		var exist bool
 		if typ, exist = conf.Library().Types[typeName]; !exist {
-			return ErrorTypeUndefined1.New(nil, exampleType)
+			return ErrorTypeUndefined1.New(nil, apiType.Type)
 		}
 
 		return checkExampleValueType(*typ, t.Value)

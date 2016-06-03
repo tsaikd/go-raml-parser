@@ -105,7 +105,7 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	require.NoError(err)
 	require.NotZero(rootdoc)
 
-	require.Equal(rootdoc.Title, "API with Examples")
+	require.Equal("API with Examples", rootdoc.Title)
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
 		require.Equal(typeObject, typ.Type)
@@ -392,7 +392,7 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 				response := method.Responses[200]
 				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
 					body := response.Bodies.ForMIMEType["application/json"]
-					require.Equal(body.Type, "User")
+					require.Equal("User", body.Type)
 				}
 			}
 		}

@@ -89,9 +89,6 @@ func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
-	if err = t.TypeDeclaration.PostProcess(conf); err != nil {
-		return
-	}
 	if err = t.ObjectType.PostProcess(conf); err != nil {
 		return
 	}
@@ -99,6 +96,14 @@ func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
 		return
 	}
 	if err = t.String.PostProcess(conf); err != nil {
+		return
+	}
+	if err = t.ArrayType.PostProcess(conf); err != nil {
+		return
+	}
+
+	// TypeDeclaration should go after other basic proprtyies done
+	if err = t.TypeDeclaration.PostProcess(conf, *t); err != nil {
 		return
 	}
 	return
