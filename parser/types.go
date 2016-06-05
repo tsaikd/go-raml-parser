@@ -59,14 +59,18 @@ func (t postProcessConfigImpl) Parser() Parser {
 	return t.dataParser
 }
 
-const typeBoolean = "boolean"
-const typeInteger = "integer"
-const typeNumber = "number"
-const typeString = "string"
-const typeObject = "object"
-const typeArray = "array"
+// RAML built-in types
+const (
+	TypeBoolean = "boolean"
+	TypeInteger = "integer"
+	TypeNumber  = "number"
+	TypeString  = "string"
+	TypeObject  = "object"
+	TypeArray   = "array"
+)
 
-func getTypeName(apiType APIType) (typeName string, isArray bool) {
+// GetAPITypeName return type name from APIType, and isArray
+func GetAPITypeName(apiType APIType) (typeName string, isArray bool) {
 	typeName = apiType.Type
 	isArray = strings.HasSuffix(apiType.Type, "[]")
 	if isArray {

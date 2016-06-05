@@ -67,7 +67,7 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 		return
 	}
 	if !t.ObjectType.IsEmpty() {
-		t.Type = typeObject
+		t.Type = TypeObject
 		return nil
 	}
 	if err = unmarshaler(&t.ScalarType); err != nil {

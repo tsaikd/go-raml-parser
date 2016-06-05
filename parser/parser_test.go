@@ -48,15 +48,15 @@ func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {
 	require.Equal("application/json", rootdoc.MediaType)
 	if assert.Contains(rootdoc.AnnotationTypes, "testHarness") {
 		annotationType := rootdoc.AnnotationTypes["testHarness"]
-		require.Equal(typeString, annotationType.Type)
+		require.Equal(TypeString, annotationType.Type)
 	}
 	if assert.Contains(rootdoc.AnnotationTypes, "badge") {
 		annotationType := rootdoc.AnnotationTypes["badge"]
-		require.Equal(typeString, annotationType.Type)
+		require.Equal(TypeString, annotationType.Type)
 	}
 	if assert.Contains(rootdoc.AnnotationTypes, "clearanceLevel") {
 		annotationType := rootdoc.AnnotationTypes["clearanceLevel"]
-		require.Equal(typeObject, annotationType.Type)
+		require.Equal(TypeObject, annotationType.Type)
 		if assert.Contains(annotationType.Properties, "level") {
 			property := annotationType.Properties["level"]
 			require.Len(property.Enum, 3)
@@ -108,14 +108,14 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	require.Equal("API with Examples", rootdoc.Title)
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
-		require.Equal(typeObject, typ.Type)
+		require.Equal(TypeObject, typ.Type)
 		if assert.Contains(typ.Properties, "name") {
 			property := typ.Properties["name"]
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 		}
 		if assert.Contains(typ.Properties, "lastname") {
 			property := typ.Properties["lastname"]
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 		}
 		require.False(typ.Example.Value.IsEmpty())
 		require.Equal("Bob", typ.Example.Value.Map["name"].String)
@@ -123,20 +123,20 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	}
 	if assert.Contains(rootdoc.Types, "Org") {
 		typ := rootdoc.Types["Org"]
-		require.Equal(typeObject, typ.Type)
+		require.Equal(TypeObject, typ.Type)
 		if assert.Contains(typ.Properties, "name") {
 			property := typ.Properties["name"]
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 			require.True(property.Required)
 		}
 		if assert.Contains(typ.Properties, "address") {
 			property := typ.Properties["address"]
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 			require.False(property.Required)
 		}
 		if assert.Contains(typ.Properties, "value") {
 			property := typ.Properties["value"]
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 			require.False(property.Required)
 		}
 	}
@@ -147,7 +147,7 @@ func Test_ParseDefiningExamples(t *testing.T) {
 			if assert.Contains(method.Headers, "UserID") {
 				header := method.Headers["UserID"]
 				require.Equal("the identifier for the user that posts a new organisation", header.Description)
-				require.Equal(typeString, header.Type)
+				require.Equal(TypeString, header.Type)
 				require.Equal("SWED-123", header.Example.Value.String)
 			}
 			if assert.Contains(method.Bodies, "application/json") {
@@ -237,26 +237,26 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 		use := rootdoc.Uses["assets"]
 		if assert.Contains(use.Types, "ProductItem") {
 			typ := use.Types["ProductItem"]
-			require.Equal(typeObject, typ.Type)
+			require.Equal(TypeObject, typ.Type)
 			if assert.Contains(typ.Properties, "product_id") {
 				property := typ.Properties["product_id"]
-				require.Equal(typeString, property.Type)
+				require.Equal(TypeString, property.Type)
 			}
 			if assert.Contains(typ.Properties, "quantity") {
 				property := typ.Properties["quantity"]
-				require.Equal(typeInteger, property.Type)
+				require.Equal(TypeInteger, property.Type)
 			}
 		}
 		if assert.Contains(use.Types, "Order") {
 			typ := use.Types["Order"]
-			require.Equal(typeObject, typ.Type)
+			require.Equal(TypeObject, typ.Type)
 			if assert.Contains(typ.Properties, "order_id") {
 				property := typ.Properties["order_id"]
-				require.Equal(typeString, property.Type)
+				require.Equal(TypeString, property.Type)
 			}
 			if assert.Contains(typ.Properties, "creation_date") {
 				property := typ.Properties["creation_date"]
-				require.Equal(typeString, property.Type)
+				require.Equal(TypeString, property.Type)
 			}
 			if assert.Contains(typ.Properties, "items") {
 				property := typ.Properties["items"]
@@ -265,7 +265,7 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 		}
 		if assert.Contains(use.Types, "Orders") {
 			typ := use.Types["Orders"]
-			require.Equal(typeObject, typ.Type)
+			require.Equal(TypeObject, typ.Type)
 			if assert.Contains(typ.Properties, "orders") {
 				property := typ.Properties["orders"]
 				require.Equal("Order[]", property.Type)
@@ -276,17 +276,17 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 			if assert.Contains(trait.QueryParameters, "size") {
 				qp := trait.QueryParameters["size"]
 				require.Equal("the amount of elements of each result page", qp.Description)
-				require.Equal(typeInteger, qp.Type)
+				require.Equal(TypeInteger, qp.Type)
 				require.False(qp.Required)
-				require.Equal(typeInteger, qp.Example.Value.Type)
+				require.Equal(TypeInteger, qp.Example.Value.Type)
 				require.EqualValues(10, qp.Example.Value.Integer)
 			}
 			if assert.Contains(trait.QueryParameters, "page") {
 				qp := trait.QueryParameters["page"]
 				require.Equal("the page number", qp.Description)
-				require.Equal(typeInteger, qp.Type)
+				require.Equal(TypeInteger, qp.Type)
 				require.False(qp.Required)
-				require.Equal(typeInteger, qp.Example.Value.Type)
+				require.Equal(TypeInteger, qp.Example.Value.Type)
 				require.EqualValues(0, qp.Example.Value.Integer)
 			}
 		}
@@ -367,21 +367,21 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	require.Equal("API with Types", rootdoc.Title)
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
-		require.Equal(typeObject, typ.Type)
+		require.Equal(TypeObject, typ.Type)
 		if assert.Contains(typ.Properties, "age") {
 			property := typ.Properties["age"]
 			require.True(property.Required)
-			require.Equal(typeNumber, property.Type)
+			require.Equal(TypeNumber, property.Type)
 		}
 		if assert.Contains(typ.Properties, "firstName") {
 			property := typ.Properties["firstName"]
 			require.True(property.Required)
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 		}
 		if assert.Contains(typ.Properties, "lastName") {
 			property := typ.Properties["lastName"]
 			require.True(property.Required)
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 		}
 	}
 	if assert.Contains(rootdoc.Resources, "/users/{id}") {
@@ -415,16 +415,16 @@ func Test_ParseExampleFromType(t *testing.T) {
 	require.Equal("Example from type", rootdoc.Title)
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
-		require.Equal(typeObject, typ.Type)
+		require.Equal(TypeObject, typ.Type)
 		if assert.Contains(typ.Properties, "name") {
 			property := typ.Properties["name"]
 			require.True(property.Required)
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 		}
 		if assert.Contains(typ.Properties, "email") {
 			property := typ.Properties["email"]
 			require.True(property.Required)
-			require.Equal(typeString, property.Type)
+			require.Equal(TypeString, property.Type)
 		}
 		if assert.Contains(typ.Examples, "user1") {
 			example := typ.Examples["user1"]
@@ -474,7 +474,7 @@ func Test_ParseExampleFromType(t *testing.T) {
 				response := method.Responses[200]
 				if assert.Contains(response.Bodies, "application/json") {
 					body := response.Bodies["application/json"]
-					require.Equal(typeObject, body.Type)
+					require.Equal(TypeObject, body.Type)
 					if assert.Contains(body.Properties, "user") {
 						property := body.Properties["user"]
 						require.Equal("User", property.Type)
@@ -483,12 +483,12 @@ func Test_ParseExampleFromType(t *testing.T) {
 						user := body.Example.Value.Map["user"]
 						if assert.Contains(user.Map, "name") {
 							value := user.Map["name"]
-							require.Equal(typeString, value.Type)
+							require.Equal(TypeString, value.Type)
 							require.NotEmpty(value.String)
 						}
 						if assert.Contains(user.Map, "email") {
 							value := user.Map["email"]
-							require.Equal(typeString, value.Type)
+							require.Equal(TypeString, value.Type)
 							require.NotEmpty(value.String)
 						}
 					}
@@ -539,7 +539,7 @@ func Test_ParseExampleFromType(t *testing.T) {
 				response := method.Responses[200]
 				if assert.Contains(response.Bodies, "application/json") {
 					body := response.Bodies["application/json"]
-					require.Equal(typeObject, body.Type)
+					require.Equal(TypeObject, body.Type)
 					if assert.Contains(body.Properties, "users") {
 						property := body.Properties["users"]
 						require.Equal("User[]", property.Type)
@@ -550,7 +550,7 @@ func Test_ParseExampleFromType(t *testing.T) {
 							user := users.Array[0]
 							if assert.Contains(user.Map, "name") {
 								value := user.Map["name"]
-								require.Equal(typeString, value.Type)
+								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
 						}

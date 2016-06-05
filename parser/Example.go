@@ -105,7 +105,7 @@ func (t Example) MarshalJSON() ([]byte, error) {
 
 func checkExampleValueType(typ APIType, value Value) (err error) {
 	switch value.Type {
-	case typeObject:
+	case TypeObject:
 		for name, property := range typ.Properties {
 			if property.Required {
 				if _, exist := value.Map[name]; !exist {
@@ -116,7 +116,7 @@ func checkExampleValueType(typ APIType, value Value) (err error) {
 		for name, v := range value.Map {
 			property, exist := typ.Properties[name]
 			if exist {
-				if property.Type == typeObject {
+				if property.Type == TypeObject {
 					if err = checkExampleValueType(property.APIType, *v); err != nil {
 						return
 					}
@@ -137,12 +137,12 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 		return
 	}
 
-	typeName, _ := getTypeName(apiType)
+	typeName, _ := GetAPITypeName(apiType)
 	switch typeName {
-	case typeBoolean, typeInteger, typeNumber, typeString:
+	case TypeBoolean, TypeInteger, TypeNumber, TypeString:
 		// no type check for RAML built-in type
 		return
-	case typeObject:
+	case TypeObject:
 		return checkExampleValueType(apiType, t.Value)
 	default:
 		regValidType := regexp.MustCompile(`^[\w]+(\[\])?$`)

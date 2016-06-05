@@ -15,15 +15,15 @@ type Value struct {
 // MarshalJSON marshal to json
 func (t Value) MarshalJSON() ([]byte, error) {
 	switch t.Type {
-	case typeBoolean:
+	case TypeBoolean:
 		return json.Marshal(t.Boolean)
-	case typeInteger:
+	case TypeInteger:
 		return json.Marshal(t.Integer)
-	case typeString:
+	case TypeString:
 		return json.Marshal(t.String)
-	case typeArray:
+	case TypeArray:
 		return json.Marshal(t.Array)
-	case typeObject:
+	case TypeObject:
 		return json.Marshal(t.Map)
 	default:
 		return json.Marshal(nil)
@@ -33,7 +33,7 @@ func (t Value) MarshalJSON() ([]byte, error) {
 // UnmarshalYAML unmarshal from YAML
 func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	if err = unmarshaler(&t.Boolean); err == nil {
-		t.Type = typeBoolean
+		t.Type = TypeBoolean
 		return
 	}
 	if !isErrorYAMLIntoBool(err) {
@@ -41,7 +41,7 @@ func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	}
 
 	if err = unmarshaler(&t.Integer); err == nil {
-		t.Type = typeInteger
+		t.Type = TypeInteger
 		return
 	}
 	if !isErrorYAMLIntoInt64(err) {
@@ -49,7 +49,7 @@ func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	}
 
 	if err = unmarshaler(&t.String); err == nil {
-		t.Type = typeString
+		t.Type = TypeString
 		return
 	}
 	if !isErrorYAMLIntoString(err) {
@@ -57,14 +57,14 @@ func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	}
 
 	if err = unmarshaler(&t.Array); err == nil {
-		t.Type = typeArray
+		t.Type = TypeArray
 		return
 	}
 
 	if err = unmarshaler(&t.Map); err != nil {
 		return
 	}
-	t.Type = typeObject
+	t.Type = TypeObject
 	return
 }
 
