@@ -1,63 +1,53 @@
 package parser
 
-import "encoding/json"
+// Bodies map of Body
+type Bodies map[string]*Body
 
 // Bodies contains Body types, necessary because of technical reasons.
-type Bodies struct {
-	// Instead of using a simple map[HTTPHeader]Body for the body
-	// property of the Response and Method, we use the Bodies struct. Why?
-	// Because some RAML APIs don't use the MIMEType part, instead relying
-	// on the mediaType property in the APIDefinition.
-	// So, you might see:
-	//
-	// responses:
-	//   200:
-	//     body:
-	//       example: "some_example" : "123"
-	//
-	// and also:
-	//
-	// responses:
-	//   200:
-	//     body:
-	//       application/json:
-	//         example: |
-	//           {
-	//             "some_example" : "123"
-	//           }
+// type Bodies struct {
+// Instead of using a simple map[HTTPHeader]Body for the body
+// property of the Response and Method, we use the Bodies struct. Why?
+// Because some RAML APIs don't use the MIMEType part, instead relying
+// on the mediaType property in the APIDefinition.
+// So, you might see:
+//
+// responses:
+//   200:
+//     body:
+//       example: "some_example" : "123"
+//
+// and also:
+//
+// responses:
+//   200:
+//     body:
+//       application/json:
+//         example: |
+//           {
+//             "some_example" : "123"
+//           }
 
-	// Resources CAN have alternate representations. For example, an API
-	// might support both JSON and XML representations. This is the map
-	// between MIME-type and the body definition related to it.
-	ForMIMEType map[string]*Body `yaml:",regexp:.*"`
-}
+// Resources CAN have alternate representations. For example, an API
+// might support both JSON and XML representations. This is the map
+// between MIME-type and the body definition related to it.
+// ForMIMEType map[string]*Body `yaml:",regexp:.*"`
+// }
 
 // UnmarshalYAML unmarshal from YAML
 func (t *Bodies) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	mimetype := map[string]*Body{}
 	if err = unmarshaler(&mimetype); err == nil {
-		t.ForMIMEType = mimetype
+		*t = mimetype
 		return
 	}
 
 	body := Body{}
 	if err = unmarshaler(&body); err == nil {
-		t.ForMIMEType = map[string]*Body{
-			"DEFAULT": &body,
-		}
+		(*t)["DEFAULT"] = &body
 		return
 	}
 
 	return
-}
-
-// MarshalJSON marshal to json
-func (t Bodies) MarshalJSON() ([]byte, error) {
-	if t.IsEmpty() {
-		return json.Marshal(nil)
-	}
-
-	return json.Marshal(t.ForMIMEType)
 }
 
 // PostProcess for fill default example by type if not set
@@ -66,15 +56,15 @@ func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
 		return
 	}
 
-	if body, exist := t.ForMIMEType["DEFAULT"]; exist {
+	if body, exist := (*t)["DEFAULT"]; exist {
 		if conf.RootDocument().MediaType == "" {
 			return ErrorEmptyRootDocumentMediaType.New(nil)
 		}
-		delete(t.ForMIMEType, "DEFAULT")
-		t.ForMIMEType[conf.RootDocument().MediaType] = body
+		delete(*t, "DEFAULT")
+		(*t)[conf.RootDocument().MediaType] = body
 	}
 
-	for _, body := range t.ForMIMEType {
+	for _, body := range *t {
 		if err = body.PostProcess(conf); err != nil {
 			return
 		}
@@ -84,7 +74,7 @@ func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
 
 // IsEmpty return true if it is empty
 func (t Bodies) IsEmpty() bool {
-	for _, elem := range t.ForMIMEType {
+	for _, elem := range t {
 		if elem != nil {
 			if !elem.IsEmpty() {
 				return false

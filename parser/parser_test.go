@@ -150,8 +150,8 @@ func Test_ParseDefiningExamples(t *testing.T) {
 				require.Equal(typeString, header.Type)
 				require.Equal("SWED-123", header.Example.Value.String)
 			}
-			if assert.Contains(method.Bodies.ForMIMEType, "application/json") {
-				body := method.Bodies.ForMIMEType["application/json"]
+			if assert.Contains(method.Bodies, "application/json") {
+				body := method.Bodies["application/json"]
 				require.Equal("Org", body.Type)
 				if assert.Contains(body.Example.Value.Map, "name") {
 					name := body.Example.Value.Map["name"]
@@ -168,8 +168,8 @@ func Test_ParseDefiningExamples(t *testing.T) {
 			require.Equal("Returns an organisation entity.", method.Description)
 			if assert.Contains(method.Responses, HTTPCode(201)) {
 				response := method.Responses[201]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal("Org", body.Type)
 					if assert.Contains(body.Examples, "acme") {
 						example := body.Examples["acme"]
@@ -207,8 +207,8 @@ func Test_ParseHelloworld(t *testing.T) {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.NotEmpty(body.Type)
 					require.NotEmpty(body.Example)
 				}
@@ -311,8 +311,8 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 			}
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal("assets.Orders", body.Type)
 					if assert.Contains(body.Examples, "single-order") {
 						example := body.Examples["single-order"]
@@ -390,8 +390,8 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal("User", body.Type)
 				}
 			}
@@ -455,8 +455,8 @@ func Test_ParseExampleFromType(t *testing.T) {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal("User", body.Type)
 					if assert.Contains(body.Example.Value.Map, "name") {
 						value := body.Example.Value.Map["name"]
@@ -472,8 +472,8 @@ func Test_ParseExampleFromType(t *testing.T) {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal(typeObject, body.Type)
 					if assert.Contains(body.Properties, "user") {
 						property := body.Properties["user"]
@@ -502,8 +502,8 @@ func Test_ParseExampleFromType(t *testing.T) {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal("User[]", body.Type)
 					if assert.Contains(body.Examples, "user1") {
 						example := body.Examples["user1"]
@@ -537,8 +537,8 @@ func Test_ParseExampleFromType(t *testing.T) {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
 				response := method.Responses[200]
-				if assert.Contains(response.Bodies.ForMIMEType, "application/json") {
-					body := response.Bodies.ForMIMEType["application/json"]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
 					require.Equal(typeObject, body.Type)
 					if assert.Contains(body.Properties, "users") {
 						property := body.Properties["users"]
