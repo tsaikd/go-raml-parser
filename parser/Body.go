@@ -32,6 +32,25 @@ type Bodies struct {
 	ForMIMEType map[string]*Body `yaml:",regexp:.*"`
 }
 
+// UnmarshalYAML unmarshal from YAML
+func (t *Bodies) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+	mimetype := map[string]*Body{}
+	if err = unmarshaler(&mimetype); err == nil {
+		t.ForMIMEType = mimetype
+		return
+	}
+
+	body := Body{}
+	if err = unmarshaler(&body); err == nil {
+		t.ForMIMEType = map[string]*Body{
+			"DEFAULT": &body,
+		}
+		return
+	}
+
+	return
+}
+
 // MarshalJSON marshal to json
 func (t Bodies) MarshalJSON() ([]byte, error) {
 	if t.IsEmpty() {
@@ -46,6 +65,15 @@ func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
+
+	if body, exist := t.ForMIMEType["DEFAULT"]; exist {
+		if conf.RootDocument().MediaType == "" {
+			return ErrorEmptyRootDocumentMediaType.New(nil)
+		}
+		delete(t.ForMIMEType, "DEFAULT")
+		t.ForMIMEType[conf.RootDocument().MediaType] = body
+	}
+
 	for _, body := range t.ForMIMEType {
 		if err = body.PostProcess(conf); err != nil {
 			return

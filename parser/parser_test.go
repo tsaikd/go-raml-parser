@@ -551,7 +551,7 @@ func Test_ParseExampleFromType(t *testing.T) {
 							if assert.Contains(user.Map, "name") {
 								value := user.Map["name"]
 								require.Equal(typeString, value.Type)
-								require.Equal("Alice", value.String)
+								require.NotEmpty(value.String)
 							}
 						}
 					}

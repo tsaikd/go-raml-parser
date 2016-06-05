@@ -30,8 +30,7 @@ func (t Value) MarshalJSON() ([]byte, error) {
 	}
 }
 
-// UnmarshalYAML unmarshal an Example which MIGHT be a simple string or a
-// map[string]interface{}
+// UnmarshalYAML unmarshal from YAML
 func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	if err = unmarshaler(&t.Boolean); err == nil {
 		t.Type = typeBoolean
