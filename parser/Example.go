@@ -1,18 +1,5 @@
 package parser
 
-import (
-	"regexp"
-
-	"github.com/tsaikd/KDGoLib/errutil"
-)
-
-// errors
-var (
-	ErrorTypeUndefined1     = errutil.NewFactory("Type %q can not find in RAML")
-	ErrorPropertyUndefined1 = errutil.NewFactory("Property %q can not find in RAML")
-	ErrorRequiredProperty1  = errutil.NewFactory("Property %q is required but not found")
-)
-
 // Examples The OPTIONAL examples facet can be used to attach multiple examples
 // to a type declaration. Its value is a map of key-value pairs, where each key
 // represents a unique identifier for an example and the value is a single example.
@@ -103,34 +90,6 @@ func (t Example) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-func checkExampleValueType(typ APIType, value Value) (err error) {
-	switch value.Type {
-	case TypeObject:
-		for name, property := range typ.Properties {
-			if property.Required {
-				if _, exist := value.Map[name]; !exist {
-					return ErrorRequiredProperty1.New(nil, name)
-				}
-			}
-		}
-		for name, v := range value.Map {
-			property, exist := typ.Properties[name]
-			if exist {
-				if property.Type == TypeObject {
-					if err = checkExampleValueType(property.APIType, *v); err != nil {
-						return
-					}
-				}
-			} else {
-				return ErrorPropertyUndefined1.New(nil, name)
-			}
-		}
-		return
-	default:
-		return
-	}
-}
-
 // PostProcess for fill default example by type if not set
 func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err error) {
 	if t == nil || t.IsEmpty() {
@@ -143,10 +102,9 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 		// no type check for RAML built-in type
 		return
 	case TypeObject:
-		return checkExampleValueType(apiType, t.Value)
+		return CheckValueAPIType(apiType, t.Value)
 	default:
-		regValidType := regexp.MustCompile(`^[\w]+(\[\])?$`)
-		if !regValidType.MatchString(typeName) {
+		if isInlineAPIType(apiType) {
 			// no type check if declared by JSON
 			return
 		}
@@ -157,6 +115,6 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 			return ErrorTypeUndefined1.New(nil, apiType.Type)
 		}
 
-		return checkExampleValueType(*typ, t.Value)
+		return CheckValueAPIType(*typ, t.Value)
 	}
 }

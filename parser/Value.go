@@ -1,12 +1,91 @@
 package parser
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"reflect"
+)
+
+// NewValue cast src to value
+func NewValue(src interface{}) (Value, error) {
+	switch src.(type) {
+	case Value:
+		return src.(Value), nil
+	case bool:
+		return Value{
+			Type:    TypeBoolean,
+			Boolean: src.(bool),
+		}, nil
+	case int:
+		return Value{
+			Type:    TypeInteger,
+			Integer: int64(src.(int)),
+		}, nil
+	case int8:
+		return Value{
+			Type:    TypeInteger,
+			Integer: int64(src.(int8)),
+		}, nil
+	case int16:
+		return Value{
+			Type:    TypeInteger,
+			Integer: int64(src.(int16)),
+		}, nil
+	case int32:
+		return Value{
+			Type:    TypeInteger,
+			Integer: int64(src.(int32)),
+		}, nil
+	case int64:
+		return Value{
+			Type:    TypeInteger,
+			Integer: int64(src.(int64)),
+		}, nil
+	case float32:
+		return Value{
+			Type:   TypeNumber,
+			Number: float64(src.(float32)),
+		}, nil
+	case float64:
+		return Value{
+			Type:   TypeNumber,
+			Number: float64(src.(float64)),
+		}, nil
+	case string:
+		return Value{
+			Type:   TypeString,
+			String: src.(string),
+		}, nil
+	case map[string]interface{}:
+		result := Value{
+			Type: TypeObject,
+			Map:  map[string]*Value{},
+		}
+		srcMap := src.(map[string]interface{})
+		for k, v := range srcMap {
+			newval, err := NewValue(v)
+			if err != nil {
+				return Value{}, err
+			}
+			result.Map[k] = &newval
+		}
+		return result, nil
+	}
+
+	refval := reflect.ValueOf(src)
+	switch refval.Kind() {
+	case reflect.Ptr:
+		return NewValue(refval.Elem().Interface())
+	}
+
+	return Value{}, ErrorUnsupportedValueType1.New(nil, src)
+}
 
 // Value multiple types value
 type Value struct {
 	Type    string
 	Boolean bool
 	Integer int64
+	Number  float64
 	String  string
 	Array   []*Value
 	Map     map[string]*Value
@@ -19,6 +98,8 @@ func (t Value) MarshalJSON() ([]byte, error) {
 		return json.Marshal(t.Boolean)
 	case TypeInteger:
 		return json.Marshal(t.Integer)
+	case TypeNumber:
+		return json.Marshal(t.Number)
 	case TypeString:
 		return json.Marshal(t.String)
 	case TypeArray:
@@ -45,6 +126,14 @@ func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 		return
 	}
 	if !isErrorYAMLIntoInt64(err) {
+		return
+	}
+
+	if err = unmarshaler(&t.Number); err == nil {
+		t.Type = TypeNumber
+		return
+	}
+	if !isErrorYAMLIntoFloat64(err) {
 		return
 	}
 
@@ -78,6 +167,7 @@ func (t Value) IsEmpty() bool {
 	return t.Type == "" &&
 		t.Boolean == false &&
 		t.Integer == 0 &&
+		t.Number == 0 &&
 		t.String == "" &&
 		len(t.Array) < 1 &&
 		len(t.Map) < 1
