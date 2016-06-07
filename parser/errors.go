@@ -14,7 +14,6 @@ var (
 	ErrorUnexpectedRAMLVersion2        = errutil.NewFactory("RAML version should be %q but got %q")
 	ErrorEmptyRootDocumentMediaType    = errutil.NewFactory("body without MIME-type and root document do not provide default MediaType")
 	ErrorTypeUndefined1                = errutil.NewFactory("Type %q can not find in RAML")
-	ErrorPropertyUndefined1            = errutil.NewFactory("Property %q can not find in RAML")
 	ErrorPropertyTypeMismatch2         = errutil.NewFactory("Property type mismatch, expected %q but got %q")
 	ErrorPropertyTypeMismatch3         = errutil.NewFactory("Property %q type mismatch, expected %q but got %q")
 	ErrorRequiredProperty1             = errutil.NewFactory("Property %q is required but not found")

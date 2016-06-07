@@ -36,25 +36,19 @@ func CheckValueAPIType(apiType APIType, value Value) (err error) {
 		}
 
 		for name, property := range apiType.Properties {
-			if !property.Required {
-				continue
-			}
-			if !isValueContainKey(value, name) {
-				return ErrorRequiredProperty1.New(nil, name)
-			}
-		}
-
-		for name, v := range value.Map {
-			property, exist := apiType.Properties[name]
-			if !exist {
-				return ErrorPropertyUndefined1.New(nil, name)
-			}
-
-			if err = CheckValueAPIType(property.APIType, *v); err != nil {
-				if ErrorPropertyTypeMismatch2.Match(err) {
-					return ErrorPropertyTypeMismatch3.New(nil, name, property.Type, v.Type)
+			if property.Required {
+				if !isValueContainKey(value, name) {
+					return ErrorRequiredProperty1.New(nil, name)
 				}
-				return
+			}
+
+			if v, exist := value.Map[name]; exist {
+				if err = CheckValueAPIType(property.APIType, *v); err != nil {
+					if ErrorPropertyTypeMismatch2.Match(err) {
+						return ErrorPropertyTypeMismatch3.New(nil, name, property.Type, v.Type)
+					}
+					return
+				}
 			}
 		}
 	}
