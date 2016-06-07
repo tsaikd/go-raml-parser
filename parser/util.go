@@ -15,11 +15,33 @@ func GetAPITypeName(apiType APIType) (typeName string, isArray bool) {
 	return
 }
 
+// CheckValueOption for changing CheckValueAPIType behavior
+type CheckValueOption interface{}
+
+// CheckValueOptionAllowIntegerToBeNumber allow type integer to be type number,
+// e.g. APIType need a integer, but value is a number
+// default: false
+type CheckValueOptionAllowIntegerToBeNumber bool
+
 // CheckValueAPIType check value is valid for apiType
-func CheckValueAPIType(apiType APIType, value Value) (err error) {
+func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption) (err error) {
+	allowIntegerToBeNumber := CheckValueOptionAllowIntegerToBeNumber(false)
+
+	for _, option := range options {
+		switch option.(type) {
+		case CheckValueOptionAllowIntegerToBeNumber:
+			allowIntegerToBeNumber = option.(CheckValueOptionAllowIntegerToBeNumber)
+		}
+	}
+
 	switch apiType.Type {
 	case TypeBoolean, TypeInteger, TypeNumber, TypeString:
 		if apiType.Type != value.Type {
+			if allowIntegerToBeNumber &&
+				apiType.Type == TypeInteger &&
+				value.Type == TypeNumber {
+				break
+			}
 			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 		}
 	default:
