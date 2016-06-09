@@ -144,3 +144,15 @@ func Test_ValueFromMap(t *testing.T) {
 		}
 	}
 }
+
+func Test_ValueFromBinary(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	value, err := NewValue([]byte("abc"))
+	require.NoError(err)
+	require.Equal(TypeBinary, value.Type)
+	require.Len(value.Binary, 3)
+}

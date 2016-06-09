@@ -560,3 +560,36 @@ func Test_ParseExampleFromType(t *testing.T) {
 		}
 	}
 }
+
+func Test_ParseExampleIncludeBinaryFile(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./test-examples/example-include-binary-file.raml")
+	require.NoError(err)
+	require.NotZero(rootdoc)
+
+	require.Equal("Example include binary file", rootdoc.Title)
+	if assert.Contains(rootdoc.Resources, "/binary") {
+		resource := rootdoc.Resources["/binary"]
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[200]
+				if assert.Contains(response.Bodies, "image/png") {
+					body := response.Bodies["image/png"]
+					require.Equal(TypeFile, body.Type)
+					require.Len(body.FileTypes, 1)
+					require.Equal("*/*", body.FileTypes[0])
+					require.Equal(TypeBinary, body.Example.Value.Type)
+					require.Len(body.Example.Value.Binary, 14865)
+				}
+			}
+		}
+	}
+}

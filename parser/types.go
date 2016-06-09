@@ -64,4 +64,6 @@ const (
 	TypeString  = "string"
 	TypeObject  = "object"
 	TypeArray   = "array"
+	TypeFile    = "file"
+	TypeBinary  = "binary"
 )

@@ -44,6 +44,9 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 			}
 			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 		}
+	case TypeFile:
+		// no type check for file type
+		return
 	default:
 		if isInlineAPIType(apiType) {
 			// no type check if declared by JSON

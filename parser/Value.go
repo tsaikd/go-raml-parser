@@ -55,6 +55,11 @@ func NewValue(src interface{}) (Value, error) {
 			Type:   TypeString,
 			String: src.(string),
 		}, nil
+	case []byte:
+		return Value{
+			Type:   TypeBinary,
+			Binary: src.([]byte),
+		}, nil
 	case map[string]interface{}:
 		result := Value{
 			Type: TypeObject,
@@ -89,6 +94,7 @@ type Value struct {
 	String  string
 	Array   []*Value
 	Map     map[string]*Value
+	Binary  []byte
 }
 
 // MarshalJSON marshal to json
@@ -106,6 +112,8 @@ func (t Value) MarshalJSON() ([]byte, error) {
 		return json.Marshal(t.Array)
 	case TypeObject:
 		return json.Marshal(t.Map)
+	case TypeBinary:
+		return json.Marshal(t.Binary)
 	default:
 		return json.Marshal(nil)
 	}
@@ -170,5 +178,6 @@ func (t Value) IsEmpty() bool {
 		t.Number == 0 &&
 		t.String == "" &&
 		len(t.Array) < 1 &&
-		len(t.Map) < 1
+		len(t.Map) < 1 &&
+		len(t.Binary) < 1
 }

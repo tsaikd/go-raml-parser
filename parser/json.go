@@ -34,9 +34,11 @@ func marshalStructToMap(output map[string]interface{}, refv reflect.Value) {
 
 func marshalFieldToMap(output map[string]interface{}, field reflect.StructField, refv reflect.Value) {
 	tag := field.Tag.Get("json")
-	if emptier, ok := refv.Interface().(SupportToCheckEmpty); ok {
-		if emptier.IsEmpty() && strings.Contains(tag, "omitempty") {
-			return
+	if refv.CanInterface() {
+		if emptier, ok := refv.Interface().(SupportToCheckEmpty); ok {
+			if emptier.IsEmpty() && strings.Contains(tag, "omitempty") {
+				return
+			}
 		}
 	}
 
@@ -79,7 +81,9 @@ func marshalFieldToMap(output map[string]interface{}, field reflect.StructField,
 	}
 
 	if name := getFieldJSONName(field); name != "" {
-		output[name] = refv.Interface()
+		if refv.CanInterface() {
+			output[name] = refv.Interface()
+		}
 	}
 }
 

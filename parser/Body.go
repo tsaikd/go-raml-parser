@@ -43,7 +43,9 @@ func (t *Bodies) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) 
 
 	body := Body{}
 	if err = unmarshaler(&body); err == nil {
-		(*t)["DEFAULT"] = &body
+		*t = map[string]*Body{
+			"DEFAULT": &body,
+		}
 		return
 	}
 

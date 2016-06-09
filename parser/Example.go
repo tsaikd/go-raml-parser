@@ -1,5 +1,10 @@
 package parser
 
+import (
+	"io/ioutil"
+	"path/filepath"
+)
+
 // Examples The OPTIONAL examples facet can be used to attach multiple examples
 // to a type declaration. Its value is a map of key-value pairs, where each key
 // represents a unique identifier for an example and the value is a single example.
@@ -69,13 +74,20 @@ func (t SingleExample) IsEmpty() bool {
 // Example wrap SingleExample for unmarshal YAML
 type Example struct {
 	SingleExample
+
+	// is include tag set
+	includeTag bool
 }
 
-// UnmarshalYAML unmarshal an Example which MIGHT be a simple string or a
+// UnmarshalYAMLTag unmarshal an Example which MIGHT be a simple string or a
 // map[string]interface{}
-func (t *Example) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+func (t *Example) UnmarshalYAMLTag(unmarshaler func(interface{}) error, tag string) (err error) {
 	if err = unmarshaler(&t.SingleExample); err == nil && !t.SingleExample.IsEmpty() {
 		return
+	}
+
+	if tag == "!include" {
+		t.includeTag = true
 	}
 
 	if err = unmarshaler(&t.Value); err == nil && !t.Value.IsEmpty() {
@@ -96,9 +108,25 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 		return
 	}
 
+	if t.includeTag && TypeString == t.Value.Type {
+		fpath := filepath.Join(conf.RootDocument().WorkingDirectory, t.Value.String)
+		var fdata []byte
+		if fdata, err = ioutil.ReadFile(fpath); err != nil {
+			return
+		}
+		switch apiType.Type {
+		case TypeFile:
+			if t.Value, err = NewValue(fdata); err != nil {
+				return
+			}
+		default:
+			return ErrorUnsupportedIncludeType1.New(nil, apiType.Type)
+		}
+	}
+
 	typeName, _ := GetAPITypeName(apiType)
 	switch typeName {
-	case TypeBoolean, TypeInteger, TypeNumber, TypeString:
+	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
 		// no type check for RAML built-in type
 		return
 	case TypeObject:

@@ -10,6 +10,7 @@ import (
 var (
 	ErrorUnsupportedParserConfig1      = errutil.NewFactory("unsupported parser config: %q")
 	ErrorUnsupportedValueType1         = errutil.NewFactory("unsupported value type: %T")
+	ErrorUnsupportedIncludeType1       = errutil.NewFactory("unsupported include for type: %q")
 	ErrorInvaludParserConfigValueType3 = errutil.NewFactory(`value type of parser config %q should be "%T" but got "%T"`)
 	ErrorUnexpectedRAMLVersion2        = errutil.NewFactory("RAML version should be %q but got %q")
 	ErrorEmptyRootDocumentMediaType    = errutil.NewFactory("body without MIME-type and root document do not provide default MediaType")

@@ -37,6 +37,7 @@ type APIType struct {
 	ScalarType
 	String
 	ArrayType
+	FileType
 }
 
 // BeforeUnmarshalYAML implement yaml Initiator
@@ -48,6 +49,9 @@ func (t *APIType) BeforeUnmarshalYAML() (err error) {
 		return
 	}
 	if err = t.ArrayType.BeforeUnmarshalYAML(); err != nil {
+		return
+	}
+	if err = t.FileType.BeforeUnmarshalYAML(); err != nil {
 		return
 	}
 	return
@@ -76,6 +80,9 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	if err = unmarshaler(&t.String); err != nil {
 		return
 	}
+	if err = unmarshaler(&t.FileType); err != nil {
+		return
+	}
 	return nil
 }
 
@@ -101,6 +108,9 @@ func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
 	if err = t.ArrayType.PostProcess(conf); err != nil {
 		return
 	}
+	if err = t.FileType.PostProcess(conf); err != nil {
+		return
+	}
 
 	// TypeDeclaration should go after other basic proprtyies done
 	if err = t.TypeDeclaration.PostProcess(conf, *t); err != nil {
@@ -111,7 +121,7 @@ func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
 	if t.Properties.IsEmpty() {
 		typeName, _ := GetAPITypeName(*t)
 		switch typeName {
-		case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject:
+		case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
 			// no more action for RAML built-in type
 			return
 		default:
@@ -137,5 +147,7 @@ func (t APIType) IsEmpty() bool {
 	return t.TypeDeclaration.IsEmpty() &&
 		t.ObjectType.IsEmpty() &&
 		t.ScalarType.IsEmpty() &&
-		t.String.IsEmpty()
+		t.String.IsEmpty() &&
+		t.ArrayType.IsEmpty() &&
+		t.FileType.IsEmpty()
 }
