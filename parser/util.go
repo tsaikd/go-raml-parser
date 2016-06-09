@@ -1,9 +1,38 @@
 package parser
 
 import (
+	"bytes"
+	"io/ioutil"
+	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 )
+
+// LoadRAMLFromDir load RAML data from directory, concat *.raml
+func LoadRAMLFromDir(dirPath string) (ramlData []byte, err error) {
+	var filenames []string
+	if filenames, err = filepath.Glob(filepath.Join(dirPath, "*.raml")); err != nil {
+		return
+	}
+	sort.Strings(filenames)
+
+	buffer := &bytes.Buffer{}
+	for _, filename := range filenames {
+		var filedata []byte
+		if filedata, err = ioutil.ReadFile(filename); err != nil {
+			return
+		}
+		if _, err = buffer.Write(filedata); err != nil {
+			return
+		}
+		if _, err = buffer.WriteRune('\n'); err != nil {
+			return
+		}
+	}
+
+	return buffer.Bytes(), nil
+}
 
 // GetAPITypeName return type name from APIType, and isArray
 func GetAPITypeName(apiType APIType) (typeName string, isArray bool) {

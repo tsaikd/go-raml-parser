@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/tsaikd/KDGoLib/futil"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 	"github.com/tsaikd/yaml"
 )
@@ -71,14 +72,22 @@ func (t parserImpl) CheckRAMLVersion(data []byte) (err error) {
 }
 
 func (t parserImpl) ParseFile(filePath string) (rootdoc RootDocument, err error) {
-	dir := filepath.Dir(filePath)
+	var workdir string
+	var filedata []byte
 
-	filedata, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return
+	if futil.IsDir(filePath) {
+		workdir = filePath
+		if filedata, err = LoadRAMLFromDir(filePath); err != nil {
+			return
+		}
+	} else {
+		workdir = filepath.Dir(filePath)
+		if filedata, err = ioutil.ReadFile(filePath); err != nil {
+			return
+		}
 	}
 
-	return t.ParseData(filedata, dir)
+	return t.ParseData(filedata, workdir)
 }
 
 func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument, err error) {
