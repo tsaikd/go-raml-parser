@@ -1,35 +1,33 @@
-package module
+package parse
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/codegangsta/cli"
 	"github.com/tsaikd/KDGoLib/cliutil/cmder"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
+	"gopkg.in/urfave/cli.v2"
 )
 
-func init() {
-	cmder.Commands = append(cmder.Commands, cli.Command{
-		Name:   "parse",
-		Usage:  "Parse RAML file and show API in json format",
-		Action: action,
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:        "f, ramlfile",
-				Value:       "api.raml",
-				Usage:       "Source RAML file",
-				Destination: &ramlFile,
-			},
-			cli.BoolFlag{
-				Name:        "checkRAMLVersion",
-				Usage:       "Check RAML Version",
-				Destination: &checkRAMLVersion,
-			},
+// Module info
+var Module = cmder.NewModule("parse").
+	SetUsage("Parse RAML file and show API in json format").
+	AddFlag(
+		&cli.StringFlag{
+			Name:        "f",
+			Aliases:     []string{"ramlfile"},
+			Value:       "api.raml",
+			Usage:       "Source RAML file",
+			Destination: &ramlFile,
 		},
-	})
-}
+		&cli.BoolFlag{
+			Name:        "checkRAMLVersion",
+			Usage:       "Check RAML Version",
+			Destination: &checkRAMLVersion,
+		},
+	).
+	SetAction(action)
 
 var ramlFile string
 var checkRAMLVersion bool
