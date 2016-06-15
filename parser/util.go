@@ -96,7 +96,7 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 				}
 			}
 
-			if v, exist := value.Map[name]; exist {
+			if v, exist := value.Map[name]; exist && v != nil {
 				if err = CheckValueAPIType(property.APIType, *v); err != nil {
 					if ErrorPropertyTypeMismatch2.Match(err) {
 						return ErrorPropertyTypeMismatch3.New(nil, name, property.Type, v.Type)
