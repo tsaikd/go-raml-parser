@@ -21,6 +21,9 @@ type Parser interface {
 	// Config Parser to change the behavior of parsing
 	Config(config parserConfig.Enum, value interface{}) (err error)
 
+	// Get Parser Config
+	Get(config parserConfig.Enum) (value interface{}, err error)
+
 	// ParseFile Parse a RAML file.
 	// Return RootDocument or an error if something went wrong.
 	ParseFile(filePath string) (rootdoc RootDocument, err error)
@@ -37,15 +40,29 @@ type Parser interface {
 }
 
 type parserImpl struct {
-	checkRAMLVersion bool
+	checkRAMLVersion  bool
+	checkValueOptions []CheckValueOption
 }
 
 func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err error) {
 	switch config {
 	case parserConfig.CheckRAMLVersion:
 		return t.ConfigCheckRAMLVersion(value)
+	case parserConfig.CheckValueOptions:
+		return t.ConfigCheckValueOptions(value)
 	default:
 		return ErrorUnsupportedParserConfig1.New(nil, config)
+	}
+}
+
+func (t *parserImpl) Get(config parserConfig.Enum) (value interface{}, err error) {
+	switch config {
+	case parserConfig.CheckRAMLVersion:
+		return t.checkRAMLVersion, nil
+	case parserConfig.CheckValueOptions:
+		return t.checkValueOptions, nil
+	default:
+		return nil, ErrorUnsupportedParserConfig1.New(nil, config)
 	}
 }
 
@@ -56,6 +73,16 @@ func (t *parserImpl) ConfigCheckRAMLVersion(value interface{}) (err error) {
 		return nil
 	default:
 		return ErrorInvaludParserConfigValueType3.New(nil, parserConfig.CheckRAMLVersion, true, value)
+	}
+}
+
+func (t *parserImpl) ConfigCheckValueOptions(value interface{}) (err error) {
+	switch value.(type) {
+	case []CheckValueOption:
+		t.checkValueOptions = value.([]CheckValueOption)
+		return nil
+	default:
+		return ErrorInvaludParserConfigValueType3.New(nil, parserConfig.CheckValueOptions, []CheckValueOption{}, value)
 	}
 }
 

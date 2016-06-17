@@ -1,6 +1,10 @@
 package parser
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/tsaikd/KDGoLib/errutil"
+)
 
 // APITypes map of APIType
 type APITypes map[string]*APIType
@@ -10,8 +14,12 @@ func (t *APITypes) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
-	for _, apitype := range *t {
+	for name, apitype := range *t {
 		if err = apitype.PostProcess(conf); err != nil {
+			switch errutil.FactoryOf(err) {
+			case ErrorRequiredProperty2:
+				return ErrorScope1.New(err, name)
+			}
 			return
 		}
 	}

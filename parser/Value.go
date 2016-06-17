@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 )
 
 // NewValue cast src to value
@@ -129,12 +130,17 @@ func (t *Value) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 		return
 	}
 
-	if err = unmarshaler(&t.Integer); err == nil {
-		t.Type = TypeInteger
-		return
-	}
-	if !isErrorYAMLIntoInt64(err) {
-		return
+	// integer value should be equal to original string
+	var matchstr string
+	if err = unmarshaler(&matchstr); err == nil {
+		if err = unmarshaler(&t.Integer); err == nil {
+			if matchstr == strconv.FormatInt(t.Integer, 10) {
+				t.Type = TypeInteger
+				return
+			}
+		} else if !isErrorYAMLIntoInt64(err) {
+			return
+		}
 	}
 
 	if err = unmarshaler(&t.Number); err == nil {

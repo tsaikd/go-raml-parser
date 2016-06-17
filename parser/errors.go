@@ -17,7 +17,8 @@ var (
 	ErrorTypeUndefined1                = errutil.NewFactory("Type %q can not find in RAML")
 	ErrorPropertyTypeMismatch2         = errutil.NewFactory("Property type mismatch, expected %q but got %q")
 	ErrorPropertyTypeMismatch3         = errutil.NewFactory("Property %q type mismatch, expected %q but got %q")
-	ErrorRequiredProperty1             = errutil.NewFactory("Property %q is required but not found")
+	ErrorRequiredProperty2             = errutil.NewFactory("Property %q is required but not found in %q")
+	ErrorScope1                        = errutil.NewFactory("Error in %q")
 )
 
 func isErrorYAMLIntoBool(err error) bool {

@@ -73,6 +73,11 @@ func generateExample(conf PostProcessConfig, apiType APIType) Example {
 	if !apiType.Example.IsEmpty() {
 		return apiType.Example
 	}
+	for _, example := range apiType.Examples {
+		if !example.IsEmpty() {
+			return *example
+		}
+	}
 
 	typeName, _ := GetAPITypeName(apiType)
 	if typ, exist := conf.Library().Types[typeName]; exist {

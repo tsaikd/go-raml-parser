@@ -8,10 +8,12 @@ type Enum int8
 // List all valid enum
 const (
 	CheckRAMLVersion Enum = 1 + iota
+	CheckValueOptions
 )
 
 var factory = enumutil.NewEnumFactory().
 	Add(CheckRAMLVersion, "CheckRAMLVersion").
+	Add(CheckValueOptions, "CheckValueOptions").
 	Build()
 
 func (t Enum) String() string {

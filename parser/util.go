@@ -54,6 +54,11 @@ type CheckValueOptionAllowIntegerToBeNumber bool
 
 // CheckValueAPIType check value is valid for apiType
 func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption) (err error) {
+	if value.IsEmpty() {
+		// no need to check if value is empty
+		return
+	}
+
 	allowIntegerToBeNumber := CheckValueOptionAllowIntegerToBeNumber(false)
 
 	for _, option := range options {
@@ -67,8 +72,8 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 	case TypeBoolean, TypeInteger, TypeNumber, TypeString:
 		if apiType.Type != value.Type {
 			if allowIntegerToBeNumber &&
-				apiType.Type == TypeInteger &&
-				value.Type == TypeNumber {
+				apiType.Type == TypeNumber &&
+				value.Type == TypeInteger {
 				break
 			}
 			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
@@ -92,12 +97,12 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		for name, property := range apiType.Properties {
 			if property.Required {
 				if !isValueContainKey(value, name) {
-					return ErrorRequiredProperty1.New(nil, name)
+					return ErrorRequiredProperty2.New(nil, name, apiType.Type)
 				}
 			}
 
 			if v, exist := value.Map[name]; exist && v != nil {
-				if err = CheckValueAPIType(property.APIType, *v); err != nil {
+				if err = CheckValueAPIType(property.APIType, *v, options...); err != nil {
 					if ErrorPropertyTypeMismatch2.Match(err) {
 						return ErrorPropertyTypeMismatch3.New(nil, name, property.Type, v.Type)
 					}

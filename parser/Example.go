@@ -3,6 +3,8 @@ package parser
 import (
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
 
 // Examples The OPTIONAL examples facet can be used to attach multiple examples
@@ -124,13 +126,20 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 		}
 	}
 
+	options := []CheckValueOption{}
+	if confOptions, err := conf.Parser().Get(parserConfig.CheckValueOptions); err == nil {
+		if opts, ok := confOptions.([]CheckValueOption); ok {
+			options = opts
+		}
+	}
+
 	typeName, _ := GetAPITypeName(apiType)
 	switch typeName {
 	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
 		// no type check for RAML built-in type
 		return
 	case TypeObject:
-		return CheckValueAPIType(apiType, t.Value)
+		return CheckValueAPIType(apiType, t.Value, options...)
 	default:
 		if isInlineAPIType(apiType) {
 			// no type check if declared by JSON
@@ -143,6 +152,6 @@ func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err erro
 			return ErrorTypeUndefined1.New(nil, apiType.Type)
 		}
 
-		return CheckValueAPIType(*typ, t.Value)
+		return CheckValueAPIType(*typ, t.Value, options...)
 	}
 }
