@@ -11,6 +11,21 @@ func NewValue(src interface{}) (Value, error) {
 	switch src.(type) {
 	case Value:
 		return src.(Value), nil
+	case []*Value:
+		return Value{
+			Type:  TypeArray,
+			Array: src.([]*Value),
+		}, nil
+	case []Value:
+		value := src.([]Value)
+		result := make([]*Value, len(value))
+		for i, v := range value {
+			result[i] = &v
+		}
+		return Value{
+			Type:  TypeArray,
+			Array: result,
+		}, nil
 	case bool:
 		return Value{
 			Type:    TypeBoolean,

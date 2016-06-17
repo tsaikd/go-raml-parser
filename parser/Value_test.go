@@ -34,6 +34,14 @@ func Test_ValueFromValue(t *testing.T) {
 	require.NoError(err)
 	require.Equal(src.Type, value.Type)
 	require.Equal(src.String, value.String)
+
+	value, err = NewValue([]*Value{&src, &src})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
+
+	value, err = NewValue([]Value{src, src})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
 }
 
 func Test_ValueFromBool(t *testing.T) {

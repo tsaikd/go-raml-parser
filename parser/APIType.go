@@ -23,6 +23,16 @@ func (t *APITypes) PostProcess(conf PostProcessConfig) (err error) {
 			return
 		}
 	}
+	for _, apitype := range *t {
+		if err = fillValueFromAPIType(&apitype.Example.Value, conf, *apitype); err != nil {
+			return
+		}
+		for _, example := range apitype.Examples {
+			if err = fillValueFromAPIType(&example.Value, conf, *apitype); err != nil {
+				return
+			}
+		}
+	}
 	return
 }
 

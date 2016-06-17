@@ -69,6 +69,70 @@ func (t TypeDeclaration) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
+func generateValueFromAPIType(conf PostProcessConfig, apiType APIType) (Value, error) {
+	typeName, isArray := GetAPITypeName(apiType)
+	switch typeName {
+	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
+		// no value for RAML built-in type
+		return Value{}, nil
+	default:
+		if isArray {
+			examples := []*Value{}
+			for _, example := range apiType.Examples {
+				if !example.Value.IsEmpty() {
+					examples = append(examples, &example.Value)
+				}
+			}
+			if len(examples) > 0 {
+				return NewValue(examples)
+			}
+			if !apiType.Example.Value.IsEmpty() {
+				examples = append(examples, &apiType.Example.Value)
+				return NewValue(examples)
+			}
+		} else {
+			if !apiType.Example.IsEmpty() {
+				return apiType.Example.Value, nil
+			}
+			for _, example := range apiType.Examples {
+				if !example.Value.IsEmpty() {
+					return example.Value, nil
+				}
+			}
+		}
+
+		if typ, exist := conf.Library().Types[typeName]; exist {
+			return generateValueFromAPIType(conf, *typ)
+		}
+
+		return Value{}, nil
+	}
+}
+
+func fillValueFromAPIType(value *Value, conf PostProcessConfig, apiType APIType) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	if value.IsEmpty() {
+		if *value, err = generateValueFromAPIType(conf, apiType); err != nil {
+			return
+		}
+	}
+
+	for name, v := range value.Map {
+		if v == nil {
+			v = &Value{}
+			value.Map[name] = v
+		}
+		property := apiType.Properties[name]
+		if err = fillValueFromAPIType(v, conf, property.APIType); err != nil {
+			return
+		}
+	}
+	return nil
+}
+
 func generateExample(conf PostProcessConfig, apiType APIType) Example {
 	if !apiType.Example.IsEmpty() {
 		return apiType.Example
@@ -165,6 +229,7 @@ func (t *TypeDeclaration) PostProcess(conf PostProcessConfig, apiType APIType) (
 		return
 	}
 
+	// generate example if possible
 	typeName, isArrayType := GetAPITypeName(apiType)
 	if isArrayType {
 		if t.Examples.IsEmpty() {
