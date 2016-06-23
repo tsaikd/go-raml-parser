@@ -1,5 +1,7 @@
 package parser
 
+import "regexp"
+
 // Resources map of Resource
 type Resources map[string]*Resource
 
@@ -8,7 +10,23 @@ func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
 	if t == nil {
 		return
 	}
-	for _, elem := range *t {
+	regexpURIParam := regexp.MustCompile(`{(\w+)}`)
+	for name, elem := range *t {
+		if elem.URIParameters == nil {
+			elem.URIParameters = APITypes{}
+		}
+
+		matches := regexpURIParam.FindAllStringSubmatch(name, -1)
+		for _, matchParams := range matches {
+			if len(matchParams) < 2 {
+				continue
+			}
+			paramName := matchParams[1]
+			if _, exist := elem.URIParameters[paramName]; !exist {
+				elem.URIParameters[paramName] = &APIType{}
+			}
+		}
+
 		if err = elem.PostProcess(conf); err != nil {
 			return
 		}
@@ -65,7 +83,7 @@ type Resource struct {
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`
 
 	// Detailed information about any URI parameters of this resource.
-	URIParameters Unimplement `yaml:"uriParameters" json:"uriParameters,omitempty"`
+	URIParameters APITypes `yaml:"uriParameters" json:"uriParameters,omitempty"`
 
 	// A nested resource, which is identified as any node whose name begins
 	// with a slash ("/"), and is therefore treated as a relative URI.

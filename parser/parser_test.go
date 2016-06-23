@@ -386,6 +386,7 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	}
 	if assert.Contains(rootdoc.Resources, "/users/{id}") {
 		resource := rootdoc.Resources["/users/{id}"]
+		require.Contains(resource.URIParameters, "id")
 		if assert.Contains(resource.Methods, "get") {
 			method := resource.Methods["get"]
 			if assert.Contains(method.Responses, HTTPCode(200)) {
