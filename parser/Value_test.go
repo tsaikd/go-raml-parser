@@ -11,7 +11,7 @@ func Test_ValueError(t *testing.T) {
 	require := require.New(t)
 	require.NotNil(require)
 
-	_, err := NewValue(nil)
+	_, err := NewValue(struct{}{})
 	require.Error(err)
 	require.True(ErrorUnsupportedValueType1.Match(err))
 }
@@ -42,6 +42,15 @@ func Test_ValueFromValue(t *testing.T) {
 	value, err = NewValue([]Value{src, src})
 	require.NoError(err)
 	require.Equal(TypeArray, value.Type)
+}
+
+func Test_ValueFromNull(t *testing.T) {
+	require := require.New(t)
+	require.NotNil(require)
+
+	value, err := NewValue(nil)
+	require.NoError(err)
+	require.Equal(TypeNull, value.Type)
 }
 
 func Test_ValueFromBool(t *testing.T) {

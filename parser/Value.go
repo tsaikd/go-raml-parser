@@ -26,6 +26,10 @@ func NewValue(src interface{}) (Value, error) {
 			Type:  TypeArray,
 			Array: result,
 		}, nil
+	case nil:
+		return Value{
+			Type: TypeNull,
+		}, nil
 	case bool:
 		return Value{
 			Type:    TypeBoolean,

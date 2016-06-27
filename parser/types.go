@@ -58,6 +58,7 @@ func (t postProcessConfigImpl) Parser() Parser {
 
 // RAML built-in types
 const (
+	TypeNull    = "null"
 	TypeBoolean = "boolean"
 	TypeInteger = "integer"
 	TypeNumber  = "number"
