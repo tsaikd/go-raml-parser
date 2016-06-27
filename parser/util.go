@@ -69,27 +69,56 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 	}
 
 	switch apiType.Type {
-	case TypeBoolean, TypeInteger, TypeNumber, TypeString:
-		if apiType.Type != value.Type {
-			if allowIntegerToBeNumber &&
-				apiType.Type == TypeNumber &&
-				value.Type == TypeInteger {
-				break
-			}
-			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+	case TypeBoolean, TypeString:
+		if apiType.Type == value.Type {
+			return nil
 		}
+		return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+	case TypeInteger:
+		if apiType.Type == value.Type {
+			return nil
+		}
+		if allowIntegerToBeNumber {
+			switch value.Type {
+			case TypeNumber:
+				if value.Number == float64(int64(value.Number)) {
+					return nil
+				}
+			}
+		}
+		return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+	case TypeNumber:
+		if apiType.Type == value.Type {
+			return nil
+		}
+		if allowIntegerToBeNumber {
+			switch value.Type {
+			case TypeInteger:
+				return nil
+			}
+		}
+		return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 	case TypeFile:
 		// no type check for file type
-		return
+		return nil
 	default:
 		if isInlineAPIType(apiType) {
 			// no type check if declared by JSON
-			return
+			return nil
 		}
 
+		_, isArray := GetAPITypeName(apiType)
 		switch value.Type {
-		case TypeArray, TypeObject:
-			break
+		case TypeNull:
+			return nil
+		case TypeArray:
+			if !isArray {
+				return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+			}
+		case TypeObject:
+			if isArray {
+				return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+			}
 		default:
 			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 		}
