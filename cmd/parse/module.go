@@ -26,20 +26,36 @@ var Module = cmder.NewModule("parse").
 			Usage:       "Check RAML Version",
 			Destination: &checkRAMLVersion,
 		},
+		&cli.BoolFlag{
+			Name:        "allowIntToBeNum",
+			Usage:       "Allow integer type to be number type when checking",
+			Destination: &allowIntToBeNum,
+		},
 	).
 	SetAction(action)
 
 var ramlFile string
 var checkRAMLVersion bool
+var allowIntToBeNum bool
+
+var checkOptions = []parser.CheckValueOption{}
 
 func action(c *cli.Context) (err error) {
-	parser := parser.NewParser()
+	ramlParser := parser.NewParser()
 
-	if err = parser.Config(parserConfig.CheckRAMLVersion, checkRAMLVersion); err != nil {
+	if allowIntToBeNum {
+		checkOptions = append(checkOptions, parser.CheckValueOptionAllowIntegerToBeNumber(true))
+	}
+
+	if err = ramlParser.Config(parserConfig.CheckRAMLVersion, checkRAMLVersion); err != nil {
 		return
 	}
 
-	rootdoc, err := parser.ParseFile(ramlFile)
+	if err = ramlParser.Config(parserConfig.CheckValueOptions, checkOptions); err != nil {
+		return
+	}
+
+	rootdoc, err := ramlParser.ParseFile(ramlFile)
 	if err != nil {
 		return
 	}
