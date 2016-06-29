@@ -80,6 +80,20 @@ func NewValue(src interface{}) (Value, error) {
 			Type:   TypeBinary,
 			Binary: src.([]byte),
 		}, nil
+	case []interface{}:
+		srcs := src.([]interface{})
+		result := make([]*Value, len(srcs))
+		for i, elem := range srcs {
+			value, err := NewValue(elem)
+			if err != nil {
+				return value, err
+			}
+			result[i] = &value
+		}
+		return Value{
+			Type:  TypeArray,
+			Array: result,
+		}, nil
 	case map[string]interface{}:
 		result := Value{
 			Type: TypeObject,

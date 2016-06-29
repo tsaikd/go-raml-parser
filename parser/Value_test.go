@@ -108,6 +108,45 @@ func Test_ValueFromFloat(t *testing.T) {
 	require.EqualValues(float64(3.14), value.Number)
 }
 
+func Test_ValueFromBinary(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	value, err := NewValue([]byte("abc"))
+	require.NoError(err)
+	require.Equal(TypeBinary, value.Type)
+	require.Len(value.Binary, 3)
+}
+
+func Test_ValueFromInterfaceSlice(t *testing.T) {
+	require := require.New(t)
+	require.NotNil(require)
+
+	value, err := NewValue([]interface{}{
+		true,
+		int(9527),
+		float64(3.14),
+		"test",
+	})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
+	require.Len(value.Array, 4)
+	require.NotNil(value.Array[0])
+	require.Equal(TypeBoolean, value.Array[0].Type)
+	require.True(value.Array[0].Boolean)
+	require.NotNil(value.Array[1])
+	require.Equal(TypeInteger, value.Array[1].Type)
+	require.Equal(int64(9527), value.Array[1].Integer)
+	require.NotNil(value.Array[2])
+	require.Equal(TypeNumber, value.Array[2].Type)
+	require.Equal(float64(3.14), value.Array[2].Number)
+	require.NotNil(value.Array[3])
+	require.Equal(TypeString, value.Array[3].Type)
+	require.Equal("test", value.Array[3].String)
+}
+
 func Test_ValueFromMap(t *testing.T) {
 	assert := assert.New(t)
 	assert.NotNil(assert)
@@ -160,16 +199,4 @@ func Test_ValueFromMap(t *testing.T) {
 			require.EqualValues("child value", childval.String)
 		}
 	}
-}
-
-func Test_ValueFromBinary(t *testing.T) {
-	assert := assert.New(t)
-	assert.NotNil(assert)
-	require := require.New(t)
-	require.NotNil(require)
-
-	value, err := NewValue([]byte("abc"))
-	require.NoError(err)
-	require.Equal(TypeBinary, value.Type)
-	require.Len(value.Binary, 3)
 }
