@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/tsaikd/KDGoLib/errutil"
 )
 
 // LoadRAMLFromDir load RAML data from directory, concat *.raml
@@ -68,7 +70,27 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		}
 	}
 
-	switch apiType.Type {
+	apiTypeName, isArray := GetAPITypeName(apiType)
+	if isArray {
+		if value.Type != TypeArray {
+			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+		}
+
+		elemType := apiType
+		elemType.Type = apiTypeName
+		for i, elemValue := range value.Array {
+			if err = CheckValueAPIType(elemType, *elemValue, options...); err != nil {
+				switch errutil.FactoryOf(err) {
+				case ErrorPropertyTypeMismatch2:
+					return ErrorArrayElementTypeMismatch3.New(nil, i, elemType.Type, elemValue.Type)
+				}
+				return
+			}
+		}
+		return
+	}
+
+	switch apiTypeName {
 	case TypeBoolean, TypeString:
 		if apiType.Type == value.Type {
 			return nil
@@ -107,18 +129,10 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 			return nil
 		}
 
-		_, isArray := GetAPITypeName(apiType)
 		switch value.Type {
 		case TypeNull:
 			return nil
-		case TypeArray:
-			if !isArray {
-				return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
-			}
 		case TypeObject:
-			if isArray {
-				return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
-			}
 		default:
 			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 		}
@@ -132,8 +146,11 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 
 			if v, exist := value.Map[name]; exist && v != nil {
 				if err = CheckValueAPIType(property.APIType, *v, options...); err != nil {
-					if ErrorPropertyTypeMismatch2.Match(err) {
+					switch errutil.FactoryOf(err) {
+					case ErrorPropertyTypeMismatch2:
 						return ErrorPropertyTypeMismatch3.New(nil, name, property.Type, v.Type)
+					case ErrorArrayElementTypeMismatch3:
+						return ErrorPropertyTypeMismatch1.New(err, name)
 					}
 					return
 				}

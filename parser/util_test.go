@@ -46,11 +46,10 @@ types:
 }
 
 func testCheckValueAPIType(apiType APIType, value interface{}, options ...CheckValueOption) (err error) {
-	v, err := NewValue(value)
-	if err != nil {
+	var v Value
+	if v, err = NewValue(value); err != nil {
 		return
 	}
-
 	return CheckValueAPIType(apiType, v, options...)
 }
 
@@ -235,4 +234,32 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	require.NoError(err)
 	err = testCheckValueAPIType(apiType, valmap, CheckValueOptionAllowIntegerToBeNumber(true))
 	require.NoError(err)
+}
+
+func Test_CheckValueAPIType_ObjectArray(t *testing.T) {
+	var err error
+	require := require.New(t)
+	require.NotNil(require)
+
+	apiType := APIType{}
+	apiType.Type = "object[]"
+	apiType.Properties = Properties{}
+
+	property := &Property{}
+	property.Type = TypeString
+	apiType.Properties["text"] = property
+
+	err = testCheckValueAPIType(apiType, []interface{}{
+		map[string]interface{}{
+			"text": "",
+		},
+	})
+	require.NoError(err)
+
+	err = testCheckValueAPIType(apiType, []interface{}{
+		map[string]interface{}{
+			"text": 0,
+		},
+	})
+	require.Error(err)
 }
