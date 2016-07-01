@@ -25,14 +25,6 @@ func (t String) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *String) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if String is empty
 func (t *String) IsEmpty() bool {
 	return t.Pattern == "" &&

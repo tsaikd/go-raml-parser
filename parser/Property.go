@@ -5,27 +5,11 @@ import "strings"
 // Properties map of Property
 type Properties map[string]*Property
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Properties) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for name, property := range *t {
-		if err = property.PostProcess(conf); err != nil {
-			return
-		}
-		if strings.HasSuffix(name, "?") {
-			property.Required = false
-			trimName := strings.TrimSuffix(name, "?")
-			delete(*t, name)
-			(*t)[trimName] = property
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Properties) IsEmpty() bool {
+	if t == nil {
+		return true
+	}
 	for _, elem := range t {
 		if elem != nil {
 			if !elem.IsEmpty() {
@@ -34,6 +18,23 @@ func (t Properties) IsEmpty() bool {
 		}
 	}
 	return true
+}
+
+var _ fixRequiredBySyntax = Properties{}
+
+func (t Properties) fixRequiredBySyntax() (err error) {
+	if t == nil {
+		return
+	}
+	for name, property := range t {
+		if strings.HasSuffix(name, "?") {
+			property.Required = false
+			trimName := strings.TrimSuffix(name, "?")
+			delete(t, name)
+			t[trimName] = property
+		}
+	}
+	return
 }
 
 // Property of a object type
@@ -78,20 +79,6 @@ func (t Property) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Property) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.APIType.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.PropertyExtra.PostProcess(conf); err != nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t *Property) IsEmpty() bool {
 	return t.APIType.IsEmpty() &&
@@ -114,11 +101,6 @@ func (t *PropertyExtra) BeforeUnmarshalYAML() (err error) {
 // MarshalJSON marshal to json
 func (t PropertyExtra) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *PropertyExtra) PostProcess(conf PostProcessConfig) (err error) {
-	return
 }
 
 // IsEmpty return true if it is empty

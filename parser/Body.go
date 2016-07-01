@@ -52,28 +52,6 @@ func (t *Bodies) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) 
 	return
 }
 
-// PostProcess for fill default example by type if not set
-func (t *Bodies) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-
-	if body, exist := (*t)["DEFAULT"]; exist {
-		if conf.RootDocument().MediaType == "" {
-			return ErrorEmptyRootDocumentMediaType.New(nil)
-		}
-		delete(*t, "DEFAULT")
-		(*t)[conf.RootDocument().MediaType] = body
-	}
-
-	for _, body := range *t {
-		if err = body.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Bodies) IsEmpty() bool {
 	for _, elem := range t {
@@ -86,6 +64,24 @@ func (t Bodies) IsEmpty() bool {
 	return true
 }
 
+var _ fixDefaultMediaType = Bodies{}
+
+func (t Bodies) fixDefaultMediaType(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
+
+	if body, exist := t["DEFAULT"]; exist {
+		if conf.RootDocument().MediaType == "" {
+			return ErrorEmptyRootDocumentMediaType.New(nil)
+		}
+		delete(t, "DEFAULT")
+		t[conf.RootDocument().MediaType] = body
+	}
+
+	return
+}
+
 // Body used for Bodies.
 // Some method verbs expect the resource to be sent as a request body.
 // For example, to create a resource, the request must include the details of
@@ -94,15 +90,4 @@ func (t Bodies) IsEmpty() bool {
 // support both JSON and XML representations.
 type Body struct {
 	APIType
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *Body) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.APIType.PostProcess(conf); err != nil {
-		return
-	}
-	return
 }

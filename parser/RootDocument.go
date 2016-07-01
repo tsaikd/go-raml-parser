@@ -28,21 +28,6 @@ func (t RootDocument) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *RootDocument) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	confWrap := newPostProcessConfig(*t, t.Library, conf.Parser())
-	if err = t.LibraryWrap.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.RootDocumentExtra.PostProcess(confWrap); err != nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t RootDocument) IsEmpty() bool {
 	return t.LibraryWrap.IsEmpty() &&
@@ -88,17 +73,6 @@ type RootDocumentExtra struct {
 	// either at the root of the API definition or a child of a resource node.
 	// For example, /users and /{groupId}.
 	Resources Resources `yaml:",regexp:/.*" json:"resources,omitempty"`
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *RootDocumentExtra) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.Resources.PostProcess(conf); err != nil {
-		return
-	}
-	return
 }
 
 // IsEmpty return true if it is empty

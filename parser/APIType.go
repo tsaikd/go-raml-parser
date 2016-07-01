@@ -1,40 +1,15 @@
 package parser
 
 import (
+	"io/ioutil"
+	"path/filepath"
 	"strings"
 
-	"github.com/tsaikd/KDGoLib/errutil"
+	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
 
 // APITypes map of APIType
 type APITypes map[string]*APIType
-
-// PostProcess for fill some field from RootDocument default config
-func (t *APITypes) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for name, apitype := range *t {
-		if err = apitype.PostProcess(conf); err != nil {
-			switch errutil.FactoryOf(err) {
-			case ErrorRequiredProperty2:
-				return ErrorScope1.New(err, name)
-			}
-			return
-		}
-	}
-	for _, apitype := range *t {
-		if err = fillValueFromAPIType(&apitype.Example.Value, conf, *apitype); err != nil {
-			return
-		}
-		for _, example := range apitype.Examples {
-			if err = fillValueFromAPIType(&example.Value, conf, *apitype); err != nil {
-				return
-			}
-		}
-	}
-	return
-}
 
 // IsEmpty return true if it is empty
 func (t APITypes) IsEmpty() bool {
@@ -109,57 +84,6 @@ func (t APIType) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *APIType) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.ObjectType.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.ScalarType.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.String.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.ArrayType.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.FileType.PostProcess(conf); err != nil {
-		return
-	}
-
-	// TypeDeclaration should go after other basic proprtyies done
-	if err = t.TypeDeclaration.PostProcess(conf, *t); err != nil {
-		return
-	}
-
-	// fill Properties if possible
-	if t.Properties.IsEmpty() {
-		typeName, _ := GetAPITypeName(*t)
-		switch typeName {
-		case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
-			// no more action for RAML built-in type
-			return
-		default:
-			if isInlineAPIType(*t) {
-				// no more action if declared by JSON
-				return
-			}
-
-			var typ *APIType
-			var exist bool
-			if typ, exist = conf.Library().Types[typeName]; !exist {
-				return ErrorTypeUndefined1.New(nil, t.Type)
-			}
-			t.Properties = typ.Properties
-		}
-	}
-
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t APIType) IsEmpty() bool {
 	return t.TypeDeclaration.IsEmpty() &&
@@ -168,4 +92,158 @@ func (t APIType) IsEmpty() bool {
 		t.String.IsEmpty() &&
 		t.ArrayType.IsEmpty() &&
 		t.FileType.IsEmpty()
+}
+
+var _ fillProperties = &APIType{}
+
+func (t *APIType) fillProperties(library Library) (err error) {
+	if t == nil {
+		return
+	}
+	if !t.Properties.IsEmpty() {
+		return
+	}
+
+	// fill Properties if possible
+	typeName, _ := GetAPITypeName(*t)
+	switch typeName {
+	case "", TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
+		// no more action for RAML built-in type
+		return
+	default:
+		if isInlineAPIType(*t) {
+			// no more action if declared by JSON
+			return
+		}
+
+		var typ *APIType
+		var exist bool
+		if typ, exist = library.Types[typeName]; !exist {
+			return ErrorTypeUndefined1.New(nil, t.Type)
+		}
+		t.Properties = typ.Properties
+	}
+
+	return
+}
+
+var _ fillExample = &APIType{}
+
+func (t *APIType) fillExample(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
+
+	if t.Example.IsEmpty() {
+		if t.Example, err = generateExample(conf.Library(), *t, false); err != nil {
+			return
+		}
+	}
+	if t.Examples.IsEmpty() {
+		if t.Examples, err = generateExamples(conf.Library(), *t, false); err != nil {
+			return
+		}
+	}
+
+	if err = fillExampleAPIType(&t.Example, conf, *t); err != nil {
+		return
+	}
+	for _, example := range t.Examples {
+		if err = fillExampleAPIType(example, conf, *t); err != nil {
+			return
+		}
+	}
+
+	return
+}
+
+func fillExampleAPIType(example *Example, conf PostProcessConfig, apiType APIType) (err error) {
+	if example == nil || example.IsEmpty() {
+		return
+	}
+
+	if example.includeTag && TypeString == example.Value.Type {
+		fpath := filepath.Join(conf.RootDocument().WorkingDirectory, example.Value.String)
+		var fdata []byte
+		if fdata, err = ioutil.ReadFile(fpath); err != nil {
+			return
+		}
+		switch apiType.Type {
+		case TypeFile:
+			if example.Value, err = NewValue(fdata); err != nil {
+				return
+			}
+		default:
+			return ErrorUnsupportedIncludeType1.New(nil, apiType.Type)
+		}
+	}
+
+	if err = fillValueFromAPIType(&example.Value, conf.Library(), apiType); err != nil {
+		return
+	}
+
+	return
+}
+
+func fillValueFromAPIType(value *Value, library Library, apiType APIType) (err error) {
+	if value == nil {
+		return nil
+	}
+
+	if value.IsEmpty() {
+		if *value, err = generateExampleValue(library, apiType, false); err != nil {
+			return
+		}
+	}
+
+	// not support fill value from inline APIType
+	if isInlineAPIType(apiType) {
+		return
+	}
+
+	for name, v := range value.Map {
+		if v == nil {
+			v = &Value{}
+			value.Map[name] = v
+		}
+		property := apiType.Properties[name]
+		if err = fillValueFromAPIType(v, library, property.APIType); err != nil {
+			return
+		}
+	}
+	return nil
+}
+
+var _ checkExample = &APIType{}
+
+func (t *APIType) checkExample(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
+
+	options := []CheckValueOption{}
+	confOptions, err := conf.Parser().Get(parserConfig.CheckValueOptions)
+	if err == nil {
+		if opts, ok := confOptions.([]CheckValueOption); ok {
+			options = opts
+		}
+	}
+
+	typeName, _ := GetAPITypeName(*t)
+	switch typeName {
+	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
+		// no type check for RAML built-in type
+		return
+	case TypeObject:
+		if err = CheckValueAPIType(*t, t.Example.Value, options...); err != nil {
+			return
+		}
+		for _, example := range t.Examples {
+			if err = CheckValueAPIType(*t, example.Value, options...); err != nil {
+				return
+			}
+		}
+	}
+
+	return
 }

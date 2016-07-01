@@ -15,14 +15,6 @@ func (t ScalarType) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *ScalarType) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t *ScalarType) IsEmpty() bool {
 	return len(t.Enum) < 1

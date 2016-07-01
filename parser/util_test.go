@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -262,4 +263,27 @@ func Test_CheckValueAPIType_ObjectArray(t *testing.T) {
 		},
 	})
 	require.Error(err)
+}
+
+func Test_CheckExampleAPIType(t *testing.T) {
+	var err error
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	_, err = parser.ParseData([]byte(strings.TrimSpace(`
+#%RAML 1.0
+types:
+  User:
+    type: object
+    properties:
+      name:  string
+      email: string
+    example:
+      name:  Alice
+	`)), ".")
+	require.Error(err)
+	require.True(ErrorRequiredProperty2.Match(err))
 }

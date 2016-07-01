@@ -33,14 +33,6 @@ func (t ArrayType) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *ArrayType) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t *ArrayType) IsEmpty() bool {
 	return t.UniqueItems == false &&

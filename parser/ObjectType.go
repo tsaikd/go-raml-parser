@@ -43,29 +43,6 @@ func (t ObjectType) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *ObjectType) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.Properties.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.MinProperties.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.MaxProperties.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Discriminator.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.DiscriminatorValue.PostProcess(conf); err != nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t ObjectType) IsEmpty() bool {
 	return t.Properties.IsEmpty() &&

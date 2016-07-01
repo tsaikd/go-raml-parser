@@ -3,19 +3,6 @@ package parser
 // QueryParameters map of QueryParameter
 type QueryParameters map[string]*QueryParameter
 
-// PostProcess for fill some field from RootDocument default config
-func (t *QueryParameters) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for _, qp := range *t {
-		if err = qp.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t QueryParameters) IsEmpty() bool {
 	for _, elem := range t {

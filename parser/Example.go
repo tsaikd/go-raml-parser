@@ -1,29 +1,9 @@
 package parser
 
-import (
-	"io/ioutil"
-	"path/filepath"
-
-	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
-)
-
 // Examples The OPTIONAL examples facet can be used to attach multiple examples
 // to a type declaration. Its value is a map of key-value pairs, where each key
 // represents a unique identifier for an example and the value is a single example.
 type Examples map[string]*Example
-
-// PostProcess for fill some field from RootDocument default config
-func (t *Examples) PostProcess(conf PostProcessConfig, apiType APIType) (err error) {
-	if t == nil {
-		return
-	}
-	for _, example := range *t {
-		if err = example.PostProcess(conf, apiType); err != nil {
-			return
-		}
-	}
-	return
-}
 
 // IsEmpty return true if it is empty
 func (t Examples) IsEmpty() bool {
@@ -104,54 +84,167 @@ func (t Example) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill default example by type if not set
-func (t *Example) PostProcess(conf PostProcessConfig, apiType APIType) (err error) {
-	if t == nil || t.IsEmpty() {
-		return
-	}
+func generateExampleValue(library Library, apiType APIType, preferArray bool) (value Value, err error) {
+	typeName, isArray := GetAPITypeName(apiType)
 
-	if t.includeTag && TypeString == t.Value.Type {
-		fpath := filepath.Join(conf.RootDocument().WorkingDirectory, t.Value.String)
-		var fdata []byte
-		if fdata, err = ioutil.ReadFile(fpath); err != nil {
-			return
-		}
-		switch apiType.Type {
-		case TypeFile:
-			if t.Value, err = NewValue(fdata); err != nil {
-				return
+	if isArray {
+		result := []interface{}{}
+		for _, example := range apiType.Examples {
+			for _, v := range example.Value.Array {
+				if !v.IsEmpty() {
+					result = append(result, v)
+				}
 			}
-		default:
-			return ErrorUnsupportedIncludeType1.New(nil, apiType.Type)
+		}
+		if len(result) > 0 {
+			return NewValue(result)
+		}
+		if !apiType.Example.Value.IsEmpty() {
+			return apiType.Example.Value, nil
+		}
+	} else if preferArray {
+		result := []interface{}{}
+		for _, example := range apiType.Examples {
+			if !example.Value.IsEmpty() {
+				result = append(result, example.Value)
+			}
+		}
+		if len(result) > 0 {
+			return NewValue(result)
+		}
+		if !apiType.Example.Value.IsEmpty() {
+			return NewValue([]interface{}{apiType.Example.Value})
 		}
 	}
 
-	options := []CheckValueOption{}
-	if confOptions, err := conf.Parser().Get(parserConfig.CheckValueOptions); err == nil {
-		if opts, ok := confOptions.([]CheckValueOption); ok {
-			options = opts
+	if !apiType.Example.Value.IsEmpty() {
+		return apiType.Example.Value, nil
+	}
+	if !apiType.Examples.IsEmpty() {
+		for _, example := range apiType.Examples {
+			if !example.Value.IsEmpty() {
+				return example.Value, nil
+			}
 		}
 	}
 
-	typeName, _ := GetAPITypeName(apiType)
 	switch typeName {
 	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
-		// no type check for RAML built-in type
-		return
+		// no value for RAML built-in type
+		return Value{}, nil
 	case TypeObject:
-		return CheckValueAPIType(apiType, t.Value, options...)
+		valmap := map[string]interface{}{}
+		for name, property := range apiType.Properties {
+			if valmap[name], err = generateExampleValue(library, property.APIType, false); err != nil {
+				return
+			}
+		}
+		if isArray || preferArray {
+			return NewValue([]interface{}{valmap})
+		}
+		return NewValue(valmap)
 	default:
-		if isInlineAPIType(apiType) {
-			// no type check if declared by JSON
-			return
+		if typ, exist := library.Types[typeName]; exist {
+			return generateExampleValue(library, *typ, isArray || preferArray)
 		}
-
-		var typ *APIType
-		var exist bool
-		if typ, exist = conf.Library().Types[typeName]; !exist {
-			return ErrorTypeUndefined1.New(nil, apiType.Type)
-		}
-
-		return CheckValueAPIType(*typ, t.Value, options...)
 	}
+	return Value{}, nil
+}
+
+func generateExample(library Library, apiType APIType, preferArray bool) (result Example, err error) {
+	typeName, isArray := GetAPITypeName(apiType)
+
+	if !apiType.Example.IsEmpty() {
+		if !isArray && preferArray {
+			example := apiType.Example
+			if example.Value, err = generateExampleValue(library, apiType, preferArray); err != nil {
+				return Example{}, err
+			}
+			return example, nil
+		}
+		return apiType.Example, nil
+	}
+	if !apiType.Examples.IsEmpty() {
+		if !isArray && preferArray {
+			example := apiType.Example
+			if example.Value, err = generateExampleValue(library, apiType, preferArray); err != nil {
+				return Example{}, err
+			}
+			return example, nil
+		}
+		for _, example := range apiType.Examples {
+			if !example.IsEmpty() {
+				return *example, nil
+			}
+		}
+	}
+
+	switch typeName {
+	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
+		// no value for RAML built-in type
+		return Example{}, nil
+	default:
+		if typ, exist := library.Types[typeName]; exist {
+			return generateExample(library, *typ, isArray || preferArray)
+		}
+
+		example := Example{}
+		if example.Value, err = generateExampleValue(library, apiType, isArray || preferArray); err != nil {
+			return Example{}, err
+		}
+		return example, nil
+	}
+}
+
+func generateExamples(library Library, apiType APIType, preferArray bool) (result Examples, err error) {
+	typeName, isArray := GetAPITypeName(apiType)
+
+	if !apiType.Examples.IsEmpty() {
+		if !isArray && preferArray {
+			example := apiType.Example
+			if example.Value, err = generateExampleValue(library, apiType, preferArray); err != nil {
+				return Examples{}, err
+			}
+			return Examples{
+				"autoGenerated": &example,
+			}, nil
+		}
+		return apiType.Examples, nil
+	}
+	if !apiType.Example.IsEmpty() {
+		if !isArray && preferArray {
+			example := apiType.Example
+			if example.Value, err = generateExampleValue(library, apiType, preferArray); err != nil {
+				return Examples{}, err
+			}
+			return Examples{
+				"autoGenerated": &example,
+			}, nil
+		}
+		return Examples{
+			"autoGenerated": &apiType.Example,
+		}, nil
+	}
+
+	switch typeName {
+	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
+		// no value for RAML built-in type
+		return Examples{}, nil
+	default:
+		if typ, exist := library.Types[typeName]; exist {
+			return generateExamples(library, *typ, isArray || preferArray)
+		}
+
+		example := Example{}
+		if example.Value, err = generateExampleValue(library, apiType, isArray); err != nil {
+			return Examples{}, nil
+		}
+		if !example.IsEmpty() {
+			return Examples{
+				"autoGenerated": &example,
+			}, nil
+		}
+	}
+
+	return Examples{}, nil
 }

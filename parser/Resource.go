@@ -5,13 +5,26 @@ import "regexp"
 // Resources map of Resource
 type Resources map[string]*Resource
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
+// IsEmpty return true if it is empty
+func (t Resources) IsEmpty() bool {
+	for _, elem := range t {
+		if elem != nil {
+			if !elem.IsEmpty() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+var _ fillURIParams = Resources{}
+
+func (t Resources) fillURIParams() (err error) {
 	if t == nil {
 		return
 	}
 	regexpURIParam := regexp.MustCompile(`{(\w+)}`)
-	for name, elem := range *t {
+	for name, elem := range t {
 		if elem.URIParameters == nil {
 			elem.URIParameters = APITypes{}
 		}
@@ -26,24 +39,8 @@ func (t *Resources) PostProcess(conf PostProcessConfig) (err error) {
 				elem.URIParameters[paramName] = &APIType{}
 			}
 		}
-
-		if err = elem.PostProcess(conf); err != nil {
-			return
-		}
 	}
 	return
-}
-
-// IsEmpty return true if it is empty
-func (t Resources) IsEmpty() bool {
-	for _, elem := range t {
-		if elem != nil {
-			if !elem.IsEmpty() {
-				return false
-			}
-		}
-	}
-	return true
 }
 
 // Resource is identified by its relative URI, which MUST begin with a slash
@@ -93,35 +90,6 @@ type Resource struct {
 // MarshalJSON marshal to json
 func (t Resource) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *Resource) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.Annotations.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Methods.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Is.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Type.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.SecuredBy.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.URIParameters.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Resources.PostProcess(conf); err != nil {
-		return
-	}
-	return
 }
 
 // IsEmpty return true if it is empty

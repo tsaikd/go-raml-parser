@@ -131,7 +131,7 @@ func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument
 	}
 
 	conf := newPostProcessConfig(rootdoc, rootdoc.Library, &t)
-	if err = rootdoc.PostProcess(conf); err != nil {
+	if err = postProcess(&rootdoc, conf); err != nil {
 		return
 	}
 
@@ -158,8 +158,7 @@ func (t parserImpl) ParseLibraryData(data []byte, conf PostProcessConfig) (libra
 		return
 	}
 
-	confWrap := newPostProcessConfig(conf.RootDocument(), library, &t)
-	if err = library.PostProcess(confWrap); err != nil {
+	if err = postProcess(&library, conf); err != nil {
 		return
 	}
 

@@ -18,19 +18,6 @@ func (t Responses) MarshalJSON() ([]byte, error) {
 	return json.Marshal(data)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Responses) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for _, response := range *t {
-		if err = response.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Responses) IsEmpty() bool {
 	for _, elem := range t {
@@ -66,23 +53,6 @@ type Response struct {
 // MarshalJSON marshal to json
 func (t Response) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *Response) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.Annotations.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Headers.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Bodies.PostProcess(conf); err != nil {
-		return
-	}
-	return
 }
 
 // IsEmpty return true if it is empty

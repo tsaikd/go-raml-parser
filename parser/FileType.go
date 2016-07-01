@@ -31,14 +31,6 @@ func (t FileType) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *FileType) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t *FileType) IsEmpty() bool {
 	return len(t.FileTypes) < 1 &&

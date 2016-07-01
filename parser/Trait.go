@@ -3,19 +3,6 @@ package parser
 // Traits map of Trait
 type Traits map[string]*Trait
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Traits) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for _, trait := range *t {
-		if err = trait.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Traits) IsEmpty() bool {
 	for _, elem := range t {
@@ -30,19 +17,6 @@ func (t Traits) IsEmpty() bool {
 
 // IsTraits slice of Trait
 type IsTraits []*Trait
-
-// PostProcess for fill some field from RootDocument default config
-func (t *IsTraits) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for _, trait := range *t {
-		if err = trait.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
 
 // IsEmpty return true if it is empty
 func (t IsTraits) IsEmpty() bool {
@@ -92,36 +66,34 @@ func (t Trait) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Trait) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-
-	if t.String != "" {
-		var trait Trait
-		name := t.String
-		if trait, err = conf.Library().GetTrait(name); err != nil {
-			return
-		}
-		*t = trait
-		t.String = name
-	}
-
-	if err = t.Method.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.TraitExtra.PostProcess(conf); err != nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Trait) IsEmpty() bool {
 	return t.String == "" &&
 		t.Method.IsEmpty() &&
 		t.TraitExtra.IsEmpty()
+}
+
+var _ fillTrait = &Trait{}
+
+func (t *Trait) fillTrait(library Library) (err error) {
+	if t == nil {
+		return
+	}
+
+	name := t.String
+	if name == "" {
+		return
+	}
+
+	trait, err := library.GetTrait(name)
+	if err != nil {
+		return
+	}
+
+	*t = trait
+	t.String = name
+
+	return
 }
 
 // TraitExtra contain fields no in Method
@@ -147,11 +119,6 @@ type TraitExtra struct {
 // MarshalJSON marshal to json
 func (t TraitExtra) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *TraitExtra) PostProcess(conf PostProcessConfig) (err error) {
-	return
 }
 
 // IsEmpty return true if it is empty

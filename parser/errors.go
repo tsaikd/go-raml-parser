@@ -8,6 +8,7 @@ import (
 
 // errors
 var (
+	ErrorLoadExternalLibrary1          = errutil.NewFactory("load external library failed: %q")
 	ErrorUnsupportedParserConfig1      = errutil.NewFactory("unsupported parser config: %q")
 	ErrorUnsupportedValueType1         = errutil.NewFactory("unsupported value type: %T")
 	ErrorUnsupportedIncludeType1       = errutil.NewFactory("unsupported include for type: %q")
@@ -20,7 +21,6 @@ var (
 	ErrorPropertyTypeMismatch2         = errutil.NewFactory("Property type mismatch, expected %q but got %q")
 	ErrorPropertyTypeMismatch3         = errutil.NewFactory("Property %q type mismatch, expected %q but got %q")
 	ErrorRequiredProperty2             = errutil.NewFactory("Property %q is required but not found in %q")
-	ErrorScope1                        = errutil.NewFactory("Error in %q")
 )
 
 func isErrorYAMLIntoBool(err error) bool {

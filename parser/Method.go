@@ -3,19 +3,6 @@ package parser
 // Methods map of Method
 type Methods map[string]*Method
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Methods) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for _, elem := range *t {
-		if err = elem.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Methods) IsEmpty() bool {
 	for _, elem := range t {
@@ -81,41 +68,6 @@ type Method struct {
 // MarshalJSON marshal to json
 func (t Method) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *Method) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if err = t.Annotations.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.QueryParameters.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Headers.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.QueryString.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Responses.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Bodies.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Protocols.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.Is.PostProcess(conf); err != nil {
-		return
-	}
-	if err = t.SecuredBy.PostProcess(conf); err != nil {
-		return
-	}
-	return
 }
 
 // IsEmpty return true if it is empty

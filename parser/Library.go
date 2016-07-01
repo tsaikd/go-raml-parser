@@ -16,19 +16,6 @@ var (
 // Libraries map of LibraryWrap
 type Libraries map[string]*LibraryWrap
 
-// PostProcess for fill some field from RootDocument default config
-func (t *Libraries) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	for _, lib := range *t {
-		if err = lib.PostProcess(conf); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t Libraries) IsEmpty() bool {
 	for _, elem := range t {
@@ -67,29 +54,29 @@ func (t LibraryWrap) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
 }
 
-// PostProcess for fill some field from RootDocument default config
-func (t *LibraryWrap) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	if t.String != "" {
-		filePath := filepath.Join(conf.RootDocument().WorkingDirectory, t.String)
-		if t.Library, err = conf.Parser().ParseLibraryFile(filePath, conf); err != nil {
-			return
-		}
-		t.String = ""
-	}
-
-	if err = t.Library.PostProcess(conf); err != nil {
-		return
-	}
-	return
-}
-
 // IsEmpty return true if it is empty
 func (t LibraryWrap) IsEmpty() bool {
 	return t.String == "" &&
 		t.Library.IsEmpty()
+}
+
+var _ loadExternalUse = &LibraryWrap{}
+
+func (t *LibraryWrap) loadExternalUse(conf PostProcessConfig) (err error) {
+	if t == nil {
+		return
+	}
+	if t.String == "" {
+		return
+	}
+
+	filePath := filepath.Join(conf.RootDocument().WorkingDirectory, t.String)
+	if t.Library, err = conf.Parser().ParseLibraryFile(filePath, conf); err != nil {
+		return ErrorLoadExternalLibrary1.New(err, filePath)
+	}
+	t.String = ""
+
+	return
 }
 
 // Library RAML libraries are used to combine any collection of data type
@@ -137,39 +124,6 @@ type Library struct {
 // MarshalJSON marshal to json
 func (t Library) MarshalJSON() ([]byte, error) {
 	return MarshalJSONWithoutEmptyStruct(t)
-}
-
-// PostProcess for fill some field from RootDocument default config
-func (t *Library) PostProcess(conf PostProcessConfig) (err error) {
-	if t == nil {
-		return
-	}
-	confWrap := newPostProcessConfig(conf.RootDocument(), *t, conf.Parser())
-	if err = t.Schemas.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.Types.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.Traits.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.ResourceTypes.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.AnnotationTypes.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.Annotations.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.SecuritySchemes.PostProcess(confWrap); err != nil {
-		return
-	}
-	if err = t.Uses.PostProcess(confWrap); err != nil {
-		return
-	}
-	return
 }
 
 // IsEmpty return true if it is empty
