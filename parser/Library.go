@@ -159,3 +159,12 @@ func (t Library) GetTrait(name string) (result Trait, err error) {
 
 	return *trait, nil
 }
+
+var _ checkUnusedTrait = Library{}
+
+func (t Library) checkUnusedTrait(traitUsage map[string]bool) (err error) {
+	for name := range t.Traits {
+		traitUsage[name] = true
+	}
+	return
+}

@@ -1,5 +1,7 @@
 package parser
 
+import "github.com/tsaikd/go-raml-parser/parser/parserConfig"
+
 // RootDocument The root section of the RAML document describes the basic
 // information about an API, such as its title and version. The root section
 // also defines assets used elsewhere in the RAML document, such as types and
@@ -33,6 +35,22 @@ func (t RootDocument) IsEmpty() bool {
 	return t.LibraryWrap.IsEmpty() &&
 		t.RootDocumentExtra.IsEmpty() &&
 		t.WorkingDirectory == ""
+}
+
+var _ afterCheckUnusedTrait = RootDocument{}
+
+func (t RootDocument) afterCheckUnusedTrait(conf PostProcessConfig) (err error) {
+	ignore, err := conf.Parser().Get(parserConfig.IgnoreUnusedTrait)
+	if err != nil {
+		return
+	}
+	if ignore.(bool) {
+		return
+	}
+	for name := range conf.TraitUsage() {
+		return ErrorUnusedTrait1.New(nil, name)
+	}
+	return
 }
 
 // RootDocumentExtra contain fields no in Library

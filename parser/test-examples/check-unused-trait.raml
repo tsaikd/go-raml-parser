@@ -1,0 +1,10 @@
+#%RAML 1.0
+traits:
+    UsedTrait:
+        description: used trait
+    UnusedTrait:
+        description: unused trait
+
+/get:
+    is:
+        - UsedTrait

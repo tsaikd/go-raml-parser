@@ -24,6 +24,7 @@ type PostProcessConfig interface {
 	RootDocument() RootDocument
 	Library() Library
 	Parser() Parser
+	TraitUsage() map[string]bool
 }
 
 func newPostProcessConfig(
@@ -35,6 +36,7 @@ func newPostProcessConfig(
 		dataRootDocument: rootdoc,
 		dataLibrary:      library,
 		dataParser:       parser,
+		dataTraitUsage:   map[string]bool{},
 	}
 }
 
@@ -42,6 +44,7 @@ type postProcessConfigImpl struct {
 	dataRootDocument RootDocument
 	dataLibrary      Library
 	dataParser       Parser
+	dataTraitUsage   map[string]bool
 }
 
 func (t postProcessConfigImpl) RootDocument() RootDocument {
@@ -54,6 +57,10 @@ func (t postProcessConfigImpl) Library() Library {
 
 func (t postProcessConfigImpl) Parser() Parser {
 	return t.dataParser
+}
+
+func (t postProcessConfigImpl) TraitUsage() map[string]bool {
+	return t.dataTraitUsage
 }
 
 // RAML built-in types

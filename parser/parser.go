@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"io/ioutil"
 	"path/filepath"
+	"reflect"
 
+	"github.com/tsaikd/KDGoLib/errutil"
 	"github.com/tsaikd/KDGoLib/futil"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 	"github.com/tsaikd/yaml"
@@ -42,17 +44,30 @@ type Parser interface {
 type parserImpl struct {
 	checkRAMLVersion  bool
 	checkValueOptions []CheckValueOption
+	ignoreUnusedTrait bool
 }
 
 func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err error) {
+	var field interface{}
 	switch config {
 	case parserConfig.CheckRAMLVersion:
-		return t.ConfigCheckRAMLVersion(value)
+		field = &t.checkRAMLVersion
 	case parserConfig.CheckValueOptions:
-		return t.ConfigCheckValueOptions(value)
+		field = &t.checkValueOptions
+	case parserConfig.IgnoreUnusedTrait:
+		field = &t.ignoreUnusedTrait
 	default:
 		return ErrorUnsupportedParserConfig1.New(nil, config)
 	}
+	if err = parserConfigSet(field, value); err != nil {
+		switch errutil.FactoryOf(err) {
+		case ErrorInvaludParserConfigValueType2:
+			return ErrorInvaludParserConfigValueType3.New(nil, config, field, value)
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 func (t *parserImpl) Get(config parserConfig.Enum) (value interface{}, err error) {
@@ -61,41 +76,11 @@ func (t *parserImpl) Get(config parserConfig.Enum) (value interface{}, err error
 		return t.checkRAMLVersion, nil
 	case parserConfig.CheckValueOptions:
 		return t.checkValueOptions, nil
+	case parserConfig.IgnoreUnusedTrait:
+		return t.ignoreUnusedTrait, nil
 	default:
 		return nil, ErrorUnsupportedParserConfig1.New(nil, config)
 	}
-}
-
-func (t *parserImpl) ConfigCheckRAMLVersion(value interface{}) (err error) {
-	switch value.(type) {
-	case bool:
-		t.checkRAMLVersion = value.(bool)
-		return nil
-	default:
-		return ErrorInvaludParserConfigValueType3.New(nil, parserConfig.CheckRAMLVersion, true, value)
-	}
-}
-
-func (t *parserImpl) ConfigCheckValueOptions(value interface{}) (err error) {
-	switch value.(type) {
-	case []CheckValueOption:
-		t.checkValueOptions = value.([]CheckValueOption)
-		return nil
-	default:
-		return ErrorInvaludParserConfigValueType3.New(nil, parserConfig.CheckValueOptions, []CheckValueOption{}, value)
-	}
-}
-
-func (t parserImpl) CheckRAMLVersion(data []byte) (err error) {
-	buffer := bytes.NewBuffer(data)
-	firstLine, err := buffer.ReadString('\n')
-	if err != nil {
-		return
-	}
-	if firstLine[:10] != "#%RAML 1.0" {
-		return ErrorUnexpectedRAMLVersion2.New(nil, "#%RAML 1.0", firstLine[:10])
-	}
-	return nil
 }
 
 func (t parserImpl) ParseFile(filePath string) (rootdoc RootDocument, err error) {
@@ -121,7 +106,7 @@ func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument
 	rootdoc.WorkingDirectory = workdir
 
 	if t.checkRAMLVersion {
-		if err = t.CheckRAMLVersion(data); err != nil {
+		if err = checkRAMLVersion(data); err != nil {
 			return
 		}
 	}
@@ -149,7 +134,7 @@ func (t parserImpl) ParseLibraryFile(filePath string, conf PostProcessConfig) (l
 
 func (t parserImpl) ParseLibraryData(data []byte, conf PostProcessConfig) (library Library, err error) {
 	if t.checkRAMLVersion {
-		if err = t.CheckRAMLVersion(data); err != nil {
+		if err = checkRAMLVersion(data); err != nil {
 			return
 		}
 	}
@@ -163,4 +148,28 @@ func (t parserImpl) ParseLibraryData(data []byte, conf PostProcessConfig) (libra
 	}
 
 	return
+}
+
+func parserConfigSet(field interface{}, value interface{}) (err error) {
+	f := reflect.ValueOf(field)
+	v := reflect.ValueOf(value)
+	defer func() {
+		if perr := recover(); perr != nil {
+			err = ErrorInvaludParserConfigValueType2.New(nil, f.Elem().Interface(), value)
+		}
+	}()
+	f.Elem().Set(v)
+	return
+}
+
+func checkRAMLVersion(data []byte) (err error) {
+	buffer := bytes.NewBuffer(data)
+	firstLine, err := buffer.ReadString('\n')
+	if err != nil {
+		return
+	}
+	if firstLine[:10] != "#%RAML 1.0" {
+		return ErrorUnexpectedRAMLVersion2.New(nil, "#%RAML 1.0", firstLine[:10])
+	}
+	return nil
 }

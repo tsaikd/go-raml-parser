@@ -96,6 +96,13 @@ func (t *Trait) fillTrait(library Library) (err error) {
 	return
 }
 
+var _ checkUnusedTrait = Trait{}
+
+func (t Trait) checkUnusedTrait(traitUsage map[string]bool) (err error) {
+	delete(traitUsage, t.String)
+	return
+}
+
 // TraitExtra contain fields no in Method
 type TraitExtra struct {
 	// The OPTIONAL usage node of a resource type or trait provides

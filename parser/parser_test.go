@@ -26,6 +26,15 @@ func Test_ParseError(t *testing.T) {
 	err = parser.Config(parserConfig.CheckRAMLVersion, true)
 	require.NoError(err)
 
+	err = parser.Config(parserConfig.CheckValueOptions, nil)
+	require.Error(err)
+
+	err = parser.Config(parserConfig.CheckValueOptions, []CheckValueOption{CheckValueOptionAllowIntegerToBeNumber(true)})
+	require.NoError(err)
+
+	err = parser.Config(parserConfig.CheckValueOptions, "error")
+	require.Error(err)
+
 	_, err = parser.ParseData([]byte("#%RAML 0.8\n"), ".")
 	require.Error(err)
 	require.True(ErrorUnexpectedRAMLVersion2.Match(err))
@@ -398,6 +407,25 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 			}
 		}
 	}
+}
+
+func Test_ParseCheckUnusedTrait(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	_, err := parser.ParseFile("./test-examples/check-unused-trait.raml")
+	require.Error(err)
+
+	err = parser.Config(parserConfig.IgnoreUnusedTrait, true)
+	require.NoError(err)
+
+	_, err = parser.ParseFile("./test-examples/check-unused-trait.raml")
+	require.NoError(err)
 }
 
 func Test_ParseDefaultMediaType(t *testing.T) {

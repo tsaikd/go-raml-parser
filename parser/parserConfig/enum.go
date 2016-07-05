@@ -9,11 +9,13 @@ type Enum int8
 const (
 	CheckRAMLVersion Enum = 1 + iota
 	CheckValueOptions
+	IgnoreUnusedTrait
 )
 
 var factory = enumutil.NewEnumFactory().
 	Add(CheckRAMLVersion, "CheckRAMLVersion").
 	Add(CheckValueOptions, "CheckValueOptions").
+	Add(IgnoreUnusedTrait, "IgnoreUnusedTrait").
 	Build()
 
 func (t Enum) String() string {

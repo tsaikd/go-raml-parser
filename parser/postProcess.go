@@ -82,6 +82,26 @@ func fillExampleExec(v interface{}, conf PostProcessConfig) (err error) {
 	return v.(fillExample).fillExample(conf)
 }
 
+type checkUnusedTrait interface {
+	checkUnusedTrait(traitUsage map[string]bool) (err error)
+}
+
+var checkUnusedTraitRef = reflect.TypeOf((*checkUnusedTrait)(nil)).Elem()
+
+func checkUnusedTraitExec(v interface{}, conf PostProcessConfig) (err error) {
+	return v.(checkUnusedTrait).checkUnusedTrait(conf.TraitUsage())
+}
+
+type afterCheckUnusedTrait interface {
+	afterCheckUnusedTrait(conf PostProcessConfig) (err error)
+}
+
+var afterCheckUnusedTraitRef = reflect.TypeOf((*afterCheckUnusedTrait)(nil)).Elem()
+
+func afterCheckUnusedTraitExec(v interface{}, conf PostProcessConfig) (err error) {
+	return v.(afterCheckUnusedTrait).afterCheckUnusedTrait(conf)
+}
+
 type checkExample interface {
 	checkExample(conf PostProcessConfig) (err error)
 }
@@ -95,15 +115,17 @@ func checkExampleExec(v interface{}, conf PostProcessConfig) (err error) {
 type postProcessFunc func(v interface{}, conf PostProcessConfig) (err error)
 
 var postProcessInfoMap = map[reflect.Type]postProcessFunc{
-	loadExternalUseRef:     loadExternalUseExec,
-	fixRequiredBySyntaxRef: fixRequiredBySyntaxExec,
-	fixDefaultMediaTypeRef: fixDefaultMediaTypeExec,
-	fixEmptyAnnotationRef:  fixEmptyAnnotationExec,
-	fillPropertiesRef:      fillPropertiesExec,
-	fillTraitRef:           fillTraitExec,
-	fillURIParamsRef:       fillURIParamsExec,
-	fillExampleRef:         fillExampleExec,
-	checkExampleRef:        checkExampleExec,
+	loadExternalUseRef:       loadExternalUseExec,
+	fixRequiredBySyntaxRef:   fixRequiredBySyntaxExec,
+	fixDefaultMediaTypeRef:   fixDefaultMediaTypeExec,
+	fixEmptyAnnotationRef:    fixEmptyAnnotationExec,
+	fillPropertiesRef:        fillPropertiesExec,
+	fillTraitRef:             fillTraitExec,
+	fillURIParamsRef:         fillURIParamsExec,
+	fillExampleRef:           fillExampleExec,
+	checkUnusedTraitRef:      checkUnusedTraitExec,
+	afterCheckUnusedTraitRef: afterCheckUnusedTraitExec,
+	checkExampleRef:          checkExampleExec,
 }
 
 func postProcess(v interface{}, conf PostProcessConfig) (err error) {
@@ -116,6 +138,8 @@ func postProcess(v interface{}, conf PostProcessConfig) (err error) {
 		fillTraitRef,
 		fillURIParamsRef,
 		fillExampleRef,
+		checkUnusedTraitRef,
+		afterCheckUnusedTraitRef,
 		checkExampleRef,
 	}
 	for _, implement := range implements {
@@ -154,9 +178,20 @@ func postProcessImplement(v interface{}, implement reflect.Type, conf PostProces
 
 	typ := val.Type()
 
-	if typ.Implements(implement) && !val.IsNil() {
-		if err = postProcessInfoMap[implement](v, conf); err != nil {
-			return
+	if typ.Implements(implement) {
+		valid := false
+		switch typ.Kind() {
+		case reflect.Struct:
+			valid = true
+		case reflect.Ptr:
+			valid = !val.IsNil() && !val.Elem().Type().Implements(implement)
+		default:
+			valid = !val.IsNil()
+		}
+		if valid {
+			if err = postProcessInfoMap[implement](v, conf); err != nil {
+				return
+			}
 		}
 	}
 
