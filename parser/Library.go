@@ -160,6 +160,15 @@ func (t Library) GetTrait(name string) (result Trait, err error) {
 	return *trait, nil
 }
 
+var _ checkUnusedAnnotation = Library{}
+
+func (t Library) checkUnusedAnnotation(annotationUsage map[string]bool) (err error) {
+	for name := range t.AnnotationTypes {
+		annotationUsage[name] = true
+	}
+	return
+}
+
 var _ checkUnusedTrait = Library{}
 
 func (t Library) checkUnusedTrait(traitUsage map[string]bool) (err error) {

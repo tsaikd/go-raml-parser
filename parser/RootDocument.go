@@ -37,6 +37,22 @@ func (t RootDocument) IsEmpty() bool {
 		t.WorkingDirectory == ""
 }
 
+var _ afterCheckUnusedAnnotation = RootDocument{}
+
+func (t RootDocument) afterCheckUnusedAnnotation(conf PostProcessConfig) (err error) {
+	ignore, err := conf.Parser().Get(parserConfig.IgnoreUnusedAnnotation)
+	if err != nil {
+		return
+	}
+	if ignore.(bool) {
+		return
+	}
+	for name := range conf.AnnotationUsage() {
+		return ErrorUnusedAnnotation1.New(nil, name)
+	}
+	return
+}
+
 var _ afterCheckUnusedTrait = RootDocument{}
 
 func (t RootDocument) afterCheckUnusedTrait(conf PostProcessConfig) (err error) {

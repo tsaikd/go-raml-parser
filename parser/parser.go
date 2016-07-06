@@ -42,9 +42,10 @@ type Parser interface {
 }
 
 type parserImpl struct {
-	checkRAMLVersion  bool
-	checkValueOptions []CheckValueOption
-	ignoreUnusedTrait bool
+	checkRAMLVersion       bool
+	checkValueOptions      []CheckValueOption
+	ignoreUnusedAnnotation bool
+	ignoreUnusedTrait      bool
 }
 
 func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err error) {
@@ -54,6 +55,8 @@ func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err er
 		field = &t.checkRAMLVersion
 	case parserConfig.CheckValueOptions:
 		field = &t.checkValueOptions
+	case parserConfig.IgnoreUnusedAnnotation:
+		field = &t.ignoreUnusedAnnotation
 	case parserConfig.IgnoreUnusedTrait:
 		field = &t.ignoreUnusedTrait
 	default:
@@ -76,6 +79,8 @@ func (t *parserImpl) Get(config parserConfig.Enum) (value interface{}, err error
 		return t.checkRAMLVersion, nil
 	case parserConfig.CheckValueOptions:
 		return t.checkValueOptions, nil
+	case parserConfig.IgnoreUnusedAnnotation:
+		return t.ignoreUnusedAnnotation, nil
 	case parserConfig.IgnoreUnusedTrait:
 		return t.ignoreUnusedTrait, nil
 	default:

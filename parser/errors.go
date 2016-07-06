@@ -23,6 +23,7 @@ var (
 	ErrorPropertyTypeMismatch3         = errutil.NewFactory("Property %q type mismatch, expected %q but got %q")
 	ErrorRequiredProperty2             = errutil.NewFactory("Property %q is required but not found in %q")
 	ErrorUnusedTrait1                  = errutil.NewFactory("Trait %q is unused")
+	ErrorUnusedAnnotation1             = errutil.NewFactory("Annotation %q is unused")
 )
 
 func isErrorYAMLIntoBool(err error) bool {

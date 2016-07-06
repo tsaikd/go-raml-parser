@@ -409,9 +409,24 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	}
 }
 
+func Test_ParseCheckUnusedAnnotation(t *testing.T) {
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	_, err := parser.ParseFile("./test-examples/check-unused-annotation.raml")
+	require.Error(err)
+
+	err = parser.Config(parserConfig.IgnoreUnusedAnnotation, true)
+	require.NoError(err)
+
+	_, err = parser.ParseFile("./test-examples/check-unused-annotation.raml")
+	require.NoError(err)
+}
+
 func Test_ParseCheckUnusedTrait(t *testing.T) {
-	assert := assert.New(t)
-	assert.NotNil(assert)
 	require := require.New(t)
 	require.NotNil(require)
 

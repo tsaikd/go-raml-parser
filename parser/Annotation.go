@@ -33,6 +33,15 @@ func (t Annotations) fixAnnotationBracket() (err error) {
 	return
 }
 
+var _ checkUnusedAnnotation = Annotations{}
+
+func (t Annotations) checkUnusedAnnotation(annotationUsage map[string]bool) (err error) {
+	for name := range t {
+		delete(annotationUsage, name)
+	}
+	return
+}
+
 // Annotation wrap types defined in spec
 type Annotation struct {
 	Value

@@ -9,12 +9,14 @@ type Enum int8
 const (
 	CheckRAMLVersion Enum = 1 + iota
 	CheckValueOptions
+	IgnoreUnusedAnnotation
 	IgnoreUnusedTrait
 )
 
 var factory = enumutil.NewEnumFactory().
 	Add(CheckRAMLVersion, "CheckRAMLVersion").
 	Add(CheckValueOptions, "CheckValueOptions").
+	Add(IgnoreUnusedAnnotation, "IgnoreUnusedAnnotation").
 	Add(IgnoreUnusedTrait, "IgnoreUnusedTrait").
 	Build()
 

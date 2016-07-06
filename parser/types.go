@@ -24,6 +24,7 @@ type PostProcessConfig interface {
 	RootDocument() RootDocument
 	Library() Library
 	Parser() Parser
+	AnnotationUsage() map[string]bool
 	TraitUsage() map[string]bool
 }
 
@@ -33,18 +34,20 @@ func newPostProcessConfig(
 	parser Parser,
 ) PostProcessConfig {
 	return postProcessConfigImpl{
-		dataRootDocument: rootdoc,
-		dataLibrary:      library,
-		dataParser:       parser,
-		dataTraitUsage:   map[string]bool{},
+		dataRootDocument:    rootdoc,
+		dataLibrary:         library,
+		dataParser:          parser,
+		dataAnnotationUsage: map[string]bool{},
+		dataTraitUsage:      map[string]bool{},
 	}
 }
 
 type postProcessConfigImpl struct {
-	dataRootDocument RootDocument
-	dataLibrary      Library
-	dataParser       Parser
-	dataTraitUsage   map[string]bool
+	dataRootDocument    RootDocument
+	dataLibrary         Library
+	dataParser          Parser
+	dataAnnotationUsage map[string]bool
+	dataTraitUsage      map[string]bool
 }
 
 func (t postProcessConfigImpl) RootDocument() RootDocument {
@@ -57,6 +60,10 @@ func (t postProcessConfigImpl) Library() Library {
 
 func (t postProcessConfigImpl) Parser() Parser {
 	return t.dataParser
+}
+
+func (t postProcessConfigImpl) AnnotationUsage() map[string]bool {
+	return t.dataAnnotationUsage
 }
 
 func (t postProcessConfigImpl) TraitUsage() map[string]bool {

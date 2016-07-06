@@ -92,6 +92,26 @@ func fillExampleExec(v interface{}, conf PostProcessConfig) (err error) {
 	return v.(fillExample).fillExample(conf)
 }
 
+type checkUnusedAnnotation interface {
+	checkUnusedAnnotation(annotationUsage map[string]bool) (err error)
+}
+
+var checkUnusedAnnotationRef = reflect.TypeOf((*checkUnusedAnnotation)(nil)).Elem()
+
+func checkUnusedAnnotationExec(v interface{}, conf PostProcessConfig) (err error) {
+	return v.(checkUnusedAnnotation).checkUnusedAnnotation(conf.AnnotationUsage())
+}
+
+type afterCheckUnusedAnnotation interface {
+	afterCheckUnusedAnnotation(conf PostProcessConfig) (err error)
+}
+
+var afterCheckUnusedAnnotationRef = reflect.TypeOf((*afterCheckUnusedAnnotation)(nil)).Elem()
+
+func afterCheckUnusedAnnotationExec(v interface{}, conf PostProcessConfig) (err error) {
+	return v.(afterCheckUnusedAnnotation).afterCheckUnusedAnnotation(conf)
+}
+
 type checkUnusedTrait interface {
 	checkUnusedTrait(traitUsage map[string]bool) (err error)
 }
@@ -125,18 +145,20 @@ func checkExampleExec(v interface{}, conf PostProcessConfig) (err error) {
 type postProcessFunc func(v interface{}, conf PostProcessConfig) (err error)
 
 var postProcessInfoMap = map[reflect.Type]postProcessFunc{
-	loadExternalUseRef:       loadExternalUseExec,
-	fixRequiredBySyntaxRef:   fixRequiredBySyntaxExec,
-	fixDefaultMediaTypeRef:   fixDefaultMediaTypeExec,
-	fixEmptyAnnotationRef:    fixEmptyAnnotationExec,
-	fixAnnotationBracketRef:  fixAnnotationBracketExec,
-	fillPropertiesRef:        fillPropertiesExec,
-	fillTraitRef:             fillTraitExec,
-	fillURIParamsRef:         fillURIParamsExec,
-	fillExampleRef:           fillExampleExec,
-	checkUnusedTraitRef:      checkUnusedTraitExec,
-	afterCheckUnusedTraitRef: afterCheckUnusedTraitExec,
-	checkExampleRef:          checkExampleExec,
+	loadExternalUseRef:            loadExternalUseExec,
+	fixRequiredBySyntaxRef:        fixRequiredBySyntaxExec,
+	fixDefaultMediaTypeRef:        fixDefaultMediaTypeExec,
+	fixEmptyAnnotationRef:         fixEmptyAnnotationExec,
+	fixAnnotationBracketRef:       fixAnnotationBracketExec,
+	fillPropertiesRef:             fillPropertiesExec,
+	fillTraitRef:                  fillTraitExec,
+	fillURIParamsRef:              fillURIParamsExec,
+	fillExampleRef:                fillExampleExec,
+	checkUnusedAnnotationRef:      checkUnusedAnnotationExec,
+	afterCheckUnusedAnnotationRef: afterCheckUnusedAnnotationExec,
+	checkUnusedTraitRef:           checkUnusedTraitExec,
+	afterCheckUnusedTraitRef:      afterCheckUnusedTraitExec,
+	checkExampleRef:               checkExampleExec,
 }
 
 func postProcess(v interface{}, conf PostProcessConfig) (err error) {
@@ -150,6 +172,8 @@ func postProcess(v interface{}, conf PostProcessConfig) (err error) {
 		fillTraitRef,
 		fillURIParamsRef,
 		fillExampleRef,
+		checkUnusedAnnotationRef,
+		afterCheckUnusedAnnotationRef,
 		checkUnusedTraitRef,
 		afterCheckUnusedTraitRef,
 		checkExampleRef,
