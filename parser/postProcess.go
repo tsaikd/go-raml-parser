@@ -42,6 +42,16 @@ func fixEmptyAnnotationExec(v interface{}, conf PostProcessConfig) (err error) {
 	return v.(fixEmptyAnnotation).fixEmptyAnnotation()
 }
 
+type fixAnnotationBracket interface {
+	fixAnnotationBracket() (err error)
+}
+
+var fixAnnotationBracketRef = reflect.TypeOf((*fixAnnotationBracket)(nil)).Elem()
+
+func fixAnnotationBracketExec(v interface{}, conf PostProcessConfig) (err error) {
+	return v.(fixAnnotationBracket).fixAnnotationBracket()
+}
+
 type fillProperties interface {
 	fillProperties(library Library) (err error)
 }
@@ -119,6 +129,7 @@ var postProcessInfoMap = map[reflect.Type]postProcessFunc{
 	fixRequiredBySyntaxRef:   fixRequiredBySyntaxExec,
 	fixDefaultMediaTypeRef:   fixDefaultMediaTypeExec,
 	fixEmptyAnnotationRef:    fixEmptyAnnotationExec,
+	fixAnnotationBracketRef:  fixAnnotationBracketExec,
 	fillPropertiesRef:        fillPropertiesExec,
 	fillTraitRef:             fillTraitExec,
 	fillURIParamsRef:         fillURIParamsExec,
@@ -134,6 +145,7 @@ func postProcess(v interface{}, conf PostProcessConfig) (err error) {
 		fixRequiredBySyntaxRef,
 		fixDefaultMediaTypeRef,
 		fixEmptyAnnotationRef,
+		fixAnnotationBracketRef,
 		fillPropertiesRef,
 		fillTraitRef,
 		fillURIParamsRef,

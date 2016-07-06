@@ -79,16 +79,16 @@ func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {
 	}
 	if assert.Contains(rootdoc.Resources, "/users") {
 		resource := rootdoc.Resources["/users"]
-		if assert.Contains(resource.Annotations, "(testHarness)") {
-			annotation := resource.Annotations["(testHarness)"]
+		if assert.Contains(resource.Annotations, "testHarness") {
+			annotation := resource.Annotations["testHarness"]
 			require.Equal("usersTest", annotation.String)
 		}
-		if assert.Contains(resource.Annotations, "(badge)") {
-			annotation := resource.Annotations["(badge)"]
+		if assert.Contains(resource.Annotations, "badge") {
+			annotation := resource.Annotations["badge"]
 			require.Equal("tested.gif", annotation.String)
 		}
-		if assert.Contains(resource.Annotations, "(clearanceLevel)") {
-			annotation := resource.Annotations["(clearanceLevel)"]
+		if assert.Contains(resource.Annotations, "clearanceLevel") {
+			annotation := resource.Annotations["clearanceLevel"]
 			if assert.Contains(annotation.Map, "level") {
 				value := annotation.Map["level"]
 				require.Equal("high", value.String)

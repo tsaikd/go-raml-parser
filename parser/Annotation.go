@@ -1,5 +1,7 @@
 package parser
 
+import "strings"
+
 // Annotations map of Annotation
 type Annotations map[string]*Annotation
 
@@ -13,6 +15,22 @@ func (t Annotations) IsEmpty() bool {
 		}
 	}
 	return true
+}
+
+var _ fixAnnotationBracket = Annotations{}
+
+func (t Annotations) fixAnnotationBracket() (err error) {
+	for name, annotation := range t {
+		fixedName := name
+		fixedName = strings.TrimPrefix(fixedName, "(")
+		fixedName = strings.TrimSuffix(fixedName, ")")
+		if fixedName == name {
+			continue
+		}
+		delete(t, name)
+		t[fixedName] = annotation
+	}
+	return
 }
 
 // Annotation wrap types defined in spec
