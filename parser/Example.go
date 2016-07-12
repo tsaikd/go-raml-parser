@@ -134,8 +134,8 @@ func generateExampleValue(library Library, apiType APIType, preferArray bool) (v
 		return Value{}, nil
 	case TypeObject:
 		valmap := map[string]interface{}{}
-		for name, property := range apiType.Properties {
-			if valmap[name], err = generateExampleValue(library, property.APIType, false); err != nil {
+		for _, property := range apiType.Properties.Slice() {
+			if valmap[property.Name], err = generateExampleValue(library, property.APIType, false); err != nil {
 				return
 			}
 		}

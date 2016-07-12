@@ -66,13 +66,13 @@ func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {
 	if assert.Contains(rootdoc.AnnotationTypes, "clearanceLevel") {
 		annotationType := rootdoc.AnnotationTypes["clearanceLevel"]
 		require.Equal(TypeObject, annotationType.Type)
-		if assert.Contains(annotationType.Properties, "level") {
-			property := annotationType.Properties["level"]
+		if assert.Contains(annotationType.Properties.Map(), "level") {
+			property := annotationType.Properties.Map()["level"]
 			require.Len(property.Enum, 3)
 			require.True(property.Required)
 		}
-		if assert.Contains(annotationType.Properties, "signature") {
-			property := annotationType.Properties["signature"]
+		if assert.Contains(annotationType.Properties.Map(), "signature") {
+			property := annotationType.Properties.Map()["signature"]
 			require.Equal("\\d{3}-\\w{12}", property.Pattern)
 			require.True(property.Required)
 		}
@@ -118,12 +118,12 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties, "name") {
-			property := typ.Properties["name"]
+		if assert.Contains(typ.Properties.Map(), "name") {
+			property := typ.Properties.Map()["name"]
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Properties, "lastname") {
-			property := typ.Properties["lastname"]
+		if assert.Contains(typ.Properties.Map(), "lastname") {
+			property := typ.Properties.Map()["lastname"]
 			require.Equal(TypeString, property.Type)
 		}
 		require.False(typ.Example.Value.IsEmpty())
@@ -133,18 +133,18 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	if assert.Contains(rootdoc.Types, "Org") {
 		typ := rootdoc.Types["Org"]
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties, "name") {
-			property := typ.Properties["name"]
+		if assert.Contains(typ.Properties.Map(), "name") {
+			property := typ.Properties.Map()["name"]
 			require.Equal(TypeString, property.Type)
 			require.True(property.Required)
 		}
-		if assert.Contains(typ.Properties, "address") {
-			property := typ.Properties["address"]
+		if assert.Contains(typ.Properties.Map(), "address") {
+			property := typ.Properties.Map()["address"]
 			require.Equal(TypeString, property.Type)
 			require.False(property.Required)
 		}
-		if assert.Contains(typ.Properties, "value") {
-			property := typ.Properties["value"]
+		if assert.Contains(typ.Properties.Map(), "value") {
+			property := typ.Properties.Map()["value"]
 			require.Equal(TypeString, property.Type)
 			require.False(property.Required)
 		}
@@ -153,8 +153,8 @@ func Test_ParseDefiningExamples(t *testing.T) {
 		resource := rootdoc.Resources["/organisation"]
 		if assert.Contains(resource.Methods, "post") {
 			method := resource.Methods["post"]
-			if assert.Contains(method.Headers, "UserID") {
-				header := method.Headers["UserID"]
+			if assert.Contains(method.Headers.Map(), "UserID") {
+				header := method.Headers.Map()["UserID"]
 				require.Equal("the identifier for the user that posts a new organisation", header.Description)
 				require.Equal(TypeString, header.Type)
 				require.Equal("SWED-123", header.Example.Value.String)
@@ -247,51 +247,51 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 		if assert.Contains(use.Types, "ProductItem") {
 			typ := use.Types["ProductItem"]
 			require.Equal(TypeObject, typ.Type)
-			if assert.Contains(typ.Properties, "product_id") {
-				property := typ.Properties["product_id"]
+			if assert.Contains(typ.Properties.Map(), "product_id") {
+				property := typ.Properties.Map()["product_id"]
 				require.Equal(TypeString, property.Type)
 			}
-			if assert.Contains(typ.Properties, "quantity") {
-				property := typ.Properties["quantity"]
+			if assert.Contains(typ.Properties.Map(), "quantity") {
+				property := typ.Properties.Map()["quantity"]
 				require.Equal(TypeInteger, property.Type)
 			}
 		}
 		if assert.Contains(use.Types, "Order") {
 			typ := use.Types["Order"]
 			require.Equal(TypeObject, typ.Type)
-			if assert.Contains(typ.Properties, "order_id") {
-				property := typ.Properties["order_id"]
+			if assert.Contains(typ.Properties.Map(), "order_id") {
+				property := typ.Properties.Map()["order_id"]
 				require.Equal(TypeString, property.Type)
 			}
-			if assert.Contains(typ.Properties, "creation_date") {
-				property := typ.Properties["creation_date"]
+			if assert.Contains(typ.Properties.Map(), "creation_date") {
+				property := typ.Properties.Map()["creation_date"]
 				require.Equal(TypeString, property.Type)
 			}
-			if assert.Contains(typ.Properties, "items") {
-				property := typ.Properties["items"]
+			if assert.Contains(typ.Properties.Map(), "items") {
+				property := typ.Properties.Map()["items"]
 				require.Equal("ProductItem[]", property.Type)
 			}
 		}
 		if assert.Contains(use.Types, "Orders") {
 			typ := use.Types["Orders"]
 			require.Equal(TypeObject, typ.Type)
-			if assert.Contains(typ.Properties, "orders") {
-				property := typ.Properties["orders"]
+			if assert.Contains(typ.Properties.Map(), "orders") {
+				property := typ.Properties.Map()["orders"]
 				require.Equal("Order[]", property.Type)
 			}
 		}
 		if assert.Contains(use.Traits, "paging") {
 			trait := use.Traits["paging"]
-			if assert.Contains(trait.QueryParameters, "size") {
-				qp := trait.QueryParameters["size"]
+			if assert.Contains(trait.QueryParameters.Map(), "size") {
+				qp := trait.QueryParameters.Map()["size"]
 				require.Equal("the amount of elements of each result page", qp.Description)
 				require.Equal(TypeInteger, qp.Type)
 				require.False(qp.Required)
 				require.Equal(TypeInteger, qp.Example.Value.Type)
 				require.EqualValues(10, qp.Example.Value.Integer)
 			}
-			if assert.Contains(trait.QueryParameters, "page") {
-				qp := trait.QueryParameters["page"]
+			if assert.Contains(trait.QueryParameters.Map(), "page") {
+				qp := trait.QueryParameters.Map()["page"]
 				require.Equal("the page number", qp.Description)
 				require.Equal(TypeInteger, qp.Type)
 				require.False(qp.Required)
@@ -311,8 +311,8 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 				require.Equal("assets.paging", is.String)
 			}
 			require.Equal("lists all orders of a specific user", method.Description)
-			if assert.Contains(method.QueryParameters, "userId") {
-				qp := method.QueryParameters["userId"]
+			if assert.Contains(method.QueryParameters.Map(), "userId") {
+				qp := method.QueryParameters.Map()["userId"]
 				require.Equal("string", qp.Type)
 				require.Equal("use to query all orders of a user", qp.Description)
 				require.True(qp.Required)
@@ -377,18 +377,18 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties, "age") {
-			property := typ.Properties["age"]
+		if assert.Contains(typ.Properties.Map(), "age") {
+			property := typ.Properties.Map()["age"]
 			require.True(property.Required)
 			require.Equal(TypeNumber, property.Type)
 		}
-		if assert.Contains(typ.Properties, "firstName") {
-			property := typ.Properties["firstName"]
+		if assert.Contains(typ.Properties.Map(), "firstName") {
+			property := typ.Properties.Map()["firstName"]
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Properties, "lastName") {
-			property := typ.Properties["lastName"]
+		if assert.Contains(typ.Properties.Map(), "lastName") {
+			property := typ.Properties.Map()["lastName"]
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
@@ -491,13 +491,13 @@ func Test_ParseExampleFromType(t *testing.T) {
 	if assert.Contains(rootdoc.Types, "User") {
 		typ := rootdoc.Types["User"]
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties, "name") {
-			property := typ.Properties["name"]
+		if assert.Contains(typ.Properties.Map(), "name") {
+			property := typ.Properties.Map()["name"]
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Properties, "email") {
-			property := typ.Properties["email"]
+		if assert.Contains(typ.Properties.Map(), "email") {
+			property := typ.Properties.Map()["email"]
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
@@ -550,8 +550,8 @@ func Test_ParseExampleFromType(t *testing.T) {
 				if assert.Contains(response.Bodies, "application/json") {
 					body := response.Bodies["application/json"]
 					require.Equal(TypeObject, body.Type)
-					if assert.Contains(body.Properties, "user") {
-						property := body.Properties["user"]
+					if assert.Contains(body.Properties.Map(), "user") {
+						property := body.Properties.Map()["user"]
 						require.Equal("User", property.Type)
 					}
 					if assert.Contains(body.Example.Value.Map, "user") {
@@ -640,8 +640,8 @@ func Test_ParseExampleFromType(t *testing.T) {
 				if assert.Contains(response.Bodies, "application/json") {
 					body := response.Bodies["application/json"]
 					require.Equal(TypeObject, body.Type)
-					if assert.Contains(body.Properties, "users") {
-						property := body.Properties["users"]
+					if assert.Contains(body.Properties.Map(), "users") {
+						property := body.Properties.Map()["users"]
 						require.Equal("User[]", property.Type)
 					}
 					if assert.Contains(body.Example.Value.Map, "users") {
@@ -715,8 +715,8 @@ func Test_ParseTrait(t *testing.T) {
 
 	if assert.Contains(rootdoc.Traits, "RequireLogin") {
 		trait := rootdoc.Traits["RequireLogin"]
-		if assert.Contains(trait.Headers, "Authorization") {
-			header := trait.Headers["Authorization"]
+		if assert.Contains(trait.Headers.Map(), "Authorization") {
+			header := trait.Headers.Map()["Authorization"]
 			require.Equal(TypeString, header.Type)
 		}
 	}
@@ -727,8 +727,8 @@ func Test_ParseTrait(t *testing.T) {
 			if assert.Len(method.Is, 1) {
 				trait := method.Is[0]
 				require.Equal(trait.String, "RequireLogin")
-				if assert.Contains(trait.Headers, "Authorization") {
-					header := trait.Headers["Authorization"]
+				if assert.Contains(trait.Headers.Map(), "Authorization") {
+					header := trait.Headers.Map()["Authorization"]
 					require.Equal(TypeString, header.Type)
 				}
 			}

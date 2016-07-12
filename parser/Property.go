@@ -1,16 +1,51 @@
 package parser
 
-import "strings"
+import (
+	"strings"
 
-// Properties map of Property
-type Properties map[string]*Property
+	"github.com/tsaikd/yaml"
+)
+
+// Properties contain multiple Property
+type Properties struct {
+	propertiesSliceData
+	mapdata map[string]*Property
+}
+
+// UnmarshalYAML implement yaml unmarshaler
+func (t *Properties) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+	mapdata := map[string]*Property{}
+	if err = unmarshaler(mapdata); err != nil {
+		return
+	}
+
+	order := yaml.MapSlice{}
+	if err = unmarshaler(&order); err != nil {
+		return
+	}
+
+	slicedata := []*Property{}
+	for _, item := range order {
+		name := item.Key.(string)
+		elem := mapdata[name]
+		elem.Name = name
+		slicedata = append(slicedata, elem)
+	}
+
+	t.propertiesSliceData = slicedata
+	t.mapdata = mapdata
+
+	return
+}
+
+// MarshalJSON marshal to json
+func (t Properties) MarshalJSON() ([]byte, error) {
+	return MarshalJSONWithoutEmptyStruct(t.mapdata)
+}
 
 // IsEmpty return true if it is empty
 func (t Properties) IsEmpty() bool {
-	if t == nil {
-		return true
-	}
-	for _, elem := range t {
+	for _, elem := range t.propertiesSliceData {
 		if elem != nil {
 			if !elem.IsEmpty() {
 				return false
@@ -20,22 +55,32 @@ func (t Properties) IsEmpty() bool {
 	return true
 }
 
-var _ fixRequiredBySyntax = Properties{}
+// Map return properties map
+func (t Properties) Map() map[string]*Property {
+	return t.mapdata
+}
+
+// Slice return properties slice
+func (t Properties) Slice() []*Property {
+	return t.propertiesSliceData
+}
+
+var _ fixRequiredBySyntax = &Properties{}
 
 func (t Properties) fixRequiredBySyntax() (err error) {
-	if t == nil {
-		return
-	}
-	for name, property := range t {
+	for name, property := range t.mapdata {
 		if strings.HasSuffix(name, "?") {
 			property.Required = false
 			trimName := strings.TrimSuffix(name, "?")
-			delete(t, name)
-			t[trimName] = property
+			property.Name = trimName
+			delete(t.mapdata, name)
+			t.mapdata[trimName] = property
 		}
 	}
 	return
 }
+
+type propertiesSliceData []*Property
 
 // Property of a object type
 type Property struct {
@@ -90,6 +135,9 @@ type PropertyExtra struct {
 	// Specifies that the property is required or not.
 	// Default: true.
 	Required bool `yaml:"required" json:"required,omitdefault" default:"true"`
+
+	// Property Name, filled by Properties.UnmarshalYAML()
+	Name string `yaml:"-" json:"name,omitempty"`
 }
 
 // BeforeUnmarshalYAML implement yaml Initiator

@@ -1,18 +1,8 @@
 package parser
 
 // QueryParameters map of QueryParameter
-type QueryParameters map[string]*QueryParameter
-
-// IsEmpty return true if it is empty
-func (t QueryParameters) IsEmpty() bool {
-	for _, elem := range t {
-		if elem != nil {
-			if !elem.IsEmpty() {
-				return false
-			}
-		}
-	}
-	return true
+type QueryParameters struct {
+	Properties
 }
 
 // QueryParameter The queryParameters node specifies the set of query

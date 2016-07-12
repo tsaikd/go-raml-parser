@@ -219,7 +219,10 @@ func fillValueFromAPIType(value *Value, library Library, apiType APIType) (err e
 			v = &Value{}
 			value.Map[name] = v
 		}
-		property := apiType.Properties[name]
+		property := apiType.Properties.Map()[name]
+		if property == nil {
+			return ErrorPropertyUndefined2.New(nil, name, apiType.Type)
+		}
 		if err = fillValueFromAPIType(v, library, property.APIType); err != nil {
 			return
 		}

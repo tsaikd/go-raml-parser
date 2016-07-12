@@ -1,18 +1,8 @@
 package parser
 
 // Headers map of Header
-type Headers map[string]*Header
-
-// IsEmpty return true if it is empty
-func (t Headers) IsEmpty() bool {
-	for _, elem := range t {
-		if elem != nil {
-			if !elem.IsEmpty() {
-				return false
-			}
-		}
-	}
-	return true
+type Headers struct {
+	Properties
 }
 
 // Header An API's methods can support or require various HTTP headers.

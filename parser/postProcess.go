@@ -179,59 +179,45 @@ func postProcess(v interface{}, conf PostProcessConfig) (err error) {
 		checkExampleRef,
 	}
 	for _, implement := range implements {
-		if err = postProcessImplement(v, implement, conf); err != nil {
+		if err = postProcessImplement(reflect.ValueOf(v), implement, conf); err != nil {
 			return
 		}
 	}
 	return
 }
 
-func postProcessImplement(v interface{}, implement reflect.Type, conf PostProcessConfig) (err error) {
-	var val reflect.Value
+var reflectTypeValue = reflect.TypeOf(Value{})
+var reflectTypeValuePtr = reflect.TypeOf(&Value{})
+var reflectTypeLibrary = reflect.TypeOf(Library{})
+var reflectTypeLibraryPtr = reflect.TypeOf(&Library{})
 
-	switch v.(type) {
-	case *Value, Value,
-		bool, int, int8, int16, int32, int64,
-		float32, float64, string:
+func postProcessImplement(val reflect.Value, implement reflect.Type, conf PostProcessConfig) (err error) {
+	switch val.Type() {
+	case reflectTypeValue, reflectTypeValuePtr:
 		// no need to post process Value
 		return nil
-	case reflect.Value:
-		val = v.(reflect.Value)
-		if !val.IsValid() || !val.CanInterface() {
-			return nil
-		}
-		v = val.Interface()
-	default:
-		val = reflect.ValueOf(v)
+	case reflectTypeLibrary:
+		conf = newPostProcessConfig(conf.RootDocument(), val.Interface().(Library), conf.Parser())
+	case reflectTypeLibraryPtr:
+		conf = newPostProcessConfig(conf.RootDocument(), *val.Interface().(*Library), conf.Parser())
 	}
 
-	switch v.(type) {
-	case Library:
-		conf = newPostProcessConfig(conf.RootDocument(), v.(Library), conf.Parser())
-	case *Library:
-		conf = newPostProcessConfig(conf.RootDocument(), *v.(*Library), conf.Parser())
-	}
-
-	typ := val.Type()
-
-	if typ.Implements(implement) {
-		valid := false
-		switch typ.Kind() {
-		case reflect.Struct:
-			valid = true
-		case reflect.Ptr:
-			valid = !val.IsNil() && !val.Elem().Type().Implements(implement)
-		default:
-			valid = !val.IsNil()
-		}
-		if valid {
-			if err = postProcessInfoMap[implement](v, conf); err != nil {
-				return
-			}
+	if v := queryPostProcessImplement(val, implement); v != nil {
+		if err = postProcessInfoMap[implement](v, conf); err != nil {
+			return
 		}
 	}
 
-	switch typ.Kind() {
+	kind := val.Kind()
+	if kind == reflect.Ptr {
+		if val.IsNil() {
+			return
+		}
+		kind = val.Elem().Kind()
+		val = val.Elem()
+	}
+
+	switch kind {
 	case reflect.Struct:
 		for i, n := 0, val.NumField(); i < n; i++ {
 			if err = postProcessImplement(val.Field(i), implement, conf); err != nil {
@@ -250,9 +236,27 @@ func postProcessImplement(v interface{}, implement reflect.Type, conf PostProces
 				return
 			}
 		}
-	case reflect.Ptr:
-		return postProcessImplement(val.Elem(), implement, conf)
 	}
 
 	return
+}
+
+// queryPostProcessImplement return not nil if val can run implement
+func queryPostProcessImplement(val reflect.Value, implement reflect.Type) interface{} {
+	if val.CanAddr() {
+		addr := val.Addr()
+		if addr.CanInterface() && addr.Type().Implements(implement) {
+			return addr.Interface()
+		}
+	}
+	if val.CanInterface() && val.Type().Implements(implement) {
+		return val.Interface()
+	}
+	if val.Kind() == reflect.Ptr && !val.IsNil() {
+		elem := val.Elem()
+		if elem.CanInterface() && elem.Type().Implements(implement) {
+			return val.Elem().Interface()
+		}
+	}
+	return nil
 }

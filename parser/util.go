@@ -137,7 +137,8 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 		}
 
-		for name, property := range apiType.Properties {
+		for _, property := range apiType.Properties.Slice() {
+			name := property.Name
 			if property.Required {
 				if !isValueContainKey(value, name) {
 					return ErrorRequiredProperty2.New(nil, name, apiType.Type)

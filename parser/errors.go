@@ -21,6 +21,7 @@ var (
 	ErrorPropertyTypeMismatch1         = errutil.NewFactory("Property %q type mismatch")
 	ErrorPropertyTypeMismatch2         = errutil.NewFactory("Property type mismatch, expected %q but got %q")
 	ErrorPropertyTypeMismatch3         = errutil.NewFactory("Property %q type mismatch, expected %q but got %q")
+	ErrorPropertyUndefined2            = errutil.NewFactory("Property %q can not find in APIType %q")
 	ErrorRequiredProperty2             = errutil.NewFactory("Property %q is required but not found in %q")
 	ErrorUnusedTrait1                  = errutil.NewFactory("Trait %q is unused")
 	ErrorUnusedAnnotation1             = errutil.NewFactory("Annotation %q is unused")

@@ -163,16 +163,19 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	apiType.Properties = Properties{}
 
 	property := &Property{}
+	property.Name = "text"
 	property.Type = TypeString
-	apiType.Properties["text"] = property
+	addProperty(&apiType.Properties, property)
 
 	property = &Property{}
+	property.Name = "int"
 	property.Type = TypeInteger
-	apiType.Properties["int"] = property
+	addProperty(&apiType.Properties, property)
 
 	property = &Property{}
+	property.Name = "num"
 	property.Type = TypeNumber
-	apiType.Properties["num"] = property
+	addProperty(&apiType.Properties, property)
 
 	err = testCheckValueAPIType(apiType, true)
 	require.Error(err)
@@ -247,8 +250,9 @@ func Test_CheckValueAPIType_ObjectArray(t *testing.T) {
 	apiType.Properties = Properties{}
 
 	property := &Property{}
+	property.Name = "text"
 	property.Type = TypeString
-	apiType.Properties["text"] = property
+	addProperty(&apiType.Properties, property)
 
 	err = testCheckValueAPIType(apiType, []interface{}{
 		map[string]interface{}{
@@ -286,4 +290,18 @@ types:
 	`)), ".")
 	require.Error(err)
 	require.True(ErrorRequiredProperty2.Match(err))
+}
+
+func addProperty(properties *Properties, property *Property) {
+	if properties.mapdata == nil {
+		properties.mapdata = map[string]*Property{}
+	}
+	if properties.propertiesSliceData == nil {
+		properties.propertiesSliceData = []*Property{}
+	}
+	if _, exist := properties.mapdata[property.Name]; exist {
+		return
+	}
+	properties.mapdata[property.Name] = property
+	properties.propertiesSliceData = append(properties.propertiesSliceData, property)
 }
