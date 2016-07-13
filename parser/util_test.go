@@ -240,6 +240,24 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	require.NoError(err)
 }
 
+func Test_CheckValueAPIType_Array(t *testing.T) {
+	var err error
+	require := require.New(t)
+	require.NotNil(require)
+
+	apiType := APIType{}
+	apiType.Type = "string[]"
+
+	err = testCheckValueAPIType(apiType, []string{"text"})
+	require.NoError(err)
+
+	err = testCheckValueAPIType(apiType, nil)
+	require.Error(err)
+
+	err = testCheckValueAPIType(apiType, nil, CheckValueOptionAllowArrayToBeNull(true))
+	require.NoError(err)
+}
+
 func Test_CheckValueAPIType_ObjectArray(t *testing.T) {
 	var err error
 	require := require.New(t)

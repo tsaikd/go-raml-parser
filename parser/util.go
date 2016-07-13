@@ -54,6 +54,10 @@ type CheckValueOption interface{}
 // default: false
 type CheckValueOptionAllowIntegerToBeNumber bool
 
+// CheckValueOptionAllowArrayToBeNull allow array type to be null,
+// default: false
+type CheckValueOptionAllowArrayToBeNull bool
+
 // CheckValueAPIType check value is valid for apiType
 func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption) (err error) {
 	if value.IsEmpty() {
@@ -62,18 +66,23 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 	}
 
 	allowIntegerToBeNumber := CheckValueOptionAllowIntegerToBeNumber(false)
+	allowArrayToBeNull := CheckValueOptionAllowArrayToBeNull(false)
 
 	for _, option := range options {
-		switch option.(type) {
+		switch optval := option.(type) {
 		case CheckValueOptionAllowIntegerToBeNumber:
-			allowIntegerToBeNumber = option.(CheckValueOptionAllowIntegerToBeNumber)
+			allowIntegerToBeNumber = optval
+		case CheckValueOptionAllowArrayToBeNull:
+			allowArrayToBeNull = optval
 		}
 	}
 
 	apiTypeName, isArray := GetAPITypeName(apiType)
 	if isArray {
 		if value.Type != TypeArray {
-			return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+			if !allowArrayToBeNull || value.Type != TypeNull {
+				return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
+			}
 		}
 
 		elemType := apiType
