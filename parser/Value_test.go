@@ -147,6 +147,27 @@ func Test_ValueFromInterfaceSlice(t *testing.T) {
 	require.Equal("test", value.Array[3].String)
 }
 
+func Test_ValueFromSlice(t *testing.T) {
+	require := require.New(t)
+	require.NotNil(require)
+
+	value, err := NewValue([]bool{true, false})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
+
+	value, err = NewValue([]int{1, 2, 3})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
+
+	value, err = NewValue([]float32{3.14})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
+
+	value, err = NewValue([]string{"text"})
+	require.NoError(err)
+	require.Equal(TypeArray, value.Type)
+}
+
 func Test_ValueFromMap(t *testing.T) {
 	assert := assert.New(t)
 	assert.NotNil(assert)

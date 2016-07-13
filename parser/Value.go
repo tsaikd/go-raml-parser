@@ -8,18 +8,19 @@ import (
 
 // NewValue cast src to value
 func NewValue(src interface{}) (Value, error) {
-	switch src.(type) {
+	var refval reflect.Value
+
+	switch srcval := src.(type) {
 	case Value:
-		return src.(Value), nil
+		return srcval, nil
 	case []*Value:
 		return Value{
 			Type:  TypeArray,
-			Array: src.([]*Value),
+			Array: srcval,
 		}, nil
 	case []Value:
-		value := src.([]Value)
-		result := make([]*Value, len(value))
-		for i, v := range value {
+		result := make([]*Value, len(srcval))
+		for i, v := range srcval {
 			result[i] = &v
 		}
 		return Value{
@@ -33,57 +34,56 @@ func NewValue(src interface{}) (Value, error) {
 	case bool:
 		return Value{
 			Type:    TypeBoolean,
-			Boolean: src.(bool),
+			Boolean: srcval,
 		}, nil
 	case int:
 		return Value{
 			Type:    TypeInteger,
-			Integer: int64(src.(int)),
+			Integer: int64(srcval),
 		}, nil
 	case int8:
 		return Value{
 			Type:    TypeInteger,
-			Integer: int64(src.(int8)),
+			Integer: int64(srcval),
 		}, nil
 	case int16:
 		return Value{
 			Type:    TypeInteger,
-			Integer: int64(src.(int16)),
+			Integer: int64(srcval),
 		}, nil
 	case int32:
 		return Value{
 			Type:    TypeInteger,
-			Integer: int64(src.(int32)),
+			Integer: int64(srcval),
 		}, nil
 	case int64:
 		return Value{
 			Type:    TypeInteger,
-			Integer: int64(src.(int64)),
+			Integer: int64(srcval),
 		}, nil
 	case float32:
 		return Value{
 			Type:   TypeNumber,
-			Number: float64(src.(float32)),
+			Number: float64(srcval),
 		}, nil
 	case float64:
 		return Value{
 			Type:   TypeNumber,
-			Number: float64(src.(float64)),
+			Number: float64(srcval),
 		}, nil
 	case string:
 		return Value{
 			Type:   TypeString,
-			String: src.(string),
+			String: srcval,
 		}, nil
 	case []byte:
 		return Value{
 			Type:   TypeBinary,
-			Binary: src.([]byte),
+			Binary: srcval,
 		}, nil
 	case []interface{}:
-		srcs := src.([]interface{})
-		result := make([]*Value, len(srcs))
-		for i, elem := range srcs {
+		result := make([]*Value, len(srcval))
+		for i, elem := range srcval {
 			value, err := NewValue(elem)
 			if err != nil {
 				return value, err
@@ -99,8 +99,7 @@ func NewValue(src interface{}) (Value, error) {
 			Type: TypeObject,
 			Map:  map[string]*Value{},
 		}
-		srcMap := src.(map[string]interface{})
-		for k, v := range srcMap {
+		for k, v := range srcval {
 			newval, err := NewValue(v)
 			if err != nil {
 				return Value{}, err
@@ -108,12 +107,29 @@ func NewValue(src interface{}) (Value, error) {
 			result.Map[k] = &newval
 		}
 		return result, nil
+	case reflect.Value:
+		return NewValue(srcval.Interface())
+	default:
+		refval = reflect.ValueOf(src)
 	}
 
-	refval := reflect.ValueOf(src)
 	switch refval.Kind() {
 	case reflect.Ptr:
 		return NewValue(refval.Elem().Interface())
+	case reflect.Slice:
+		length := refval.Len()
+		result := make([]*Value, length)
+		for i := 0; i < length; i++ {
+			value, err := NewValue(refval.Index(i))
+			if err != nil {
+				return Value{}, err
+			}
+			result[i] = &value
+		}
+		return Value{
+			Type:  TypeArray,
+			Array: result,
+		}, nil
 	}
 
 	return Value{}, ErrorUnsupportedValueType1.New(nil, src)
