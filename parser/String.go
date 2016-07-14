@@ -20,11 +20,6 @@ func (t *String) BeforeUnmarshalYAML() (err error) {
 	return
 }
 
-// MarshalJSON marshal to json
-func (t String) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if String is empty
 func (t *String) IsEmpty() bool {
 	return t.Pattern == "" &&

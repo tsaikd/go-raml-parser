@@ -1,10 +1,10 @@
 package parse
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/tsaikd/KDGoLib/cliutil/cmder"
+	"github.com/tsaikd/KDGoLib/jsonex"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 	"gopkg.in/urfave/cli.v2"
@@ -60,7 +60,7 @@ func action(c *cli.Context) (err error) {
 		return
 	}
 
-	jsondata, err := json.MarshalIndent(rootdoc, "", "  ")
+	jsondata, err := jsonex.MarshalIndent(rootdoc, "", "  ")
 	if err != nil {
 		return
 	}

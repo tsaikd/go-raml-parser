@@ -28,11 +28,6 @@ func (t *ArrayType) BeforeUnmarshalYAML() (err error) {
 	return
 }
 
-// MarshalJSON marshal to json
-func (t ArrayType) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t *ArrayType) IsEmpty() bool {
 	return t.UniqueItems == false &&

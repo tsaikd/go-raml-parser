@@ -3,6 +3,7 @@ package parser
 import (
 	"strings"
 
+	"github.com/tsaikd/KDGoLib/jsonex"
 	"github.com/tsaikd/yaml"
 )
 
@@ -40,7 +41,7 @@ func (t *Properties) UnmarshalYAML(unmarshaler func(interface{}) error) (err err
 
 // MarshalJSON marshal to json
 func (t Properties) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t.mapdata)
+	return jsonex.Marshal(t.mapdata)
 }
 
 // IsEmpty return true if it is empty
@@ -119,11 +120,6 @@ func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error
 	return
 }
 
-// MarshalJSON marshal to json
-func (t Property) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t *Property) IsEmpty() bool {
 	return t.APIType.IsEmpty() &&
@@ -144,11 +140,6 @@ type PropertyExtra struct {
 func (t *PropertyExtra) BeforeUnmarshalYAML() (err error) {
 	t.Required = true
 	return
-}
-
-// MarshalJSON marshal to json
-func (t PropertyExtra) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // IsEmpty return true if it is empty

@@ -49,11 +49,6 @@ func (t *LibraryWrap) UnmarshalYAML(unmarshaler func(interface{}) error) (err er
 	return
 }
 
-// MarshalJSON marshal to json
-func (t LibraryWrap) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t LibraryWrap) IsEmpty() bool {
 	return t.String == "" &&
@@ -119,11 +114,6 @@ type Library struct {
 
 	// Imported external libraries for use within the API.
 	Uses Libraries `yaml:"uses" json:"uses,omitempty"`
-}
-
-// MarshalJSON marshal to json
-func (t Library) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // IsEmpty return true if it is empty

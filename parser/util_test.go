@@ -1,11 +1,11 @@
 package parser
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tsaikd/KDGoLib/jsonex"
 )
 
 func Test_LoadRAMLFromDir(t *testing.T) {
@@ -230,7 +230,7 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	require.False(float64(int64(num)) == num)
 
 	valmap := map[string]interface{}{}
-	err = json.Unmarshal([]byte(`{
+	err = jsonex.Unmarshal([]byte(`{
 		"text": "",
 		"int": 0,
 		"num": 0

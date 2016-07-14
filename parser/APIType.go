@@ -79,11 +79,6 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	return nil
 }
 
-// MarshalJSON marshal to json
-func (t APIType) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t APIType) IsEmpty() bool {
 	return t.TypeDeclaration.IsEmpty() &&

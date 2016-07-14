@@ -25,11 +25,6 @@ func (t *RootDocument) UnmarshalYAML(unmarshaler func(interface{}) error) (err e
 	return
 }
 
-// MarshalJSON marshal to json
-func (t RootDocument) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t RootDocument) IsEmpty() bool {
 	return t.LibraryWrap.IsEmpty() &&

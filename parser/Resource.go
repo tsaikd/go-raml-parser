@@ -87,11 +87,6 @@ type Resource struct {
 	Resources Resources `yaml:",regexp:/.*" json:"resources,omitempty"`
 }
 
-// MarshalJSON marshal to json
-func (t Resource) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t Resource) IsEmpty() bool {
 	return t.DisplayName == "" &&

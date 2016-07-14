@@ -10,11 +10,6 @@ type ScalarType struct {
 	Enum []Value `yaml:"enum" json:"enum,omitempty"`
 }
 
-// MarshalJSON marshal to json
-func (t ScalarType) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t *ScalarType) IsEmpty() bool {
 	return len(t.Enum) < 1

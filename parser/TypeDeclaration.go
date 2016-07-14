@@ -64,11 +64,6 @@ type TypeDeclaration struct {
 	XML Unimplement `yaml:"xml" json:"xml,omitempty"`
 }
 
-// MarshalJSON marshal to json
-func (t TypeDeclaration) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t *TypeDeclaration) IsEmpty() bool {
 	if t == nil {

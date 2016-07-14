@@ -1,6 +1,6 @@
 package parser
 
-import "encoding/json"
+import "github.com/tsaikd/KDGoLib/jsonex"
 
 // Responses map of Response
 type Responses map[HTTPCode]*Response
@@ -8,14 +8,14 @@ type Responses map[HTTPCode]*Response
 // MarshalJSON marshal to json
 func (t Responses) MarshalJSON() ([]byte, error) {
 	if t.IsEmpty() {
-		return json.Marshal(nil)
+		return jsonNull, nil
 	}
 
 	data := map[string]interface{}{}
 	for k, v := range t {
 		data[k.String()] = v
 	}
-	return json.Marshal(data)
+	return jsonex.Marshal(data)
 }
 
 // IsEmpty return true if it is empty
@@ -48,11 +48,6 @@ type Response struct {
 
 	// The body of the response
 	Bodies Bodies `yaml:"body" json:"body,omitempty"`
-}
-
-// MarshalJSON marshal to json
-func (t Response) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // IsEmpty return true if it is empty

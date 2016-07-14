@@ -65,11 +65,6 @@ type Method struct {
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`
 }
 
-// MarshalJSON marshal to json
-func (t Method) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t Method) IsEmpty() bool {
 	return t.DisplayName == "" &&

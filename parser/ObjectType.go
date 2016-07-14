@@ -38,11 +38,6 @@ func (t *ObjectType) BeforeUnmarshalYAML() (err error) {
 	return
 }
 
-// MarshalJSON marshal to json
-func (t ObjectType) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t ObjectType) IsEmpty() bool {
 	return t.Properties.IsEmpty() &&

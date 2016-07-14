@@ -38,7 +38,7 @@ type SingleExample struct {
 	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// The actual example of a type instance.
-	Value Value `yaml:"value" json:"value"`
+	Value Value `yaml:"value" json:"value,omitempty"`
 
 	// Validates the example against any type declaration (the default), or not.
 	// Set this to false avoid validation.
@@ -77,11 +77,6 @@ func (t *Example) UnmarshalYAMLTag(unmarshaler func(interface{}) error, tag stri
 	}
 
 	return
-}
-
-// MarshalJSON marshal to json
-func (t Example) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 func generateExampleValue(library Library, apiType APIType, preferArray bool) (value Value, err error) {

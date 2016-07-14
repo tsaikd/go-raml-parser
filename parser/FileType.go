@@ -26,11 +26,6 @@ func (t *FileType) BeforeUnmarshalYAML() (err error) {
 	return
 }
 
-// MarshalJSON marshal to json
-func (t FileType) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t *FileType) IsEmpty() bool {
 	return len(t.FileTypes) < 1 &&

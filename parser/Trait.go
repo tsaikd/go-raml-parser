@@ -61,11 +61,6 @@ func (t *Trait) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	return
 }
 
-// MarshalJSON marshal to json
-func (t Trait) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
-}
-
 // IsEmpty return true if it is empty
 func (t Trait) IsEmpty() bool {
 	return t.String == "" &&
@@ -121,11 +116,6 @@ type TraitExtra struct {
 
 	// The name of the method
 	MethodName string `yaml:"methodName" json:"methodName,omitempty"`
-}
-
-// MarshalJSON marshal to json
-func (t TraitExtra) MarshalJSON() ([]byte, error) {
-	return MarshalJSONWithoutEmptyStruct(t)
 }
 
 // IsEmpty return true if it is empty

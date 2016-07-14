@@ -9,7 +9,10 @@ import (
 	"strings"
 
 	"github.com/tsaikd/KDGoLib/errutil"
+	"github.com/tsaikd/KDGoLib/jsonex"
 )
+
+var jsonNull, _ = jsonex.Marshal(nil)
 
 // LoadRAMLFromDir load RAML data from directory, concat *.raml
 func LoadRAMLFromDir(dirPath string) (ramlData []byte, err error) {

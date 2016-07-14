@@ -1,9 +1,10 @@
 package parser
 
 import (
-	"encoding/json"
 	"reflect"
 	"strconv"
+
+	"github.com/tsaikd/KDGoLib/jsonex"
 )
 
 // NewValue cast src to value
@@ -151,21 +152,21 @@ type Value struct {
 func (t Value) MarshalJSON() ([]byte, error) {
 	switch t.Type {
 	case TypeBoolean:
-		return json.Marshal(t.Boolean)
+		return jsonex.Marshal(t.Boolean)
 	case TypeInteger:
-		return json.Marshal(t.Integer)
+		return jsonex.Marshal(t.Integer)
 	case TypeNumber:
-		return json.Marshal(t.Number)
+		return jsonex.Marshal(t.Number)
 	case TypeString:
-		return json.Marshal(t.String)
+		return jsonex.Marshal(t.String)
 	case TypeArray:
-		return json.Marshal(t.Array)
+		return jsonex.Marshal(t.Array)
 	case TypeObject:
-		return json.Marshal(t.Map)
+		return jsonex.Marshal(t.Map)
 	case TypeBinary:
-		return json.Marshal(t.Binary)
+		return jsonex.Marshal(t.Binary)
 	default:
-		return json.Marshal(nil)
+		return jsonex.Marshal(nil)
 	}
 }
 
