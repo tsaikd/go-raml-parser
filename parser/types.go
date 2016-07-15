@@ -70,6 +70,20 @@ func (t postProcessConfigImpl) TraitUsage() map[string]bool {
 	return t.dataTraitUsage
 }
 
+type typoCheck map[string]*Value
+
+func (t typoCheck) IsEmpty() bool {
+	return len(t) == 0
+}
+
+func (t typoCheck) Names() []string {
+	names := []string{}
+	for name := range t {
+		names = append(names, name)
+	}
+	return names
+}
+
 // RAML built-in types
 const (
 	TypeNull    = "null"

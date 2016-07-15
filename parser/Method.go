@@ -63,6 +63,9 @@ type Method struct {
 
 	// The security schemes that apply to this method.
 	SecuredBy Unimplement `yaml:"securedBy" json:"securedBy,omitempty"`
+
+	// The field used for check typo error in RAML file
+	TypoCheck typoCheck `yaml:",regexp:.*" json:"-"`
 }
 
 // IsEmpty return true if it is empty
@@ -78,4 +81,13 @@ func (t Method) IsEmpty() bool {
 		t.Protocols.IsEmpty() &&
 		t.Is.IsEmpty() &&
 		t.SecuredBy.IsEmpty()
+}
+
+var _ checkTypoError = Method{}
+
+func (t Method) checkTypoError() (err error) {
+	if !t.TypoCheck.IsEmpty() {
+		return ErrorTypo2.New(nil, "Method", t.TypoCheck.Names())
+	}
+	return
 }

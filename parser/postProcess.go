@@ -92,6 +92,16 @@ func fillExampleExec(v interface{}, conf PostProcessConfig) (err error) {
 	return v.(fillExample).fillExample(conf)
 }
 
+type checkTypoError interface {
+	checkTypoError() (err error)
+}
+
+var checkTypoErrorRef = reflect.TypeOf((*checkTypoError)(nil)).Elem()
+
+func checkTypoErrorExec(v interface{}, conf PostProcessConfig) (err error) {
+	return v.(checkTypoError).checkTypoError()
+}
+
 type checkUnusedAnnotation interface {
 	checkUnusedAnnotation(annotationUsage map[string]bool) (err error)
 }
@@ -154,6 +164,7 @@ var postProcessInfoMap = map[reflect.Type]postProcessFunc{
 	fillTraitRef:                  fillTraitExec,
 	fillURIParamsRef:              fillURIParamsExec,
 	fillExampleRef:                fillExampleExec,
+	checkTypoErrorRef:             checkTypoErrorExec,
 	checkUnusedAnnotationRef:      checkUnusedAnnotationExec,
 	afterCheckUnusedAnnotationRef: afterCheckUnusedAnnotationExec,
 	checkUnusedTraitRef:           checkUnusedTraitExec,
@@ -172,6 +183,7 @@ func postProcess(v interface{}, conf PostProcessConfig) (err error) {
 		fillTraitRef,
 		fillURIParamsRef,
 		fillExampleRef,
+		checkTypoErrorRef,
 		checkUnusedAnnotationRef,
 		afterCheckUnusedAnnotationRef,
 		checkUnusedTraitRef,

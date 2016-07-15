@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,6 +39,21 @@ func Test_ParseError(t *testing.T) {
 	_, err = parser.ParseData([]byte("#%RAML 0.8\n"), ".")
 	require.Error(err)
 	require.True(ErrorUnexpectedRAMLVersion2.Match(err))
+
+	_, err = parser.ParseData([]byte(strings.TrimSpace(`
+#%RAML 1.0
+
+/get/error:
+    get:
+        response:
+            200:
+                body:
+                    application/json:
+                        type: string
+
+	`)), ".")
+	require.Error(err)
+	require.True(ErrorTypo2.Match(err))
 }
 
 func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {
