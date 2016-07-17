@@ -17,6 +17,20 @@ func (t Annotations) IsEmpty() bool {
 	return true
 }
 
+var _ fixEmptyAnnotation = Annotations{}
+
+func (t Annotations) fixEmptyAnnotation() (err error) {
+	for name, elem := range t {
+		if elem != nil {
+			continue
+		}
+		elem = &Annotation{}
+		elem.Type = TypeNull
+		t[name] = elem
+	}
+	return
+}
+
 var _ fixAnnotationBracket = Annotations{}
 
 func (t Annotations) fixAnnotationBracket() (err error) {

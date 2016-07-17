@@ -18,9 +18,6 @@ func (t AnnotationTypes) IsEmpty() bool {
 var _ fixEmptyAnnotation = AnnotationTypes{}
 
 func (t AnnotationTypes) fixEmptyAnnotation() (err error) {
-	if t == nil {
-		return
-	}
 	for name, elem := range t {
 		if elem == nil {
 			elem = &AnnotationType{}

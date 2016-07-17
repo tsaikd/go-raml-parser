@@ -1,11 +1,15 @@
 package parser
 
 import (
+	"bytes"
+	"encoding/gob"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tsaikd/KDGoLib/jsonex"
+	"github.com/tsaikd/KDGoLib/testutil/requireutil"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
 
@@ -750,4 +754,32 @@ func Test_ParseTrait(t *testing.T) {
 			}
 		}
 	}
+}
+
+func Test_GobEncodeDecode(t *testing.T) {
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./raml-examples/others/mobile-order-api/api.raml")
+	require.NoError(err)
+	require.NotZero(rootdoc)
+
+	buffer := &bytes.Buffer{}
+	enc := gob.NewEncoder(buffer)
+	dec := gob.NewDecoder(buffer)
+
+	err = enc.Encode(rootdoc)
+	require.NoError(err)
+	var decodedDoc RootDocument
+	err = dec.Decode(&decodedDoc)
+	require.NoError(err)
+
+	srcjson, err := jsonex.MarshalIndent(rootdoc, "", "  ")
+	require.NoError(err)
+	dstjson, err := jsonex.MarshalIndent(decodedDoc, "", "  ")
+	require.NoError(err)
+	requireutil.RequireText(t, string(srcjson), string(dstjson))
 }

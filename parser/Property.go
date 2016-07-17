@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"bytes"
+	"encoding/gob"
 	"strings"
 
 	"github.com/tsaikd/KDGoLib/jsonex"
@@ -42,6 +44,30 @@ func (t *Properties) UnmarshalYAML(unmarshaler func(interface{}) error) (err err
 // MarshalJSON marshal to json
 func (t Properties) MarshalJSON() ([]byte, error) {
 	return jsonex.Marshal(t.mapdata)
+}
+
+// MarshalBinary marshal to binary
+func (t Properties) MarshalBinary() ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	enc := gob.NewEncoder(buffer)
+	if err := enc.Encode(t.propertiesSliceData); err != nil {
+		return []byte(""), err
+	}
+	return buffer.Bytes(), nil
+}
+
+// UnmarshalBinary unmarshal from binary
+func (t *Properties) UnmarshalBinary(data []byte) (err error) {
+	buffer := bytes.NewBuffer(data)
+	dec := gob.NewDecoder(buffer)
+	if err = dec.Decode(&t.propertiesSliceData); err != nil {
+		return
+	}
+	t.mapdata = map[string]*Property{}
+	for _, property := range t.propertiesSliceData {
+		t.mapdata[property.Name] = property
+	}
+	return nil
 }
 
 // IsEmpty return true if it is empty
