@@ -7,13 +7,15 @@ type Enum int8
 
 // List all valid enum
 const (
-	CheckRAMLVersion Enum = 1 + iota
+	CacheDirectory Enum = 1 + iota
+	CheckRAMLVersion
 	CheckValueOptions
 	IgnoreUnusedAnnotation
 	IgnoreUnusedTrait
 )
 
 var factory = enumutil.NewEnumFactory().
+	Add(CacheDirectory, "CacheDirectory").
 	Add(CheckRAMLVersion, "CheckRAMLVersion").
 	Add(CheckValueOptions, "CheckValueOptions").
 	Add(IgnoreUnusedAnnotation, "IgnoreUnusedAnnotation").

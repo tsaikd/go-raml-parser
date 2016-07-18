@@ -42,6 +42,7 @@ type Parser interface {
 }
 
 type parserImpl struct {
+	cacheDirectory         string
 	checkRAMLVersion       bool
 	checkValueOptions      []CheckValueOption
 	ignoreUnusedAnnotation bool
@@ -51,6 +52,8 @@ type parserImpl struct {
 func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err error) {
 	var field interface{}
 	switch config {
+	case parserConfig.CacheDirectory:
+		field = &t.cacheDirectory
 	case parserConfig.CheckRAMLVersion:
 		field = &t.checkRAMLVersion
 	case parserConfig.CheckValueOptions:
@@ -90,21 +93,36 @@ func (t *parserImpl) Get(config parserConfig.Enum) (value interface{}, err error
 
 func (t parserImpl) ParseFile(filePath string) (rootdoc RootDocument, err error) {
 	var workdir string
-	var filedata []byte
+	var fileData []byte
 
 	if futil.IsDir(filePath) {
 		workdir = filePath
-		if filedata, err = LoadRAMLFromDir(filePath); err != nil {
+		if fileData, err = LoadRAMLFromDir(filePath); err != nil {
 			return
 		}
 	} else {
 		workdir = filepath.Dir(filePath)
-		if filedata, err = ioutil.ReadFile(filePath); err != nil {
+		if fileData, err = ioutil.ReadFile(filePath); err != nil {
 			return
 		}
 	}
 
-	return t.ParseData(filedata, workdir)
+	if t.cacheDirectory != "" {
+		var saveFunc func(RootDocument)
+		if saveFunc, rootdoc, err = loadFromCache(filePath, fileData, t.cacheDirectory); err == nil {
+			return
+		}
+		if saveFunc != nil {
+			defer func() {
+				// only cache when parsing success
+				if err == nil {
+					saveFunc(rootdoc)
+				}
+			}()
+		}
+	}
+
+	return t.ParseData(fileData, workdir)
 }
 
 func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument, err error) {

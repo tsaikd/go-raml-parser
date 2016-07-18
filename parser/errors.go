@@ -8,6 +8,7 @@ import (
 
 // errors
 var (
+	ErrorCacheNotFound                 = errutil.NewFactory("cache not found")
 	ErrorLoadExternalLibrary1          = errutil.NewFactory("load external library failed: %q")
 	ErrorUnsupportedParserConfig1      = errutil.NewFactory("unsupported parser config: %q")
 	ErrorUnsupportedValueType1         = errutil.NewFactory("unsupported value type: %T")
