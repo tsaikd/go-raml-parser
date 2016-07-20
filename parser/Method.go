@@ -91,3 +91,17 @@ func (t Method) checkTypoError() (err error) {
 	}
 	return
 }
+
+var _ checkAnnotation = Method{}
+
+func (t Method) checkAnnotation(conf PostProcessConfig) (err error) {
+	if err = t.Annotations.checkAnnotationTargetLocation(TargetLocationMethod); err != nil {
+		return
+	}
+	if err = t.Bodies.checkAnnotationTargetLocation(TargetLocationRequestBody); err != nil {
+		if err = t.Bodies.checkAnnotationTargetLocation(TargetLocationTypeDeclaration); err != nil {
+			return
+		}
+	}
+	return nil
+}

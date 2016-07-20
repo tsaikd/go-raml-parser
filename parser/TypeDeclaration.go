@@ -80,3 +80,9 @@ func (t *TypeDeclaration) IsEmpty() bool {
 		t.Facets.IsEmpty() &&
 		t.XML.IsEmpty()
 }
+
+var _ checkAnnotation = TypeDeclaration{}
+
+func (t TypeDeclaration) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationTypeDeclaration)
+}

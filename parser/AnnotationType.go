@@ -37,11 +37,34 @@ type AnnotationType struct {
 	// a node corresponding to one of the locations.
 	// The value MUST be one or more of the options described in the
 	// Target Locations.
-	AllowedTargets Unimplement `yaml:"allowedTargets" json:"allowedTargets,omitempty"`
+	AllowedTargets TargetLocations `yaml:"allowedTargets" json:"allowedTargets,omitempty"`
+}
+
+// UnmarshalYAML implement yaml unmarshaler
+func (t *AnnotationType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+	if err = unmarshaler(&t.APIType); err != nil {
+		return
+	}
+
+	buf := struct {
+		AllowedTargets TargetLocations `yaml:"allowedTargets"`
+	}{}
+	if err = unmarshaler(&buf); err != nil {
+		return
+	}
+	t.AllowedTargets = buf.AllowedTargets
+
+	return nil
 }
 
 // IsEmpty return true if it is empty
 func (t AnnotationType) IsEmpty() bool {
 	return t.APIType.IsEmpty() &&
 		t.AllowedTargets.IsEmpty()
+}
+
+var _ checkAnnotation = AnnotationType{}
+
+func (t AnnotationType) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationAnnotationType)
 }

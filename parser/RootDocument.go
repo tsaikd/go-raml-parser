@@ -64,6 +64,12 @@ func (t RootDocument) afterCheckUnusedTrait(conf PostProcessConfig) (err error) 
 	return
 }
 
+var _ checkAnnotation = RootDocument{}
+
+func (t RootDocument) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationAPI)
+}
+
 // RootDocumentExtra contain fields no in Library
 type RootDocumentExtra struct {
 	// A short, plain-text label for the API. Its value is a string.

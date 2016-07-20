@@ -64,6 +64,15 @@ func (t Bodies) IsEmpty() bool {
 	return true
 }
 
+func (t Bodies) checkAnnotationTargetLocation(targetLocation TargetLocation) (err error) {
+	for _, body := range t {
+		if err = body.Annotations.checkAnnotationTargetLocation(targetLocation); err != nil {
+			return
+		}
+	}
+	return nil
+}
+
 var _ fixDefaultMediaType = Bodies{}
 
 func (t Bodies) fixDefaultMediaType(conf PostProcessConfig) (err error) {

@@ -53,6 +53,12 @@ func (t SingleExample) IsEmpty() bool {
 		t.Value.IsEmpty()
 }
 
+var _ checkAnnotation = SingleExample{}
+
+func (t SingleExample) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationExample)
+}
+
 // Example wrap SingleExample for unmarshal YAML
 type Example struct {
 	SingleExample

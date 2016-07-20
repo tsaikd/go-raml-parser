@@ -99,3 +99,9 @@ func (t Resource) IsEmpty() bool {
 		t.URIParameters.IsEmpty() &&
 		t.Resources.IsEmpty()
 }
+
+var _ checkAnnotation = Resource{}
+
+func (t Resource) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationResource)
+}

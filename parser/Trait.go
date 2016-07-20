@@ -68,6 +68,12 @@ func (t Trait) IsEmpty() bool {
 		t.TraitExtra.IsEmpty()
 }
 
+var _ checkAnnotation = Trait{}
+
+func (t Trait) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationTrait)
+}
+
 var _ fillTrait = &Trait{}
 
 func (t *Trait) fillTrait(library Library) (err error) {

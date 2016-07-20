@@ -21,6 +21,15 @@ func (t Annotations) IsEmpty() bool {
 	return true
 }
 
+func (t Annotations) checkAnnotationTargetLocation(targetLocation TargetLocation) (err error) {
+	for _, annotation := range t {
+		if !annotation.AnnotationType.AllowedTargets.IsAllowed(targetLocation) {
+			return ErrorInvalidAnnotationTargetLocation2.New(nil, annotation.Name, targetLocation)
+		}
+	}
+	return nil
+}
+
 var _ fixEmptyAnnotation = Annotations{}
 
 func (t Annotations) fixEmptyAnnotation() (err error) {
@@ -42,6 +51,7 @@ func (t Annotations) fixAnnotationBracket() (err error) {
 		fixedName := name
 		fixedName = strings.TrimPrefix(fixedName, "(")
 		fixedName = strings.TrimSuffix(fixedName, ")")
+		annotation.Name = fixedName
 		if fixedName == name {
 			continue
 		}
@@ -60,9 +70,31 @@ func (t Annotations) checkUnusedAnnotation(annotationUsage map[string]bool) (err
 	return
 }
 
-var _ checkExample = Annotations{}
+// Annotation wrap types defined in spec
+type Annotation struct {
+	Value
 
-func (t Annotations) checkExample(conf PostProcessConfig) (err error) {
+	// fill by fixAnnotationBracket
+	Name string `yaml:"-"`
+	// fill by fillAnnotation
+	AnnotationType AnnotationType `yaml:"-"`
+}
+
+var _ fillAnnotation = &Annotation{}
+
+func (t *Annotation) fillAnnotation(library Library) (err error) {
+	name := t.Name
+	annotype := library.AnnotationTypes[name]
+	if annotype == nil {
+		return ErrorAnnotationTypeUndefined1.New(nil, name)
+	}
+	t.AnnotationType = *annotype
+	return
+}
+
+var _ checkAnnotation = Annotation{}
+
+func (t Annotation) checkAnnotation(conf PostProcessConfig) (err error) {
 	options := []CheckValueOption{}
 	confOptions, err := conf.Parser().Get(parserConfig.CheckValueOptions)
 	if err == nil {
@@ -71,20 +103,9 @@ func (t Annotations) checkExample(conf PostProcessConfig) (err error) {
 		}
 	}
 
-	for name, anno := range t {
-		annotype := conf.Library().AnnotationTypes[name]
-		if annotype == nil {
-			return ErrorAnnotationTypeUndefined1.New(nil, name)
-		}
-		if err = CheckValueAPIType(annotype.APIType, anno.Value, options...); err != nil {
-			return
-		}
+	if err = CheckValueAPIType(t.AnnotationType.APIType, t.Value, options...); err != nil {
+		return
 	}
 
 	return nil
-}
-
-// Annotation wrap types defined in spec
-type Annotation struct {
-	Value
 }

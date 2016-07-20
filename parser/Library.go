@@ -167,3 +167,9 @@ func (t Library) checkUnusedTrait(traitUsage map[string]bool) (err error) {
 	}
 	return
 }
+
+var _ checkAnnotation = Library{}
+
+func (t Library) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationLibrary)
+}

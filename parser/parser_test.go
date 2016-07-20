@@ -26,7 +26,7 @@ func Test_ParseError(t *testing.T) {
 
 	err = parser.Config(parserConfig.CheckRAMLVersion, nil)
 	require.Error(err)
-	require.True(ErrorInvaludParserConfigValueType3.Match(err))
+	require.True(ErrorInvalidParserConfigValueType3.Match(err))
 
 	err = parser.Config(parserConfig.CheckRAMLVersion, true)
 	require.NoError(err)
@@ -58,6 +58,77 @@ func Test_ParseError(t *testing.T) {
 	`)), ".")
 	require.Error(err)
 	require.True(ErrorTypo2.Match(err))
+}
+
+func Test_ParseAnnotationsAnnotationTargets(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./raml-examples/annotations/annotation-targets.raml")
+	require.NoError(err)
+	require.NotZero(rootdoc)
+
+	require.Equal("Illustrating allowed targets", rootdoc.Title)
+	require.Equal("application/json", rootdoc.MediaType)
+	if assert.Contains(rootdoc.AnnotationTypes, "meta-resource-method") {
+		annotationType := rootdoc.AnnotationTypes["meta-resource-method"]
+		if assert.Len(annotationType.AllowedTargets, 2) {
+			require.Equal(TargetLocationResource, annotationType.AllowedTargets[0])
+			require.Equal(TargetLocationMethod, annotationType.AllowedTargets[1])
+		}
+	}
+	if assert.Contains(rootdoc.AnnotationTypes, "meta-data") {
+		annotationType := rootdoc.AnnotationTypes["meta-data"]
+		if assert.Len(annotationType.AllowedTargets, 1) {
+			require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
+		}
+	}
+	if assert.Contains(rootdoc.Types, "User") {
+		apiType := rootdoc.Types["User"]
+		require.Equal(TypeObject, apiType.Type)
+		if assert.Contains(apiType.Annotations, "meta-data") {
+			annotation := apiType.Annotations["meta-data"]
+			require.Equal("on an object; on a data type declaration", annotation.String)
+		}
+		if assert.Contains(apiType.Properties.Map(), "name") {
+			property := apiType.Properties.Map()["name"]
+			require.Equal(TypeString, property.Type)
+			if assert.Contains(property.Annotations, "meta-data") {
+				annotation := property.Annotations["meta-data"]
+				require.Equal("on a string property", annotation.String)
+			}
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/users") {
+		resource := rootdoc.Resources["/users"]
+		if assert.Contains(resource.Annotations, "meta-resource-method") {
+			annotation := resource.Annotations["meta-resource-method"]
+			require.Equal("on a resource", annotation.String)
+		}
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Annotations, "meta-resource-method") {
+				annotation := method.Annotations["meta-resource-method"]
+				require.Equal("on a method", annotation.String)
+			}
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[HTTPCode(200)]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
+					require.Equal("User[]", body.Type)
+					if assert.Contains(body.Annotations, "meta-data") {
+						annotation := body.Annotations["meta-data"]
+						require.Equal("on a body", annotation.String)
+					}
+				}
+			}
+		}
+	}
 }
 
 func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {

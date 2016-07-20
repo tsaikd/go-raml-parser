@@ -67,8 +67,8 @@ func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err er
 	}
 	if err = parserConfigSet(field, value); err != nil {
 		switch errutil.FactoryOf(err) {
-		case ErrorInvaludParserConfigValueType2:
-			return ErrorInvaludParserConfigValueType3.New(nil, config, field, value)
+		case ErrorInvalidParserConfigValueType2:
+			return ErrorInvalidParserConfigValueType3.New(nil, config, field, value)
 		default:
 			return err
 		}
@@ -178,7 +178,7 @@ func parserConfigSet(field interface{}, value interface{}) (err error) {
 	v := reflect.ValueOf(value)
 	defer func() {
 		if perr := recover(); perr != nil {
-			err = ErrorInvaludParserConfigValueType2.New(nil, f.Elem().Interface(), value)
+			err = ErrorInvalidParserConfigValueType2.New(nil, f.Elem().Interface(), value)
 		}
 	}()
 	f.Elem().Set(v)
