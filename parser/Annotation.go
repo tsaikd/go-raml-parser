@@ -1,6 +1,10 @@
 package parser
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
+)
 
 // Annotations map of Annotation
 type Annotations map[string]*Annotation
@@ -54,6 +58,30 @@ func (t Annotations) checkUnusedAnnotation(annotationUsage map[string]bool) (err
 		delete(annotationUsage, name)
 	}
 	return
+}
+
+var _ checkExample = Annotations{}
+
+func (t Annotations) checkExample(conf PostProcessConfig) (err error) {
+	options := []CheckValueOption{}
+	confOptions, err := conf.Parser().Get(parserConfig.CheckValueOptions)
+	if err == nil {
+		if opts, ok := confOptions.([]CheckValueOption); ok {
+			options = opts
+		}
+	}
+
+	for name, anno := range t {
+		annotype := conf.Library().AnnotationTypes[name]
+		if annotype == nil {
+			return ErrorAnnotationTypeUndefined1.New(nil, name)
+		}
+		if err = CheckValueAPIType(annotype.APIType, anno.Value, options...); err != nil {
+			return
+		}
+	}
+
+	return nil
 }
 
 // Annotation wrap types defined in spec

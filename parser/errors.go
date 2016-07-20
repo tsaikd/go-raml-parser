@@ -17,6 +17,7 @@ var (
 	ErrorInvaludParserConfigValueType3 = errutil.NewFactory(`value type of parser config %q should be "%T" but got "%T"`)
 	ErrorUnexpectedRAMLVersion2        = errutil.NewFactory("RAML version should be %q but got %q")
 	ErrorEmptyRootDocumentMediaType    = errutil.NewFactory("body without MIME-type and root document do not provide default MediaType")
+	ErrorAnnotationTypeUndefined1      = errutil.NewFactory("Annotation type %q can not find in RAML")
 	ErrorTypeUndefined1                = errutil.NewFactory("Type %q can not find in RAML")
 	ErrorTypo2                         = errutil.NewFactory("Detect typo error on %q: %v")
 	ErrorArrayElementTypeMismatch3     = errutil.NewFactory("Array element %d type mismatch, expected %q but got %q")
