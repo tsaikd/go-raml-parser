@@ -791,6 +791,35 @@ func Test_ParseExampleIncludeBinaryFile(t *testing.T) {
 	}
 }
 
+func Test_ParseObjectArray(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./test-examples/object-array.raml")
+	require.NoError(err)
+	require.NotZero(rootdoc)
+
+	if assert.Contains(rootdoc.Types, "UserList") {
+		apiType := rootdoc.Types["UserList"]
+		require.Equal("object[]", apiType.Type)
+		if assert.Contains(apiType.Properties.Map(), "name") {
+			property := apiType.Properties.Map()["name"]
+			require.Equal(TypeString, property.Type)
+		}
+		if assert.Len(apiType.Example.Value.Array, 2) {
+			require.Contains(apiType.Example.Value.Array[0].Map, "name")
+			require.Equal("Alice", apiType.Example.Value.Array[0].Map["name"].String)
+			require.Contains(apiType.Example.Value.Array[1].Map, "name")
+			require.Equal("Bob", apiType.Example.Value.Array[1].Map["name"].String)
+		}
+	}
+}
+
 func Test_ParseTrait(t *testing.T) {
 	assert := assert.New(t)
 	assert.NotNil(assert)
