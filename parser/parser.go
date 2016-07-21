@@ -33,12 +33,6 @@ type Parser interface {
 	// ParseFile Parse RAML from bynary data.
 	// Return RootDocument or an error if something went wrong.
 	ParseData(data []byte, workdir string) (rootdoc RootDocument, err error)
-
-	// ParseLibraryFile Parse a RAML library file, referenced by RootDocument
-	ParseLibraryFile(filePath string, conf PostProcessConfig) (library Library, err error)
-
-	// ParseLibraryData Parse a RAML library data, referenced by RootDocument
-	ParseLibraryData(data []byte, conf PostProcessConfig) (library Library, err error)
 }
 
 type parserImpl struct {
@@ -138,35 +132,8 @@ func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument
 		return
 	}
 
-	conf := newPostProcessConfig(rootdoc, rootdoc.Library, &t)
+	conf := newPostProcessConfig(&t, &rootdoc, nil, nil, nil)
 	if err = postProcess(&rootdoc, conf); err != nil {
-		return
-	}
-
-	return
-}
-
-func (t parserImpl) ParseLibraryFile(filePath string, conf PostProcessConfig) (library Library, err error) {
-	filedata, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return
-	}
-
-	return t.ParseLibraryData(filedata, conf)
-}
-
-func (t parserImpl) ParseLibraryData(data []byte, conf PostProcessConfig) (library Library, err error) {
-	if t.checkRAMLVersion {
-		if err = checkRAMLVersion(data); err != nil {
-			return
-		}
-	}
-
-	if err = yaml.Unmarshal(data, &library); err != nil {
-		return
-	}
-
-	if err = postProcess(&library, conf); err != nil {
 		return
 	}
 

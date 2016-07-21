@@ -145,12 +145,12 @@ func (t *APIType) fillExample(conf PostProcessConfig) (err error) {
 	}
 
 	if t.Example.IsEmpty() {
-		if t.Example, err = generateExample(conf.Library(), *t, false); err != nil {
+		if t.Example, err = generateExample(*conf.Library(), *t, false); err != nil {
 			return
 		}
 	}
 	if t.Examples.IsEmpty() {
-		if t.Examples, err = generateExamples(conf.Library(), *t, false); err != nil {
+		if t.Examples, err = generateExamples(*conf.Library(), *t, false); err != nil {
 			return
 		}
 	}
@@ -188,7 +188,7 @@ func fillExampleAPIType(example *Example, conf PostProcessConfig, apiType APITyp
 		}
 	}
 
-	if err = fillValueFromAPIType(&example.Value, conf.Library(), apiType); err != nil {
+	if err = fillValueFromAPIType(&example.Value, *conf.Library(), apiType); err != nil {
 		return
 	}
 

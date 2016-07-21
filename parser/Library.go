@@ -1,20 +1,15 @@
 package parser
 
 import (
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
-	"github.com/tsaikd/KDGoLib/errutil"
+	"github.com/tsaikd/yaml"
 )
 
-// errors
-var (
-	ErrorTraitNotFound1 = errutil.NewFactory("trait %q not found")
-	ErrorUseNotFound1   = errutil.NewFactory("use %q not found")
-)
-
-// Libraries map of LibraryWrap
-type Libraries map[string]*LibraryWrap
+// Libraries map of Library
+type Libraries map[string]*Library
 
 // IsEmpty return true if it is empty
 func (t Libraries) IsEmpty() bool {
@@ -28,59 +23,117 @@ func (t Libraries) IsEmpty() bool {
 	return true
 }
 
-// LibraryWrap wrap Library because Library may be a string for external library file
-type LibraryWrap struct {
-	String string `json:",omitempty"`
-	Library
+var _ loadExternalUse = Libraries{}
+
+func (t Libraries) loadExternalUse(conf PostProcessConfig) (err error) {
+	for name, library := range t {
+		filePath := filepath.Join(conf.RootDocument().WorkingDirectory, library.Name)
+
+		fileData, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			return ErrorLoadExternalLibrary1.New(err, filePath)
+		}
+
+		if err = yaml.Unmarshal(fileData, library); err != nil {
+			return ErrorLoadExternalLibrary1.New(err, filePath)
+		}
+
+		library.Name = name
+	}
+	return
 }
 
-// UnmarshalYAML unmarshal LibraryWrap from YAML
-func (t *LibraryWrap) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
-	if err = unmarshaler(&t.String); err == nil {
+// Library wrap LibraryRAML because LibraryRAML may be a string for external library file
+type Library struct {
+	Name string `json:",omitempty"`
+
+	LibraryRAML
+}
+
+// UnmarshalYAML unmarshal Library from YAML
+func (t *Library) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
+	if err = unmarshaler(&t.Name); err == nil {
 		return
 	}
 	if !isErrorYAMLIntoString(err) {
 		return
 	}
 
-	if err = unmarshaler(&t.Library); err != nil {
+	if err = unmarshaler(&t.LibraryRAML); err != nil {
 		return
 	}
 	return
 }
 
 // IsEmpty return true if it is empty
-func (t LibraryWrap) IsEmpty() bool {
-	return t.String == "" &&
-		t.Library.IsEmpty()
+func (t Library) IsEmpty() bool {
+	return t.Name == "" &&
+		t.LibraryRAML.IsEmpty()
 }
 
-var _ loadExternalUse = &LibraryWrap{}
+// GetTrait return trait if found
+func (t Library) GetTrait(name string) (result Trait, err error) {
+	if splits := strings.Split(name, "."); len(splits) == 2 {
+		useName, traitName := splits[0], splits[1]
+		use, ok := t.Uses[useName]
+		if !ok || use == nil {
+			err = ErrorUseNotFound1.New(nil, useName)
+			return
+		}
+		return use.GetTrait(traitName)
+	}
 
-func (t *LibraryWrap) loadExternalUse(conf PostProcessConfig) (err error) {
-	if t == nil {
+	trait, ok := t.Traits[name]
+	if !ok || trait == nil {
+		err = ErrorTraitNotFound1.New(nil, name)
 		return
 	}
-	if t.String == "" {
-		return
-	}
 
-	filePath := filepath.Join(conf.RootDocument().WorkingDirectory, t.String)
-	if t.Library, err = conf.Parser().ParseLibraryFile(filePath, conf); err != nil {
-		return ErrorLoadExternalLibrary1.New(err, filePath)
-	}
-	t.String = ""
+	return *trait, nil
+}
 
+// Prefix return "" if Library is not external used
+func (t Library) Prefix() string {
+	if t.Name == "" {
+		return ""
+	}
+	return t.Name + "."
+}
+
+var _ checkUnusedAnnotation = Library{}
+
+func (t Library) checkUnusedAnnotation(conf PostProcessConfig) (err error) {
+	annotationUsage := conf.AnnotationUsage()
+	for name := range t.AnnotationTypes {
+		annotationUsage[name] = true
+	}
 	return
 }
 
-// Library RAML libraries are used to combine any collection of data type
+var _ checkUnusedTrait = Library{}
+
+func (t Library) checkUnusedTrait(conf PostProcessConfig) (err error) {
+	prefix := t.Prefix()
+	traitUsage := conf.TraitUsage()
+	for name := range t.Traits {
+		traitUsage[prefix+name] = true
+	}
+	return
+}
+
+var _ checkAnnotation = Library{}
+
+func (t Library) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationLibrary)
+}
+
+// LibraryRAML RAML libraries are used to combine any collection of data type
 // declarations, resource type declarations, trait declarations, and security
 // scheme declarations into modular, externalized, reusable groups.
 // While libraries are intended to define common declarations in external
 // documents, which are then included where needed, libraries can also
 // be defined inline.
-type Library struct {
+type LibraryRAML struct {
 	// Describes the content or purpose of a specific library. The value is
 	// a string and MAY be formatted using markdown.
 	Usage string `yaml:"usage" json:"usage,omitempty"`
@@ -117,7 +170,7 @@ type Library struct {
 }
 
 // IsEmpty return true if it is empty
-func (t Library) IsEmpty() bool {
+func (t LibraryRAML) IsEmpty() bool {
 	return t.Usage == "" &&
 		t.Schemas.IsEmpty() &&
 		t.Types.IsEmpty() &&
@@ -127,49 +180,4 @@ func (t Library) IsEmpty() bool {
 		t.Annotations.IsEmpty() &&
 		t.SecuritySchemes.IsEmpty() &&
 		t.Uses.IsEmpty()
-}
-
-// GetTrait return trait if found
-func (t Library) GetTrait(name string) (result Trait, err error) {
-	if splits := strings.Split(name, "."); len(splits) == 2 {
-		useName, traitName := splits[0], splits[1]
-		use, ok := t.Uses[useName]
-		if !ok || use == nil {
-			err = ErrorUseNotFound1.New(nil, useName)
-			return
-		}
-		return use.GetTrait(traitName)
-	}
-
-	trait, ok := t.Traits[name]
-	if !ok || trait == nil {
-		err = ErrorTraitNotFound1.New(nil, name)
-		return
-	}
-
-	return *trait, nil
-}
-
-var _ checkUnusedAnnotation = Library{}
-
-func (t Library) checkUnusedAnnotation(annotationUsage map[string]bool) (err error) {
-	for name := range t.AnnotationTypes {
-		annotationUsage[name] = true
-	}
-	return
-}
-
-var _ checkUnusedTrait = Library{}
-
-func (t Library) checkUnusedTrait(traitUsage map[string]bool) (err error) {
-	for name := range t.Traits {
-		traitUsage[name] = true
-	}
-	return
-}
-
-var _ checkAnnotation = Library{}
-
-func (t Library) checkAnnotation(conf PostProcessConfig) (err error) {
-	return t.Annotations.checkAnnotationTargetLocation(TargetLocationLibrary)
 }

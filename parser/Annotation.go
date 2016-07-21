@@ -63,9 +63,10 @@ func (t Annotations) fixAnnotationBracket() (err error) {
 
 var _ checkUnusedAnnotation = Annotations{}
 
-func (t Annotations) checkUnusedAnnotation(annotationUsage map[string]bool) (err error) {
+func (t Annotations) checkUnusedAnnotation(conf PostProcessConfig) (err error) {
+	annotationUsage := conf.AnnotationUsage()
 	for name := range t {
-		delete(annotationUsage, name)
+		delete(annotationUsage, conf.Library().Prefix()+name)
 	}
 	return
 }

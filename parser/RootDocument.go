@@ -7,7 +7,7 @@ import "github.com/tsaikd/go-raml-parser/parser/parserConfig"
 // also defines assets used elsewhere in the RAML document, such as types and
 // traits.
 type RootDocument struct {
-	LibraryWrap
+	Library
 	RootDocumentExtra
 
 	// directory of RAML file
@@ -16,7 +16,7 @@ type RootDocument struct {
 
 // UnmarshalYAML unmarshal RootDocument from YAML
 func (t *RootDocument) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
-	if err = unmarshaler(&t.LibraryWrap); err != nil {
+	if err = unmarshaler(&t.Library); err != nil {
 		return
 	}
 	if err = unmarshaler(&t.RootDocumentExtra); err != nil {
@@ -27,7 +27,7 @@ func (t *RootDocument) UnmarshalYAML(unmarshaler func(interface{}) error) (err e
 
 // IsEmpty return true if it is empty
 func (t RootDocument) IsEmpty() bool {
-	return t.LibraryWrap.IsEmpty() &&
+	return t.Library.IsEmpty() &&
 		t.RootDocumentExtra.IsEmpty() &&
 		t.WorkingDirectory == ""
 }

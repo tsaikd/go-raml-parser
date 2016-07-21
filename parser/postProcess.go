@@ -59,7 +59,7 @@ type fillAnnotation interface {
 var fillAnnotationRef = reflect.TypeOf((*fillAnnotation)(nil)).Elem()
 
 func fillAnnotationExec(v interface{}, conf PostProcessConfig) (err error) {
-	return v.(fillAnnotation).fillAnnotation(conf.Library())
+	return v.(fillAnnotation).fillAnnotation(*conf.Library())
 }
 
 type fillProperties interface {
@@ -69,7 +69,7 @@ type fillProperties interface {
 var fillPropertiesRef = reflect.TypeOf((*fillProperties)(nil)).Elem()
 
 func fillPropertiesExec(v interface{}, conf PostProcessConfig) (err error) {
-	return v.(fillProperties).fillProperties(conf.Library())
+	return v.(fillProperties).fillProperties(*conf.Library())
 }
 
 type fillTrait interface {
@@ -79,7 +79,7 @@ type fillTrait interface {
 var fillTraitRef = reflect.TypeOf((*fillTrait)(nil)).Elem()
 
 func fillTraitExec(v interface{}, conf PostProcessConfig) (err error) {
-	return v.(fillTrait).fillTrait(conf.Library())
+	return v.(fillTrait).fillTrait(*conf.Library())
 }
 
 type fillURIParams interface {
@@ -113,13 +113,13 @@ func checkTypoErrorExec(v interface{}, conf PostProcessConfig) (err error) {
 }
 
 type checkUnusedAnnotation interface {
-	checkUnusedAnnotation(annotationUsage map[string]bool) (err error)
+	checkUnusedAnnotation(conf PostProcessConfig) (err error)
 }
 
 var checkUnusedAnnotationRef = reflect.TypeOf((*checkUnusedAnnotation)(nil)).Elem()
 
 func checkUnusedAnnotationExec(v interface{}, conf PostProcessConfig) (err error) {
-	return v.(checkUnusedAnnotation).checkUnusedAnnotation(conf.AnnotationUsage())
+	return v.(checkUnusedAnnotation).checkUnusedAnnotation(conf)
 }
 
 type afterCheckUnusedAnnotation interface {
@@ -133,13 +133,13 @@ func afterCheckUnusedAnnotationExec(v interface{}, conf PostProcessConfig) (err 
 }
 
 type checkUnusedTrait interface {
-	checkUnusedTrait(traitUsage map[string]bool) (err error)
+	checkUnusedTrait(conf PostProcessConfig) (err error)
 }
 
 var checkUnusedTraitRef = reflect.TypeOf((*checkUnusedTrait)(nil)).Elem()
 
 func checkUnusedTraitExec(v interface{}, conf PostProcessConfig) (err error) {
-	return v.(checkUnusedTrait).checkUnusedTrait(conf.TraitUsage())
+	return v.(checkUnusedTrait).checkUnusedTrait(conf)
 }
 
 type afterCheckUnusedTrait interface {
@@ -224,8 +224,7 @@ func postProcess(v interface{}, conf PostProcessConfig) (err error) {
 
 var reflectTypeValue = reflect.TypeOf(Value{})
 var reflectTypeValuePtr = reflect.TypeOf(&Value{})
-var reflectTypeLibrary = reflect.TypeOf(Library{})
-var reflectTypeLibraryPtr = reflect.TypeOf(&Library{})
+var reflectTypeLibrary = reflect.TypeOf(&Library{})
 
 func postProcessImplement(val reflect.Value, implement reflect.Type, conf PostProcessConfig) (err error) {
 	switch val.Type() {
@@ -233,9 +232,13 @@ func postProcessImplement(val reflect.Value, implement reflect.Type, conf PostPr
 		// no need to post process Value
 		return nil
 	case reflectTypeLibrary:
-		conf = newPostProcessConfig(conf.RootDocument(), val.Interface().(Library), conf.Parser())
-	case reflectTypeLibraryPtr:
-		conf = newPostProcessConfig(conf.RootDocument(), *val.Interface().(*Library), conf.Parser())
+		conf = newPostProcessConfig(
+			conf.Parser(),
+			conf.RootDocument(),
+			val.Interface().(*Library),
+			conf.AnnotationUsage(),
+			conf.TraitUsage(),
+		)
 	}
 
 	if v := queryPostProcessImplement(val, implement); v != nil {

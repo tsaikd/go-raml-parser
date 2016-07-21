@@ -30,16 +30,11 @@ func (t IsTraits) IsEmpty() bool {
 	return true
 }
 
-// Trait like a method, can provide method-level nodes such as description,
-// headers, query string parameters, and responses. Methods that use one or
-// more traits inherit nodes of those traits. A resource and resource type
-// can also use, and thus inherit from, one or more traits, which then apply
-// to all methods of the resource and resource type. Traits are related to
-// methods through a mixing pattern.
+// Trait wrap TraitRAML because TraitRAML may be a string for using trait
 type Trait struct {
 	String string `json:",omitempty"`
-	Method
-	TraitExtra
+
+	TraitRAML
 }
 
 // UnmarshalYAML implement yaml unmarshaler
@@ -55,7 +50,7 @@ func (t *Trait) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	if err = unmarshaler(&t.Method); err != nil {
 		return
 	}
-	if err = unmarshaler(&t.TraitExtra); err != nil {
+	if err = unmarshaler(&t.TraitRAML); err != nil {
 		return
 	}
 	return
@@ -64,14 +59,7 @@ func (t *Trait) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 // IsEmpty return true if it is empty
 func (t Trait) IsEmpty() bool {
 	return t.String == "" &&
-		t.Method.IsEmpty() &&
-		t.TraitExtra.IsEmpty()
-}
-
-var _ checkAnnotation = Trait{}
-
-func (t Trait) checkAnnotation(conf PostProcessConfig) (err error) {
-	return t.Annotations.checkAnnotationTargetLocation(TargetLocationTrait)
+		t.TraitRAML.IsEmpty()
 }
 
 var _ fillTrait = &Trait{}
@@ -97,15 +85,32 @@ func (t *Trait) fillTrait(library Library) (err error) {
 	return
 }
 
+var _ checkAnnotation = Trait{}
+
+func (t Trait) checkAnnotation(conf PostProcessConfig) (err error) {
+	return t.Annotations.checkAnnotationTargetLocation(TargetLocationTrait)
+}
+
 var _ checkUnusedTrait = Trait{}
 
-func (t Trait) checkUnusedTrait(traitUsage map[string]bool) (err error) {
-	delete(traitUsage, t.String)
+func (t Trait) checkUnusedTrait(conf PostProcessConfig) (err error) {
+	if t.String == "" {
+		return
+	}
+	traitUsage := conf.TraitUsage()
+	delete(traitUsage, conf.Library().Prefix()+t.String)
 	return
 }
 
-// TraitExtra contain fields no in Method
-type TraitExtra struct {
+// TraitRAML like a method, can provide method-level nodes such as description,
+// headers, query string parameters, and responses. Methods that use one or
+// more traits inherit nodes of those traits. A resource and resource type
+// can also use, and thus inherit from, one or more traits, which then apply
+// to all methods of the resource and resource type. Traits are related to
+// methods through a mixing pattern.
+type TraitRAML struct {
+	Method
+
 	// The OPTIONAL usage node of a resource type or trait provides
 	// instructions about how and when the resource type or trait should
 	// be used. Documentation generators MUST describe this node in terms
@@ -125,8 +130,9 @@ type TraitExtra struct {
 }
 
 // IsEmpty return true if it is empty
-func (t TraitExtra) IsEmpty() bool {
-	return t.Usage == "" &&
+func (t TraitRAML) IsEmpty() bool {
+	return t.Method.IsEmpty() &&
+		t.Usage == "" &&
 		t.ResourcePath == "" &&
 		t.ResourcePathName == "" &&
 		t.MethodName == ""

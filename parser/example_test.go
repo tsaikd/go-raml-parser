@@ -45,10 +45,11 @@ types:
 		fmt.Println(err)
 	}
 
-	userType := rootdoc.Types["User"]
-	fmt.Println("User type:", userType.Type)
-	for _, property := range userType.Properties.Slice() {
-		fmt.Println("Property:", property.Name)
+	if userType := rootdoc.Types["User"]; userType != nil {
+		fmt.Println("User type:", userType.Type)
+		for _, property := range userType.Properties.Slice() {
+			fmt.Println("Property:", property.Name)
+		}
 	}
 
 	// Output:

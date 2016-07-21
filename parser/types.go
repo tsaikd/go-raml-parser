@@ -21,45 +21,62 @@ type SupportToCheckEmpty interface {
 
 // PostProcessConfig used for PostProcess()
 type PostProcessConfig interface {
-	RootDocument() RootDocument
-	Library() Library
 	Parser() Parser
+	RootDocument() *RootDocument
+	Library() *Library
 	AnnotationUsage() map[string]bool
 	TraitUsage() map[string]bool
 }
 
 func newPostProcessConfig(
-	rootdoc RootDocument,
-	library Library,
 	parser Parser,
+	rootdoc *RootDocument,
+	library *Library,
+	annotationUsage map[string]bool,
+	traitUsage map[string]bool,
 ) PostProcessConfig {
+	if parser == nil {
+		parser = NewParser()
+	}
+	if rootdoc == nil {
+		rootdoc = &RootDocument{}
+	}
+	if library == nil {
+		library = &rootdoc.Library
+	}
+	if annotationUsage == nil {
+		annotationUsage = map[string]bool{}
+	}
+	if traitUsage == nil {
+		traitUsage = map[string]bool{}
+	}
 	return postProcessConfigImpl{
+		dataParser:          parser,
 		dataRootDocument:    rootdoc,
 		dataLibrary:         library,
-		dataParser:          parser,
-		dataAnnotationUsage: map[string]bool{},
-		dataTraitUsage:      map[string]bool{},
+		dataAnnotationUsage: annotationUsage,
+		dataTraitUsage:      traitUsage,
 	}
 }
 
 type postProcessConfigImpl struct {
-	dataRootDocument    RootDocument
-	dataLibrary         Library
 	dataParser          Parser
+	dataRootDocument    *RootDocument
+	dataLibrary         *Library
 	dataAnnotationUsage map[string]bool
 	dataTraitUsage      map[string]bool
 }
 
-func (t postProcessConfigImpl) RootDocument() RootDocument {
+func (t postProcessConfigImpl) Parser() Parser {
+	return t.dataParser
+}
+
+func (t postProcessConfigImpl) RootDocument() *RootDocument {
 	return t.dataRootDocument
 }
 
-func (t postProcessConfigImpl) Library() Library {
+func (t postProcessConfigImpl) Library() *Library {
 	return t.dataLibrary
-}
-
-func (t postProcessConfigImpl) Parser() Parser {
-	return t.dataParser
 }
 
 func (t postProcessConfigImpl) AnnotationUsage() map[string]bool {

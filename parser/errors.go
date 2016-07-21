@@ -30,6 +30,8 @@ var (
 	ErrorRequiredProperty2                = errutil.NewFactory("Property %q is required but not found in %q")
 	ErrorUnusedTrait1                     = errutil.NewFactory("Trait %q is unused")
 	ErrorUnusedAnnotation1                = errutil.NewFactory("Annotation %q is unused")
+	ErrorTraitNotFound1                   = errutil.NewFactory("trait %q not found")
+	ErrorUseNotFound1                     = errutil.NewFactory("use %q not found")
 )
 
 func isErrorYAMLIntoBool(err error) bool {
