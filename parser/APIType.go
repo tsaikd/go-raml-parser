@@ -99,7 +99,7 @@ func (t *APIType) fillProperties(library Library) (err error) {
 	}
 
 	// fill Properties if possible
-	typeName, isArray := GetAPITypeName(*t)
+	typeName, _ := GetAPITypeName(*t)
 	switch typeName {
 	case "", TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
 		// no more action for RAML built-in type
@@ -116,22 +116,7 @@ func (t *APIType) fillProperties(library Library) (err error) {
 			return ErrorTypeUndefined1.New(nil, t.Type)
 		}
 
-		// do not copy TypeDeclaration because Type should not be empty
-		if t.ObjectType.IsEmpty() {
-			t.ObjectType = typ.ObjectType
-		}
-		if t.ScalarType.IsEmpty() {
-			t.ScalarType = typ.ScalarType
-		}
-		if t.String.IsEmpty() {
-			t.String = typ.String
-		}
-		if isArray && t.ArrayType.IsEmpty() {
-			t.ArrayType = typ.ArrayType
-		}
-		if t.FileType.IsEmpty() {
-			t.FileType = typ.FileType
-		}
+		mergeAPIType(t, *typ)
 
 		return
 	}

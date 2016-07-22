@@ -500,7 +500,77 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	}
 }
 
+func Test_ParseAnnotationOnType(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./test-examples/annotation-on-type.raml")
+	require.NoError(err)
+
+	if assert.Contains(rootdoc.AnnotationTypes, "AnnotationOnType") {
+		annotationType := rootdoc.AnnotationTypes["AnnotationOnType"]
+		require.Equal("annotation on type", annotationType.Description)
+		require.Len(annotationType.AllowedTargets, 1)
+		require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
+		require.Equal(TypeString, annotationType.Type)
+	}
+	if assert.Contains(rootdoc.Types, "User") {
+		apiType := rootdoc.Types["User"]
+		if assert.Contains(apiType.Annotations, "AnnotationOnType") {
+			annotation := apiType.Annotations["AnnotationOnType"]
+			require.Equal("something on annotation", annotation.String)
+			annotationType := annotation.AnnotationType
+			require.Equal("annotation on type", annotationType.Description)
+			require.Len(annotationType.AllowedTargets, 1)
+			require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
+			require.Equal(TypeString, annotationType.Type)
+		}
+	}
+	if assert.Contains(rootdoc.Resources, "/user") {
+		resource := rootdoc.Resources["/user"]
+		if assert.Contains(resource.Methods, "get") {
+			method := resource.Methods["get"]
+			if assert.Contains(method.Bodies, "application/json") {
+				body := method.Bodies["application/json"]
+				require.Equal("User", body.Type)
+				if assert.Contains(body.Annotations, "AnnotationOnType") {
+					annotation := body.Annotations["AnnotationOnType"]
+					require.Equal("something on annotation", annotation.String)
+					annotationType := annotation.AnnotationType
+					require.Equal("annotation on type", annotationType.Description)
+					require.Len(annotationType.AllowedTargets, 1)
+					require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
+					require.Equal(TypeString, annotationType.Type)
+				}
+			}
+			if assert.Contains(method.Responses, HTTPCode(200)) {
+				response := method.Responses[HTTPCode(200)]
+				if assert.Contains(response.Bodies, "application/json") {
+					body := response.Bodies["application/json"]
+					require.Equal("User", body.Type)
+					if assert.Contains(body.Annotations, "AnnotationOnType") {
+						annotation := body.Annotations["AnnotationOnType"]
+						require.Equal("something on annotation", annotation.String)
+						annotationType := annotation.AnnotationType
+						require.Equal("annotation on type", annotationType.Description)
+						require.Len(annotationType.AllowedTargets, 1)
+						require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
+						require.Equal(TypeString, annotationType.Type)
+					}
+				}
+			}
+		}
+	}
+}
+
 func Test_ParseCheckUnusedAnnotation(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
 	require := require.New(t)
 	require.NotNil(require)
 
@@ -513,8 +583,16 @@ func Test_ParseCheckUnusedAnnotation(t *testing.T) {
 	err = parser.Config(parserConfig.IgnoreUnusedAnnotation, true)
 	require.NoError(err)
 
-	_, err = parser.ParseFile("./test-examples/check-unused-annotation.raml")
+	rootdoc, err := parser.ParseFile("./test-examples/check-unused-annotation.raml")
 	require.NoError(err)
+
+	if assert.Contains(rootdoc.Resources, "/get") {
+		resource := rootdoc.Resources["/get"]
+		if assert.Contains(resource.Annotations, "UsedAnnotation") {
+			annotation := resource.Annotations["UsedAnnotation"]
+			require.Equal("used annotation", annotation.AnnotationType.Description)
+		}
+	}
 }
 
 func Test_ParseCheckUnusedTrait(t *testing.T) {

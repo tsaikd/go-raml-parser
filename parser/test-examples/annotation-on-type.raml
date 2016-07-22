@@ -1,0 +1,26 @@
+#%RAML 1.0
+annotationTypes:
+    AnnotationOnType:
+        description:    annotation on type
+        allowedTargets: TypeDeclaration
+        type:           string
+
+types:
+    User:
+        (AnnotationOnType): something on annotation
+        type:               object
+        properties:
+            name: string
+        example:
+            name: Alice
+
+/user:
+    get:
+        body:
+            application/json:
+                type: User
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: User
