@@ -108,7 +108,7 @@ func Test_CheckValueAPIType_Boolean(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = TypeBoolean
+	apiType.setType(TypeBoolean)
 
 	err = testCheckValueAPIType(apiType, true)
 	require.NoError(err)
@@ -132,7 +132,7 @@ func Test_CheckValueAPIType_Integer(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = TypeInteger
+	apiType.setType(TypeInteger)
 
 	err = testCheckValueAPIType(apiType, true)
 	require.Error(err)
@@ -156,7 +156,7 @@ func Test_CheckValueAPIType_Number(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = TypeNumber
+	apiType.setType(TypeNumber)
 
 	err = testCheckValueAPIType(apiType, true)
 	require.Error(err)
@@ -183,7 +183,7 @@ func Test_CheckValueAPIType_String(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = TypeString
+	apiType.setType(TypeString)
 
 	err = testCheckValueAPIType(apiType, true)
 	require.Error(err)
@@ -207,22 +207,22 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = "obj"
+	apiType.setType(TypeObject)
 	apiType.Properties = Properties{}
 
 	property := &Property{}
 	property.Name = "text"
-	property.Type = TypeString
+	property.setType(TypeString)
 	addProperty(&apiType.Properties, property)
 
 	property = &Property{}
 	property.Name = "int"
-	property.Type = TypeInteger
+	property.setType(TypeInteger)
 	addProperty(&apiType.Properties, property)
 
 	property = &Property{}
 	property.Name = "num"
-	property.Type = TypeNumber
+	property.setType(TypeNumber)
 	addProperty(&apiType.Properties, property)
 
 	err = testCheckValueAPIType(apiType, true)
@@ -294,7 +294,7 @@ func Test_CheckValueAPIType_Array(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = "string[]"
+	apiType.setType("string[]")
 
 	err = testCheckValueAPIType(apiType, []string{"text"})
 	require.NoError(err)
@@ -312,12 +312,12 @@ func Test_CheckValueAPIType_ObjectArray(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.Type = "object[]"
+	apiType.setType("object[]")
 	apiType.Properties = Properties{}
 
 	property := &Property{}
 	property.Name = "text"
-	property.Type = TypeString
+	property.setType(TypeString)
 	addProperty(&apiType.Properties, property)
 
 	err = testCheckValueAPIType(apiType, []interface{}{
@@ -335,6 +335,29 @@ func Test_CheckValueAPIType_ObjectArray(t *testing.T) {
 	require.Error(err)
 }
 
+func Test_CheckValueAPIType_CustomType(t *testing.T) {
+	var err error
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	_, err = parser.ParseData([]byte(strings.TrimSpace(`
+#%RAML 1.0
+types:
+    Username:
+        type: string
+    User:
+        type: object
+        properties:
+            name: Username
+        example:
+            name: Alice
+	`)), ".")
+	require.NoError(err)
+}
+
 func Test_CheckExampleAPIType(t *testing.T) {
 	var err error
 	require := require.New(t)
@@ -346,13 +369,13 @@ func Test_CheckExampleAPIType(t *testing.T) {
 	_, err = parser.ParseData([]byte(strings.TrimSpace(`
 #%RAML 1.0
 types:
-  User:
-    type: object
-    properties:
-      name:  string
-      email: string
-    example:
-      name:  Alice
+    User:
+        type: object
+        properties:
+            name:  string
+            email: string
+        example:
+            name:  Alice
 	`)), ".")
 	require.Error(err)
 	require.True(ErrorRequiredProperty2.Match(err))

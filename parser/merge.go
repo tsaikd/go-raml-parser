@@ -1,8 +1,6 @@
 package parser
 
 func mergeAPIType(dst *APIType, fromList ...APIType) {
-	_, isArray := GetAPITypeName(*dst)
-
 	for _, from := range fromList {
 		mergeTypeDeclaration(&dst.TypeDeclaration, from.TypeDeclaration)
 
@@ -15,12 +13,14 @@ func mergeAPIType(dst *APIType, fromList ...APIType) {
 		if dst.String.IsEmpty() {
 			dst.String = from.String
 		}
-		if isArray && dst.ArrayType.IsEmpty() {
+		if dst.IsArray && dst.ArrayType.IsEmpty() {
 			dst.ArrayType = from.ArrayType
 		}
 		if dst.FileType.IsEmpty() {
 			dst.FileType = from.FileType
 		}
+
+		dst.NativeType = from.NativeType
 	}
 }
 

@@ -21,7 +21,7 @@ func (t AnnotationTypes) fixEmptyAnnotation() (err error) {
 	for name, elem := range t {
 		if elem == nil {
 			elem = &AnnotationType{}
-			elem.Type = "string"
+			elem.setType(TypeString)
 			t[name] = elem
 		}
 	}

@@ -40,14 +40,13 @@ func LoadRAMLFromDir(dirPath string) (ramlData []byte, err error) {
 	return buffer.Bytes(), nil
 }
 
-// GetAPITypeName return type name from APIType, and isArray
-func GetAPITypeName(apiType APIType) (typeName string, isArray bool) {
-	typeName = apiType.Type
-	isArray = strings.HasSuffix(apiType.Type, "[]")
+// IsArrayType check name has suffix []
+func IsArrayType(name string) (originName string, isArray bool) {
+	isArray = strings.HasSuffix(name, "[]")
 	if isArray {
-		typeName = apiType.Type[:len(apiType.Type)-2]
+		return name[:len(name)-2], isArray
 	}
-	return
+	return name, isArray
 }
 
 // ParseYAMLError return the error detail info if it's an YAML parse error,
@@ -117,8 +116,7 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		}
 	}
 
-	apiTypeName, isArray := GetAPITypeName(apiType)
-	if isArray {
+	if apiType.IsArray {
 		if value.Type != TypeArray {
 			if !allowArrayToBeNull || value.Type != TypeNull {
 				return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
@@ -126,7 +124,7 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		}
 
 		elemType := apiType
-		elemType.Type = apiTypeName
+		elemType.IsArray = false
 		for i, elemValue := range value.Array {
 			if err = CheckValueAPIType(elemType, *elemValue, options...); err != nil {
 				switch errutil.FactoryOf(err) {
@@ -139,14 +137,14 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		return
 	}
 
-	switch apiTypeName {
+	switch apiType.NativeType {
 	case TypeBoolean, TypeString:
-		if apiType.Type == value.Type {
+		if apiType.NativeType == value.Type {
 			return nil
 		}
 		return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 	case TypeInteger:
-		if apiType.Type == value.Type {
+		if apiType.NativeType == value.Type {
 			return nil
 		}
 		if allowIntegerToBeNumber {
@@ -159,7 +157,7 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		}
 		return ErrorPropertyTypeMismatch2.New(nil, apiType.Type, value.Type)
 	case TypeNumber:
-		if apiType.Type == value.Type {
+		if apiType.NativeType == value.Type {
 			return nil
 		}
 		if allowIntegerToBeNumber {

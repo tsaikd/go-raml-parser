@@ -3,7 +3,6 @@ package parser
 import (
 	"io/ioutil"
 	"path/filepath"
-	"strings"
 
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
@@ -31,6 +30,13 @@ type APIType struct {
 	String
 	ArrayType
 	FileType
+
+	// Type without [] suffix
+	BaseType string `yaml:"-" json:"-"`
+	// used when custom type, NativeType store the type should be check
+	NativeType string `yaml:"-" json:"-"`
+	// IsArray means the NativeType is array or not
+	IsArray bool `yaml:"-" json:"-"`
 }
 
 // BeforeUnmarshalYAML implement yaml Initiator
@@ -55,7 +61,8 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 	if err = unmarshaler(&t.TypeDeclaration); err != nil {
 		return
 	}
-	if strings.HasSuffix(t.TypeDeclaration.Type, "[]") {
+	t.setType(t.TypeDeclaration.Type)
+	if t.IsArray {
 		if err = unmarshaler(&t.ArrayType); err != nil {
 			return
 		}
@@ -64,8 +71,8 @@ func (t *APIType) UnmarshalYAML(unmarshaler func(interface{}) error) (err error)
 		return
 	}
 	if !t.ObjectType.IsEmpty() {
-		if t.Type == "" {
-			t.Type = TypeObject
+		if t.TypeDeclaration.Type == "" {
+			t.setType(TypeObject)
 		}
 		return nil
 	}
@@ -88,7 +95,16 @@ func (t APIType) IsEmpty() bool {
 		t.ScalarType.IsEmpty() &&
 		t.String.IsEmpty() &&
 		t.ArrayType.IsEmpty() &&
-		t.FileType.IsEmpty()
+		t.FileType.IsEmpty() &&
+		t.BaseType == "" &&
+		t.NativeType == "" &&
+		t.IsArray == false
+}
+
+func (t *APIType) setType(name string) {
+	t.Type = name
+	t.BaseType, t.IsArray = IsArrayType(name)
+	t.NativeType = t.BaseType
 }
 
 var _ fillProperties = &APIType{}
@@ -99,8 +115,7 @@ func (t *APIType) fillProperties(library Library) (err error) {
 	}
 
 	// fill Properties if possible
-	typeName, _ := GetAPITypeName(*t)
-	switch typeName {
+	switch t.BaseType {
 	case "", TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
 		// no more action for RAML built-in type
 		return
@@ -112,7 +127,7 @@ func (t *APIType) fillProperties(library Library) (err error) {
 
 		var typ *APIType
 		var exist bool
-		if typ, exist = library.Types[typeName]; !exist {
+		if typ, exist = library.Types[t.BaseType]; !exist {
 			return ErrorTypeUndefined1.New(nil, t.Type)
 		}
 
@@ -227,19 +242,12 @@ func (t *APIType) checkExample(conf PostProcessConfig) (err error) {
 		}
 	}
 
-	typeName, _ := GetAPITypeName(*t)
-	switch typeName {
-	case TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
-		// no type check for RAML built-in type
+	if err = CheckValueAPIType(*t, t.Example.Value, options...); err != nil {
 		return
-	case TypeObject:
-		if err = CheckValueAPIType(*t, t.Example.Value, options...); err != nil {
+	}
+	for _, example := range t.Examples {
+		if err = CheckValueAPIType(*t, example.Value, options...); err != nil {
 			return
-		}
-		for _, example := range t.Examples {
-			if err = CheckValueAPIType(*t, example.Value, options...); err != nil {
-				return
-			}
 		}
 	}
 

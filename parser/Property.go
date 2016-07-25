@@ -130,6 +130,7 @@ func (t *Property) BeforeUnmarshalYAML() (err error) {
 // a Property which MIGHT be a simple string or a map[string]interface{}
 func (t *Property) UnmarshalYAML(unmarshaler func(interface{}) error) (err error) {
 	if err = unmarshaler(&t.Type); err == nil {
+		t.setType(t.Type)
 		return
 	}
 	if !isErrorYAMLIntoString(err) {
