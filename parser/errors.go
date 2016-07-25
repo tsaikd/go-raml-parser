@@ -32,6 +32,8 @@ var (
 	ErrorUnusedAnnotation1                = errutil.NewFactory("Annotation %q is unused")
 	ErrorTraitNotFound1                   = errutil.NewFactory("trait %q not found")
 	ErrorUseNotFound1                     = errutil.NewFactory("use %q not found")
+	ErrorYAMLParseFailed                  = errutil.NewFactory("YAML parse failed")
+	ErrorYAMLParseFailed1                 = errutil.NewFactory("%v\nYAML parse failed")
 )
 
 func isErrorYAMLIntoBool(err error) bool {

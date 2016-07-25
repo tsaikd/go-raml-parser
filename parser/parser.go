@@ -14,7 +14,9 @@ import (
 
 // NewParser create Parser instance
 func NewParser() Parser {
-	parser := &parserImpl{}
+	parser := &parserImpl{
+		errorTraceDistance: 4,
+	}
 	return parser
 }
 
@@ -39,6 +41,7 @@ type parserImpl struct {
 	cacheDirectory         string
 	checkRAMLVersion       bool
 	checkValueOptions      []CheckValueOption
+	errorTraceDistance     int64
 	ignoreUnusedAnnotation bool
 	ignoreUnusedTrait      bool
 }
@@ -52,6 +55,8 @@ func (t *parserImpl) Config(config parserConfig.Enum, value interface{}) (err er
 		field = &t.checkRAMLVersion
 	case parserConfig.CheckValueOptions:
 		field = &t.checkValueOptions
+	case parserConfig.ErrorTraceDistance:
+		field = &t.errorTraceDistance
 	case parserConfig.IgnoreUnusedAnnotation:
 		field = &t.ignoreUnusedAnnotation
 	case parserConfig.IgnoreUnusedTrait:
@@ -76,6 +81,8 @@ func (t *parserImpl) Get(config parserConfig.Enum) (value interface{}, err error
 		return t.checkRAMLVersion, nil
 	case parserConfig.CheckValueOptions:
 		return t.checkValueOptions, nil
+	case parserConfig.ErrorTraceDistance:
+		return t.errorTraceDistance, nil
 	case parserConfig.IgnoreUnusedAnnotation:
 		return t.ignoreUnusedAnnotation, nil
 	case parserConfig.IgnoreUnusedTrait:
@@ -129,7 +136,13 @@ func (t parserImpl) ParseData(data []byte, workdir string) (rootdoc RootDocument
 	}
 
 	if err = yaml.Unmarshal(data, &rootdoc); err != nil {
-		return
+		line, _, ok := ParseYAMLError(err)
+		if !ok || t.errorTraceDistance < 0 {
+			return rootdoc, ErrorYAMLParseFailed.New(err)
+		}
+
+		extraInfo := GetLinesInRange(string(data), "\n", line+1, t.errorTraceDistance)
+		return rootdoc, ErrorYAMLParseFailed1.New(err, extraInfo)
 	}
 
 	conf := newPostProcessConfig(&t, &rootdoc, nil, nil, nil)

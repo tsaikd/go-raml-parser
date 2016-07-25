@@ -7,10 +7,17 @@ type Enum int8
 
 // List all valid enum
 const (
+	// RAML parser cache directory, type: string, default: ""
 	CacheDirectory Enum = 1 + iota
+	// RAML parser should check RAML version or not, type: bool, default: false
 	CheckRAMLVersion
+	// options pass to CheckValueAPIType, type: []CheckValueOption, default: []CheckValueOption{}
 	CheckValueOptions
+	// show RAML data when error occur, set < 0 to disable, type: int64, default: 4
+	ErrorTraceDistance
+	// RAML parser should ignore unused annotations, type: bool, default: false
 	IgnoreUnusedAnnotation
+	// RAML parser should ignore unused traits, type: bool, default: false
 	IgnoreUnusedTrait
 )
 
@@ -18,6 +25,7 @@ var factory = enumutil.NewEnumFactory().
 	Add(CacheDirectory, "CacheDirectory").
 	Add(CheckRAMLVersion, "CheckRAMLVersion").
 	Add(CheckValueOptions, "CheckValueOptions").
+	Add(ErrorTraceDistance, "ErrorTraceDistance").
 	Add(IgnoreUnusedAnnotation, "IgnoreUnusedAnnotation").
 	Add(IgnoreUnusedTrait, "IgnoreUnusedTrait").
 	Build()
