@@ -3,6 +3,7 @@ package parser
 import (
 	"io/ioutil"
 	"path/filepath"
+	"strconv"
 
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
@@ -242,14 +243,120 @@ func (t *APIType) checkExample(conf PostProcessConfig) (err error) {
 		}
 	}
 
-	if err = CheckValueAPIType(*t, t.Example.Value, options...); err != nil {
-		return
+	if !t.Example.Value.IsZero() {
+		if err = CheckValueAPIType(*t, t.Example.Value, options...); err != nil {
+			return
+		}
 	}
 	for _, example := range t.Examples {
-		if err = CheckValueAPIType(*t, example.Value, options...); err != nil {
-			return
+		if !example.Value.IsZero() {
+			if err = CheckValueAPIType(*t, example.Value, options...); err != nil {
+				return
+			}
 		}
 	}
 
 	return
+}
+
+// NewValueWithAPIType return Value from src with apiType check
+func NewValueWithAPIType(apiType APIType, src interface{}) (Value, error) {
+	srcval, err := NewValue(src)
+	if err != nil {
+		return srcval, err
+	}
+
+	if apiType.IsArray {
+		switch srcval.Type {
+		case TypeArray:
+			elemType := apiType
+			elemType.IsArray = false
+			result := make([]*Value, len(srcval.Array))
+			for i, srcelem := range srcval.Array {
+				var value Value
+				if value, err = NewValueWithAPIType(elemType, srcelem); err != nil {
+					return srcval, err
+				}
+				result[i] = &value
+			}
+			return Value{
+				Type:  TypeArray,
+				Array: result,
+			}, nil
+		case TypeNull:
+			return Value{
+				Type:  TypeArray,
+				Array: []*Value{},
+			}, nil
+		}
+		return srcval, ErrorTypeConvertFailed2.New(nil, srcval.Type, apiType.Type)
+	}
+
+	switch apiType.NativeType {
+	case TypeBoolean:
+		switch srcval.Type {
+		case apiType.NativeType:
+		case TypeString:
+			var natval bool
+			if natval, err = strconv.ParseBool(srcval.String); err != nil {
+				return srcval, err
+			}
+			return Value{
+				Type:    apiType.NativeType,
+				Boolean: natval,
+			}, nil
+		default:
+			return srcval, ErrorTypeConvertFailed2.New(nil, srcval.Type, apiType.Type)
+		}
+	case TypeInteger:
+		switch srcval.Type {
+		case apiType.NativeType:
+		case TypeString:
+			var natval int64
+			if natval, err = strconv.ParseInt(srcval.String, 0, 64); err != nil {
+				return srcval, err
+			}
+			return Value{
+				Type:    apiType.NativeType,
+				Integer: natval,
+			}, nil
+		default:
+			return srcval, ErrorTypeConvertFailed2.New(nil, srcval.Type, apiType.Type)
+		}
+	case TypeNumber:
+		switch srcval.Type {
+		case apiType.NativeType:
+		case TypeString:
+			var natval float64
+			if natval, err = strconv.ParseFloat(srcval.String, 64); err != nil {
+				return srcval, err
+			}
+			return Value{
+				Type:   apiType.NativeType,
+				Number: natval,
+			}, nil
+		default:
+			return srcval, ErrorTypeConvertFailed2.New(nil, srcval.Type, apiType.Type)
+		}
+	case TypeObject:
+		switch srcval.Type {
+		case TypeObject:
+			val := Value{
+				Type: TypeObject,
+				Map:  map[string]*Value{},
+			}
+			for name, prop := range apiType.Properties.Map() {
+				var propval Value
+				if propval, err = NewValueWithAPIType(prop.APIType, srcval.Map[name]); err != nil {
+					return val, err
+				}
+				val.Map[name] = &propval
+			}
+			return val, nil
+		default:
+			return srcval, ErrorTypeConvertFailed2.New(nil, srcval.Type, apiType.Type)
+		}
+	}
+
+	return srcval, nil
 }

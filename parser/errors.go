@@ -21,6 +21,7 @@ var (
 	ErrorAnnotationTypeUndefined1         = errutil.NewFactory("Annotation type %q can not find in RAML")
 	ErrorInvalidAnnotationTargetLocation2 = errutil.NewFactory("Annotation %q is invalid for TargetLocation %q")
 	ErrorTypeUndefined1                   = errutil.NewFactory("Type %q can not find in RAML")
+	ErrorTypeConvertFailed2               = errutil.NewFactory("can not convert type from %q to %q")
 	ErrorTypo2                            = errutil.NewFactory("detect typo error on %q: %v")
 	ErrorArrayElementTypeMismatch3        = errutil.NewFactory("array element %d type mismatch, expected %q but got %q")
 	ErrorPropertyTypeMismatch1            = errutil.NewFactory("Property %q type mismatch")

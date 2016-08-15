@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -49,6 +50,10 @@ func Test_ValueFromNull(t *testing.T) {
 	require.NotNil(require)
 
 	value, err := NewValue(nil)
+	require.NoError(err)
+	require.Equal(TypeNull, value.Type)
+
+	value, err = NewValue((*url.Values)(nil))
 	require.NoError(err)
 	require.Equal(TypeNull, value.Type)
 }
@@ -185,39 +190,57 @@ func Test_ValueFromMap(t *testing.T) {
 	})
 	require.NoError(err)
 	require.Equal(TypeObject, value.Type)
-	if assert.Contains(value.Map, "key1") {
-		rootval := value.Map["key1"]
-		require.NotNil(rootval)
-		require.Equal(TypeBoolean, rootval.Type)
-		require.True(rootval.Boolean)
+	if prop := value.Map["key1"]; assert.NotNil(prop) {
+		require.Equal(TypeBoolean, prop.Type)
+		require.True(prop.Boolean)
 	}
-	if assert.Contains(value.Map, "key2") {
-		rootval := value.Map["key2"]
-		require.NotNil(rootval)
-		require.Equal(TypeInteger, rootval.Type)
-		require.EqualValues(9527, rootval.Integer)
+	if prop := value.Map["key2"]; assert.NotNil(prop) {
+		require.Equal(TypeInteger, prop.Type)
+		require.EqualValues(9527, prop.Integer)
 	}
-	if assert.Contains(value.Map, "key3") {
-		rootval := value.Map["key3"]
-		require.NotNil(rootval)
-		require.Equal(TypeNumber, rootval.Type)
-		require.EqualValues(3.14, rootval.Number)
+	if prop := value.Map["key3"]; assert.NotNil(prop) {
+		require.Equal(TypeNumber, prop.Type)
+		require.EqualValues(3.14, prop.Number)
 	}
-	if assert.Contains(value.Map, "key4") {
-		rootval := value.Map["key4"]
-		require.NotNil(rootval)
-		require.Equal(TypeString, rootval.Type)
-		require.EqualValues("test", rootval.String)
+	if prop := value.Map["key4"]; assert.NotNil(prop) {
+		require.Equal(TypeString, prop.Type)
+		require.EqualValues("test", prop.String)
 	}
-	if assert.Contains(value.Map, "child") {
-		rootval := value.Map["child"]
-		require.NotNil(rootval)
-		require.Equal(TypeObject, rootval.Type)
-		if assert.Contains(rootval.Map, "childKey") {
-			childval := rootval.Map["childKey"]
-			require.NotNil(childval)
-			require.Equal(TypeString, childval.Type)
-			require.EqualValues("child value", childval.String)
+	if propRoot := value.Map["child"]; assert.NotNil(propRoot) {
+		require.Equal(TypeObject, propRoot.Type)
+		if propChild := propRoot.Map["childKey"]; assert.NotNil(propChild) {
+			require.Equal(TypeString, propChild.Type)
+			require.EqualValues("child value", propChild.String)
+		}
+	}
+}
+
+func Test_ValueFromURLValues(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	value, err := NewValue(url.Values{
+		"key1": []string{"single"},
+		"key2": []string{"foo", "bar"},
+	})
+	require.NoError(err)
+	require.Equal(TypeObject, value.Type)
+	if prop := value.Map["key1"]; assert.NotNil(prop) {
+		require.Equal(TypeString, prop.Type)
+		require.Equal("single", prop.String)
+	}
+	if prop := value.Map["key2"]; assert.NotNil(prop) {
+		require.Equal(TypeArray, prop.Type)
+		require.Len(prop.Array, 2)
+		if elem := prop.Array[0]; assert.NotNil(elem) {
+			require.Equal(TypeString, elem.Type)
+			require.Equal("foo", elem.String)
+		}
+		if elem := prop.Array[1]; assert.NotNil(elem) {
+			require.Equal(TypeString, elem.Type)
+			require.Equal("bar", elem.String)
 		}
 	}
 }

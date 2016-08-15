@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"net/url"
 	"reflect"
 	"strconv"
 
@@ -103,9 +104,30 @@ func NewValue(src interface{}) (Value, error) {
 		for k, v := range srcval {
 			newval, err := NewValue(v)
 			if err != nil {
-				return Value{}, err
+				return result, err
 			}
 			result.Map[k] = &newval
+		}
+		return result, nil
+	case url.Values:
+		result := Value{
+			Type: TypeObject,
+			Map:  map[string]*Value{},
+		}
+		for k, v := range srcval {
+			if len(v) == 1 {
+				newval, err := NewValue(v[0])
+				if err != nil {
+					return result, err
+				}
+				result.Map[k] = &newval
+			} else {
+				newval, err := NewValue(v)
+				if err != nil {
+					return result, err
+				}
+				result.Map[k] = &newval
+			}
 		}
 		return result, nil
 	case reflect.Value:
@@ -116,7 +138,13 @@ func NewValue(src interface{}) (Value, error) {
 
 	switch refval.Kind() {
 	case reflect.Ptr:
-		return NewValue(refval.Elem().Interface())
+		elem := refval.Elem()
+		if !elem.IsValid() {
+			return Value{
+				Type: TypeNull,
+			}, nil
+		}
+		return NewValue(elem.Interface())
 	case reflect.Slice:
 		length := refval.Len()
 		result := make([]*Value, length)
@@ -231,4 +259,42 @@ func (t Value) IsEmpty() bool {
 		len(t.Array) < 1 &&
 		len(t.Map) < 1 &&
 		len(t.Binary) < 1
+}
+
+// IsZero return true if Value is empty or contains only type name
+func (t Value) IsZero() bool {
+	switch t.Type {
+	case TypeBoolean:
+		return t.Boolean == false
+	case TypeInteger:
+		return t.Integer == 0
+	case TypeNumber:
+		return t.Number == 0
+	case TypeString:
+		return t.String == ""
+	case TypeArray:
+		if len(t.Array) < 1 {
+			return true
+		}
+		for _, elem := range t.Array {
+			if elem != nil && !elem.IsZero() {
+				return false
+			}
+		}
+		return true
+	case TypeObject:
+		if len(t.Map) < 1 {
+			return true
+		}
+		for _, elem := range t.Map {
+			if elem != nil && !elem.IsZero() {
+				return false
+			}
+		}
+		return true
+	case TypeBinary:
+		return len(t.Binary) < 1
+	default:
+		return true
+	}
 }
