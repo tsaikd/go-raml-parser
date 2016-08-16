@@ -122,23 +122,14 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	require.NotNil(require)
 
 	apiType := APIType{}
-	apiType.setType(TypeObject)
-	apiType.Properties = Properties{}
-
-	property := &Property{}
-	property.Name = "text"
-	property.setType(TypeString)
-	addProperty(&apiType.Properties, property)
-
-	property = &Property{}
-	property.Name = "int"
-	property.setType(TypeInteger)
-	addProperty(&apiType.Properties, property)
-
-	property = &Property{}
-	property.Name = "num"
-	property.setType(TypeNumber)
-	addProperty(&apiType.Properties, property)
+	err = yaml.Unmarshal([]byte(strings.TrimSpace(`
+type: object
+properties:
+    text: string
+    int:  integer
+    num:  number
+	`)), &apiType)
+	require.NoError(err)
 
 	err = testCheckValueAPIType(apiType, true)
 	require.Error(err)
@@ -157,6 +148,20 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 		"int":  0,
 		"num":  0.1,
 	})
+	require.Error(err)
+
+	err = testCheckValueAPIType(apiType, map[string]interface{}{
+		"text": "",
+		"int":  0,
+		"num":  0.1,
+	}, CheckValueOptionAllowRequiredPropertyToBeEmpty(true))
+	require.NoError(err)
+
+	err = testCheckValueAPIType(apiType, map[string]interface{}{
+		"text": "test string",
+		"int":  0,
+		"num":  0.1,
+	})
 	require.NoError(err)
 
 	err = testCheckValueAPIType(apiType, map[string]interface{}{
@@ -167,21 +172,21 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 	require.Error(err)
 
 	err = testCheckValueAPIType(apiType, map[string]interface{}{
-		"text": "",
+		"text": "test string",
 		"int":  0.1,
 		"num":  0.1,
 	})
 	require.Error(err)
 
 	err = testCheckValueAPIType(apiType, map[string]interface{}{
-		"text": "",
+		"text": "test string",
 		"int":  0,
 		"num":  0,
 	})
 	require.Error(err)
 
 	err = testCheckValueAPIType(apiType, map[string]interface{}{
-		"text": "",
+		"text": "test string",
 		"int":  float64(0),
 		"num":  int64(0),
 	}, CheckValueOptionAllowIntegerToBeNumber(true))
@@ -194,7 +199,7 @@ func Test_CheckValueAPIType_Object(t *testing.T) {
 
 	valmap := map[string]interface{}{}
 	err = jsonex.Unmarshal([]byte(`{
-		"text": "",
+		"text": "test string",
 		"int": 0,
 		"num": 0
 	}`), &valmap)

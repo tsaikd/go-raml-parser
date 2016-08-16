@@ -18,10 +18,16 @@ type CheckValueOptionAllowIntegerToBeNumber bool
 // default: false
 type CheckValueOptionAllowArrayToBeNull bool
 
+// CheckValueOptionAllowRequiredPropertyToBeEmpty allow required property to be empty value, but still should be existed
+// only check the following types: TypeString, TypeArray, TypeObject, TypeBinary
+// default: false
+type CheckValueOptionAllowRequiredPropertyToBeEmpty bool
+
 // CheckValueAPIType check value is valid for apiType
 func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption) (err error) {
 	allowIntegerToBeNumber := CheckValueOptionAllowIntegerToBeNumber(false)
 	allowArrayToBeNull := CheckValueOptionAllowArrayToBeNull(false)
+	allowRequiredPropertyToBeEmpty := CheckValueOptionAllowRequiredPropertyToBeEmpty(false)
 
 	for _, option := range options {
 		switch optval := option.(type) {
@@ -29,6 +35,8 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 			allowIntegerToBeNumber = optval
 		case CheckValueOptionAllowArrayToBeNull:
 			allowArrayToBeNull = optval
+		case CheckValueOptionAllowRequiredPropertyToBeEmpty:
+			allowRequiredPropertyToBeEmpty = optval
 		}
 	}
 
@@ -37,6 +45,7 @@ func CheckValueAPIType(apiType APIType, value Value, options ...CheckValueOption
 		value,
 		allowIntegerToBeNumber,
 		allowArrayToBeNull,
+		allowRequiredPropertyToBeEmpty,
 	)
 }
 
@@ -45,6 +54,7 @@ func checkValueAPIType(
 	value Value,
 	allowIntegerToBeNumber CheckValueOptionAllowIntegerToBeNumber,
 	allowArrayToBeNull CheckValueOptionAllowArrayToBeNull,
+	allowRequiredPropertyToBeEmpty CheckValueOptionAllowRequiredPropertyToBeEmpty,
 ) (err error) {
 	if value.IsEmpty() {
 		// no need to check if value is empty
@@ -66,6 +76,7 @@ func checkValueAPIType(
 				*elemValue,
 				allowIntegerToBeNumber,
 				allowArrayToBeNull,
+				allowRequiredPropertyToBeEmpty,
 			); err != nil {
 				switch errutil.FactoryOf(err) {
 				case ErrorPropertyTypeMismatch2:
@@ -127,6 +138,7 @@ func checkValueAPIType(
 				*property,
 				value,
 				allowArrayToBeNull,
+				allowRequiredPropertyToBeEmpty,
 				apiType,
 			); err != nil {
 				return err
@@ -137,6 +149,7 @@ func checkValueAPIType(
 				value,
 				allowIntegerToBeNumber,
 				allowArrayToBeNull,
+				allowRequiredPropertyToBeEmpty,
 			); err != nil {
 				return err
 			}
@@ -150,6 +163,7 @@ func checkPropertyRequired(
 	property Property,
 	parent Value,
 	allowArrayToBeNull CheckValueOptionAllowArrayToBeNull,
+	allowRequiredPropertyToBeEmpty CheckValueOptionAllowRequiredPropertyToBeEmpty,
 	apiType APIType, // only used for error message
 ) (err error) {
 	if !property.Required {
@@ -167,6 +181,14 @@ func checkPropertyRequired(
 		if value == nil {
 			return ErrorRequiredProperty2.New(nil, property.Name, apiType.Type)
 		}
+		if !bool(allowRequiredPropertyToBeEmpty) {
+			switch value.Type {
+			case TypeString, TypeArray, TypeObject, TypeBinary:
+				if value.IsZero() {
+					return ErrorRequiredProperty2.New(nil, property.Name, apiType.Type)
+				}
+			}
+		}
 		return nil
 	default:
 		panic("check property required with wrong parent type: " + parent.Type)
@@ -178,6 +200,7 @@ func checkPropertyValue(
 	parent Value,
 	allowIntegerToBeNumber CheckValueOptionAllowIntegerToBeNumber,
 	allowArrayToBeNull CheckValueOptionAllowArrayToBeNull,
+	allowRequiredPropertyToBeEmpty CheckValueOptionAllowRequiredPropertyToBeEmpty,
 ) (err error) {
 	value := parent.Map[property.Name]
 	if value == nil {
@@ -189,6 +212,7 @@ func checkPropertyValue(
 		*value,
 		allowIntegerToBeNumber,
 		allowArrayToBeNull,
+		allowRequiredPropertyToBeEmpty,
 	); err != nil {
 		switch errutil.FactoryOf(err) {
 		case ErrorPropertyTypeMismatch2:
