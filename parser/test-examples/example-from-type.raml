@@ -1,51 +1,51 @@
 #%RAML 1.0
 title: Example from type
 types:
-  User:
-    type: object
-    properties:
-      name:  string
-      email: string
-    examples:
-      user1:
-        name:  Alice
-        email: alice@example.com
-      user2:
-        name:  Bob
-        email: bob@example.com
+    User:
+        type: object
+        properties:
+            name:  string
+            email: string
+        examples:
+            user1:
+                name:  Alice
+                email: alice@example.com
+            user2:
+                name:  Bob
+                email: bob@example.com
 
 /user:
-  get:
-    responses:
-      200:
-        body:
-          application/json:
-            type: User
+    get:
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: User
 
 /user/wrap:
-  get:
-    responses:
-      200:
-        body:
-          application/json:
-            type: object
-            properties:
-              user: User
+    get:
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: object
+                        properties:
+                            user: User
 
 /users:
-  get:
-    responses:
-      200:
-        body:
-          application/json:
-            type: User[]
+    get:
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: User[]
 
 /users/wrap:
-  get:
-    responses:
-      200:
-        body:
-          application/json:
-            type: object
-            properties:
-              users: User[]
+    get:
+        responses:
+            200:
+                body:
+                    application/json:
+                        type: object
+                        properties:
+                            users: User[]

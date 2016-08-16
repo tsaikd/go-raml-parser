@@ -1,16 +1,16 @@
 #%RAML 1.0
 mediaType: application/json
 types:
-  User:
-    type: object
-    properties:
-      name: string
-    example:
-      name: Alice
+    User:
+        type: object
+        properties:
+            name: string
+        example:
+            name: Alice
 
 /user:
-  get:
-    responses:
-      200:
-        body:
-          type: User
+    get:
+        responses:
+            200:
+                body:
+                    type: User

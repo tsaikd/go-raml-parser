@@ -2,11 +2,11 @@
 title: Example include binary file
 
 /binary:
-  get:
-    responses:
-      200:
-        body:
-          image/png:
-            type: file
-            fileTypes: ['*/*']
-            example: !include file.png
+    get:
+        responses:
+            200:
+                body:
+                    image/png:
+                        type: file
+                        fileTypes: ['*/*']
+                        example: !include file.png

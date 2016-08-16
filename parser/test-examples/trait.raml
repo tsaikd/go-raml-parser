@@ -1,11 +1,11 @@
 #%RAML 1.0
 traits:
-  RequireLogin:
-      headers:
-          Authorization:
-              type: string
+    RequireLogin:
+        headers:
+            Authorization:
+                type: string
 
 /user:
-  get:
-    is:
-      - RequireLogin
+    get:
+        is:
+            - RequireLogin
