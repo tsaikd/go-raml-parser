@@ -226,6 +226,76 @@ properties:
 	))
 }
 
+func Test_CheckValueAPIType_ObjectDeep(t *testing.T) {
+	require := require.New(t)
+	require.NotNil(require)
+
+	apiType := getAPITypeFromString(`
+type: object
+properties:
+    level1:
+        type: object
+        properties:
+            level2:
+                type: object
+                properties:
+                    text: string
+	`)
+	require.NoError(testCheckValueAPIType(apiType,
+		map[string]interface{}{
+			"level1": map[string]interface{}{
+				"level2": map[string]interface{}{
+					"text": "test string",
+				},
+			},
+		},
+	))
+	require.Error(testCheckValueAPIType(apiType,
+		map[string]interface{}{
+			"level1": map[string]interface{}{
+				"level2": map[string]interface{}{
+					"text": "",
+				},
+			},
+		},
+	))
+	require.Error(testCheckValueAPIType(apiType,
+		map[string]interface{}{
+			"level1": map[string]interface{}{},
+		},
+	))
+
+	apiType = getAPITypeFromString(`
+type: object
+properties:
+    level1:
+        type: object
+        properties:
+            lv2sibling: string
+            level2?:
+                type: object
+                properties:
+                    text: string
+	`)
+	require.NoError(testCheckValueAPIType(apiType,
+		map[string]interface{}{
+			"level1": map[string]interface{}{
+				"lv2sibling": "test string",
+				"level2": map[string]interface{}{
+					"text": "",
+				},
+			},
+		},
+	))
+	require.NoError(testCheckValueAPIType(apiType,
+		map[string]interface{}{
+			"level1": map[string]interface{}{
+				"lv2sibling": "test string",
+			},
+		},
+	))
+}
+
 func Test_CheckValueAPIType_CustomType(t *testing.T) {
 	require := require.New(t)
 	require.NotNil(require)

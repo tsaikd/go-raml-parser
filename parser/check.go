@@ -206,6 +206,10 @@ func checkPropertyValue(
 	if value == nil {
 		return nil
 	}
+	// no need to check recursive if property is not required
+	if !property.Required && value.IsZero() {
+		return nil
+	}
 
 	if err = checkValueAPIType(
 		property.APIType,
