@@ -568,6 +568,28 @@ func Test_ParseAnnotationOnType(t *testing.T) {
 	}
 }
 
+func Test_ParseBaseURIParameters(t *testing.T) {
+	assert := assert.New(t)
+	assert.NotNil(assert)
+	require := require.New(t)
+	require.NotNil(require)
+
+	parser := NewParser()
+	require.NotNil(parser)
+
+	rootdoc, err := parser.ParseFile("./test-examples/base-uri-parameters.raml")
+	require.NoError(err)
+
+	require.Equal("Amazon S3 REST API", rootdoc.Title)
+	require.Equal("1", rootdoc.Version)
+	require.Equal("https://{bucketName}.s3.amazonaws.com", rootdoc.BaseURI)
+	if assert.NotNil(rootdoc.BaseURIParameters) {
+		if uriParam := rootdoc.BaseURIParameters["bucketName"]; assert.NotNil(uriParam) {
+			require.Equal("The name of the bucket", uriParam.Description)
+		}
+	}
+}
+
 func Test_ParseCheckUnusedAnnotation(t *testing.T) {
 	assert := assert.New(t)
 	assert.NotNil(assert)

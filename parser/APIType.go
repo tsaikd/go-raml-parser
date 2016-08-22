@@ -23,6 +23,15 @@ func (t APITypes) IsEmpty() bool {
 	return true
 }
 
+// NewAPIType return empty APIType
+func NewAPIType() *APIType {
+	apiType := &APIType{}
+	if err := apiType.BeforeUnmarshalYAML(); err != nil {
+		panic(err)
+	}
+	return apiType
+}
+
 // APIType wrap types defined in spec
 type APIType struct {
 	TypeDeclaration

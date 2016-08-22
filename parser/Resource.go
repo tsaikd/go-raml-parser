@@ -36,7 +36,7 @@ func (t Resources) fillURIParams() (err error) {
 			}
 			paramName := matchParams[1]
 			if _, exist := elem.URIParameters[paramName]; !exist {
-				elem.URIParameters[paramName] = &APIType{}
+				elem.URIParameters[paramName] = NewAPIType()
 			}
 		}
 	}
@@ -65,7 +65,7 @@ type Resource struct {
 	Annotations Annotations `yaml:",regexp:\\(.*\\)" json:"annotations,omitempty"`
 
 	// The object describing the method.
-	Methods Methods `yaml:",regexp:(get|patch|put|post|delete|options|head)" json:",omitempty"`
+	Methods Methods `yaml:",regexp:(get|patch|put|post|delete|options|head)" json:"methods,omitempty"`
 
 	// A list of traits to apply to all methods declared (implicitly or
 	// explicitly) for this resource. Individual methods can override this

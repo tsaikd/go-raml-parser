@@ -88,7 +88,7 @@ type RootDocumentExtra struct {
 	BaseURI string `yaml:"baseUri" json:"baseUri,omitempty"`
 
 	// Named parameters used in the baseUri (template).
-	BaseURIParameters Unimplement `yaml:"baseUriParameters" json:"baseUriParameters,omitempty"`
+	BaseURIParameters APITypes `yaml:"baseUriParameters" json:"baseUriParameters,omitempty"`
 
 	// The protocols supported by the API.
 	Protocols Unimplement `yaml:"protocols" json:"protocols,omitempty"`
