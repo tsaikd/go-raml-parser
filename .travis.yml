@@ -1,12 +1,11 @@
 language: go
 
 go:
-  - 1.6
-  - 1.7
-  - tip
+  - 1.8
+  - 1.9
 
 install:
-  - gobuilder version -c ">=0.1.4" &>/dev/null || go get -u -v "github.com/tsaikd/gobuilder"
+  - gobuilder version -c ">=0.1.8" &>/dev/null || go get -u -v "github.com/tsaikd/gobuilder"
 
 script:
   - gobuilder --check --test --all

@@ -75,54 +75,41 @@ func Test_ParseAnnotationsAnnotationTargets(t *testing.T) {
 
 	require.Equal("Illustrating allowed targets", rootdoc.Title)
 	require.Equal("application/json", rootdoc.MediaType)
-	if assert.Contains(rootdoc.AnnotationTypes, "meta-resource-method") {
-		annotationType := rootdoc.AnnotationTypes["meta-resource-method"]
+	if annotationType, ok := rootdoc.AnnotationTypes["meta-resource-method"]; assert.True(ok) {
 		if assert.Len(annotationType.AllowedTargets, 2) {
 			require.Equal(TargetLocationResource, annotationType.AllowedTargets[0])
 			require.Equal(TargetLocationMethod, annotationType.AllowedTargets[1])
 		}
 	}
-	if assert.Contains(rootdoc.AnnotationTypes, "meta-data") {
-		annotationType := rootdoc.AnnotationTypes["meta-data"]
+	if annotationType, ok := rootdoc.AnnotationTypes["meta-data"]; assert.True(ok) {
 		if assert.Len(annotationType.AllowedTargets, 1) {
 			require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
 		}
 	}
-	if assert.Contains(rootdoc.Types, "User") {
-		apiType := rootdoc.Types["User"]
+	if apiType, ok := rootdoc.Types["User"]; assert.True(ok) {
 		require.Equal(TypeObject, apiType.Type)
-		if assert.Contains(apiType.Annotations, "meta-data") {
-			annotation := apiType.Annotations["meta-data"]
+		if annotation, ok := apiType.Annotations["meta-data"]; assert.True(ok) {
 			require.Equal("on an object; on a data type declaration", annotation.String)
 		}
-		if assert.Contains(apiType.Properties.Map(), "name") {
-			property := apiType.Properties.Map()["name"]
+		if property, ok := apiType.Properties.Map()["name"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
-			if assert.Contains(property.Annotations, "meta-data") {
-				annotation := property.Annotations["meta-data"]
+			if annotation, ok := property.Annotations["meta-data"]; assert.True(ok) {
 				require.Equal("on a string property", annotation.String)
 			}
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/users") {
-		resource := rootdoc.Resources["/users"]
-		if assert.Contains(resource.Annotations, "meta-resource-method") {
-			annotation := resource.Annotations["meta-resource-method"]
+	if resource, ok := rootdoc.Resources["/users"]; assert.True(ok) {
+		if annotation, ok := resource.Annotations["meta-resource-method"]; assert.True(ok) {
 			require.Equal("on a resource", annotation.String)
 		}
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Annotations, "meta-resource-method") {
-				annotation := method.Annotations["meta-resource-method"]
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if annotation, ok := method.Annotations["meta-resource-method"]; assert.True(ok) {
 				require.Equal("on a method", annotation.String)
 			}
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[HTTPCode(200)]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+			if response, ok := method.Responses[HTTPCode(200)]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("User[]", body.Type)
-					if assert.Contains(body.Annotations, "meta-data") {
-						annotation := body.Annotations["meta-data"]
+					if annotation, ok := body.Annotations["meta-data"]; assert.True(ok) {
 						require.Equal("on a body", annotation.String)
 					}
 				}
@@ -146,46 +133,35 @@ func Test_ParseAnnotationsSimpleAnnotations(t *testing.T) {
 
 	require.Equal("Illustrating annotations", rootdoc.Title)
 	require.Equal("application/json", rootdoc.MediaType)
-	if assert.Contains(rootdoc.AnnotationTypes, "testHarness") {
-		annotationType := rootdoc.AnnotationTypes["testHarness"]
+	if annotationType, ok := rootdoc.AnnotationTypes["testHarness"]; assert.True(ok) {
 		require.Equal(TypeString, annotationType.Type)
 	}
-	if assert.Contains(rootdoc.AnnotationTypes, "badge") {
-		annotationType := rootdoc.AnnotationTypes["badge"]
+	if annotationType, ok := rootdoc.AnnotationTypes["badge"]; assert.True(ok) {
 		require.Equal(TypeString, annotationType.Type)
 	}
-	if assert.Contains(rootdoc.AnnotationTypes, "clearanceLevel") {
-		annotationType := rootdoc.AnnotationTypes["clearanceLevel"]
+	if annotationType, ok := rootdoc.AnnotationTypes["clearanceLevel"]; assert.True(ok) {
 		require.Equal(TypeObject, annotationType.Type)
-		if assert.Contains(annotationType.Properties.Map(), "level") {
-			property := annotationType.Properties.Map()["level"]
+		if property, ok := annotationType.Properties.Map()["level"]; assert.True(ok) {
 			require.Len(property.Enum, 3)
 			require.True(property.Required)
 		}
-		if assert.Contains(annotationType.Properties.Map(), "signature") {
-			property := annotationType.Properties.Map()["signature"]
+		if property, ok := annotationType.Properties.Map()["signature"]; assert.True(ok) {
 			require.Equal("\\d{3}-\\w{12}", property.Pattern)
 			require.True(property.Required)
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/users") {
-		resource := rootdoc.Resources["/users"]
-		if assert.Contains(resource.Annotations, "testHarness") {
-			annotation := resource.Annotations["testHarness"]
+	if resource, ok := rootdoc.Resources["/users"]; assert.True(ok) {
+		if annotation, ok := resource.Annotations["testHarness"]; assert.True(ok) {
 			require.Equal("usersTest", annotation.String)
 		}
-		if assert.Contains(resource.Annotations, "badge") {
-			annotation := resource.Annotations["badge"]
+		if annotation, ok := resource.Annotations["badge"]; assert.True(ok) {
 			require.Equal("tested.gif", annotation.String)
 		}
-		if assert.Contains(resource.Annotations, "clearanceLevel") {
-			annotation := resource.Annotations["clearanceLevel"]
-			if assert.Contains(annotation.Map, "level") {
-				value := annotation.Map["level"]
+		if annotation, ok := resource.Annotations["clearanceLevel"]; assert.True(ok) {
+			if value, ok := annotation.Map["level"]; assert.True(ok) {
 				require.Equal("high", value.String)
 			}
-			if assert.Contains(annotation.Map, "signature") {
-				value := annotation.Map["signature"]
+			if value, ok := annotation.Map["signature"]; assert.True(ok) {
 				require.Equal("230-ghtwvfrs1itr", value.String)
 			}
 		}
@@ -206,77 +182,59 @@ func Test_ParseDefiningExamples(t *testing.T) {
 	require.NotZero(rootdoc)
 
 	require.Equal("API with Examples", rootdoc.Title)
-	if assert.Contains(rootdoc.Types, "User") {
-		typ := rootdoc.Types["User"]
+	if typ, ok := rootdoc.Types["User"]; assert.True(ok) {
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties.Map(), "name") {
-			property := typ.Properties.Map()["name"]
+		if property, ok := typ.Properties.Map()["name"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Properties.Map(), "lastname") {
-			property := typ.Properties.Map()["lastname"]
+		if property, ok := typ.Properties.Map()["lastname"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
 		}
 		require.False(typ.Example.Value.IsEmpty())
 		require.Equal("Bob", typ.Example.Value.Map["name"].String)
 		require.Equal("Marley", typ.Example.Value.Map["lastname"].String)
 	}
-	if assert.Contains(rootdoc.Types, "Org") {
-		typ := rootdoc.Types["Org"]
+	if typ, ok := rootdoc.Types["Org"]; assert.True(ok) {
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties.Map(), "name") {
-			property := typ.Properties.Map()["name"]
+		if property, ok := typ.Properties.Map()["name"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
 			require.True(property.Required)
 		}
-		if assert.Contains(typ.Properties.Map(), "address") {
-			property := typ.Properties.Map()["address"]
+		if property, ok := typ.Properties.Map()["address"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
 			require.False(property.Required)
 		}
-		if assert.Contains(typ.Properties.Map(), "value") {
-			property := typ.Properties.Map()["value"]
+		if property, ok := typ.Properties.Map()["value"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
 			require.False(property.Required)
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/organisation") {
-		resource := rootdoc.Resources["/organisation"]
-		if assert.Contains(resource.Methods, "post") {
-			method := resource.Methods["post"]
-			if assert.Contains(method.Headers.Map(), "UserID") {
-				header := method.Headers.Map()["UserID"]
+	if resource, ok := rootdoc.Resources["/organisation"]; assert.True(ok) {
+		if method, ok := resource.Methods["post"]; assert.True(ok) {
+			if header, ok := method.Headers.Map()["UserID"]; assert.True(ok) {
 				require.Equal("the identifier for the user that posts a new organisation", header.Description)
 				require.Equal(TypeString, header.Type)
 				require.Equal("SWED-123", header.Example.Value.String)
 			}
-			if assert.Contains(method.Bodies, "application/json") {
-				body := method.Bodies["application/json"]
+			if body, ok := method.Bodies["application/json"]; assert.True(ok) {
 				require.Equal("Org", body.Type)
-				if assert.Contains(body.Example.Value.Map, "name") {
-					name := body.Example.Value.Map["name"]
+				if name, ok := body.Example.Value.Map["name"]; assert.True(ok) {
 					require.Equal("Doe Enterprise", name.String)
 				}
-				if assert.Contains(body.Example.Value.Map, "value") {
-					value := body.Example.Value.Map["value"]
+				if value, ok := body.Example.Value.Map["value"]; assert.True(ok) {
 					require.Equal("Silver", value.String)
 				}
 			}
 		}
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
 			require.Equal("Returns an organisation entity.", method.Description)
-			if assert.Contains(method.Responses, HTTPCode(201)) {
-				response := method.Responses[201]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+			if response, ok := method.Responses[201]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("Org", body.Type)
-					if assert.Contains(body.Examples, "acme") {
-						example := body.Examples["acme"]
+					if example, ok := body.Examples["acme"]; assert.True(ok) {
 						require.Equal("Acme", example.Value.Map["name"].String)
 					}
-					if assert.Contains(body.Examples, "softwareCorp") {
-						example := body.Examples["softwareCorp"]
+					if example, ok := body.Examples["softwareCorp"]; assert.True(ok) {
 						require.Equal("Software Corp", example.Value.Map["name"].String)
 						require.Equal("35 Central Street", example.Value.Map["address"].String)
 						require.Equal("Gold", example.Value.Map["value"].String)
@@ -301,14 +259,10 @@ func Test_ParseHelloworld(t *testing.T) {
 	require.NotZero(rootdoc)
 
 	require.Equal("Hello world", rootdoc.Title)
-	if assert.Contains(rootdoc.Resources, "/helloworld") {
-		resource := rootdoc.Resources["/helloworld"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/helloworld"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.NotEmpty(body.Type)
 					require.NotEmpty(body.Example)
 				}
@@ -333,56 +287,43 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 	require.Equal("Mobile Order API", rootdoc.Title)
 	require.Equal("1.0", rootdoc.Version)
 	require.Equal("http://localhost:8081/api", rootdoc.BaseURI)
-	if assert.Contains(rootdoc.Uses, "assets") {
-		use := rootdoc.Uses["assets"]
-		if assert.Contains(use.Types, "ProductItem") {
-			typ := use.Types["ProductItem"]
+	if use, ok := rootdoc.Uses["assets"]; assert.True(ok) {
+		if typ, ok := use.Types["ProductItem"]; assert.True(ok) {
 			require.Equal(TypeObject, typ.Type)
-			if assert.Contains(typ.Properties.Map(), "product_id") {
-				property := typ.Properties.Map()["product_id"]
+			if property, ok := typ.Properties.Map()["product_id"]; assert.True(ok) {
 				require.Equal(TypeString, property.Type)
 			}
-			if assert.Contains(typ.Properties.Map(), "quantity") {
-				property := typ.Properties.Map()["quantity"]
+			if property, ok := typ.Properties.Map()["quantity"]; assert.True(ok) {
 				require.Equal(TypeInteger, property.Type)
 			}
 		}
-		if assert.Contains(use.Types, "Order") {
-			typ := use.Types["Order"]
+		if typ, ok := use.Types["Order"]; assert.True(ok) {
 			require.Equal(TypeObject, typ.Type)
-			if assert.Contains(typ.Properties.Map(), "order_id") {
-				property := typ.Properties.Map()["order_id"]
+			if property, ok := typ.Properties.Map()["order_id"]; assert.True(ok) {
 				require.Equal(TypeString, property.Type)
 			}
-			if assert.Contains(typ.Properties.Map(), "creation_date") {
-				property := typ.Properties.Map()["creation_date"]
+			if property, ok := typ.Properties.Map()["creation_date"]; assert.True(ok) {
 				require.Equal(TypeString, property.Type)
 			}
-			if assert.Contains(typ.Properties.Map(), "items") {
-				property := typ.Properties.Map()["items"]
+			if property, ok := typ.Properties.Map()["items"]; assert.True(ok) {
 				require.Equal("ProductItem[]", property.Type)
 			}
 		}
-		if assert.Contains(use.Types, "Orders") {
-			typ := use.Types["Orders"]
+		if typ, ok := use.Types["Orders"]; assert.True(ok) {
 			require.Equal(TypeObject, typ.Type)
-			if assert.Contains(typ.Properties.Map(), "orders") {
-				property := typ.Properties.Map()["orders"]
+			if property, ok := typ.Properties.Map()["orders"]; assert.True(ok) {
 				require.Equal("Order[]", property.Type)
 			}
 		}
-		if assert.Contains(use.Traits, "paging") {
-			trait := use.Traits["paging"]
-			if assert.Contains(trait.QueryParameters.Map(), "size") {
-				qp := trait.QueryParameters.Map()["size"]
+		if trait, ok := use.Traits["paging"]; assert.True(ok) {
+			if qp, ok := trait.QueryParameters.Map()["size"]; assert.True(ok) {
 				require.Equal("the amount of elements of each result page", qp.Description)
 				require.Equal(TypeInteger, qp.Type)
 				require.False(qp.Required)
 				require.Equal(TypeInteger, qp.Example.Value.Type)
 				require.EqualValues(10, qp.Example.Value.Integer)
 			}
-			if assert.Contains(trait.QueryParameters.Map(), "page") {
-				qp := trait.QueryParameters.Map()["page"]
+			if qp, ok := trait.QueryParameters.Map()["page"]; assert.True(ok) {
 				require.Equal("the page number", qp.Description)
 				require.Equal(TypeInteger, qp.Type)
 				require.False(qp.Required)
@@ -391,53 +332,41 @@ func Test_ParseOthersMobileOrderApi(t *testing.T) {
 			}
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/orders") {
-		resource := rootdoc.Resources["/orders"]
+	if resource, ok := rootdoc.Resources["/orders"]; assert.True(ok) {
 		require.Equal("Orders", resource.DisplayName)
 		require.Equal("Orders collection resource used to create new orders.", resource.Description)
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
 			if assert.Len(method.Is, 1) {
 				is := method.Is[0]
 				require.Equal("assets.paging", is.String)
 			}
 			require.Equal("lists all orders of a specific user", method.Description)
-			if assert.Contains(method.QueryParameters.Map(), "userId") {
-				qp := method.QueryParameters.Map()["userId"]
+			if qp, ok := method.QueryParameters.Map()["userId"]; assert.True(ok) {
 				require.Equal("string", qp.Type)
 				require.Equal("use to query all orders of a user", qp.Description)
 				require.True(qp.Required)
 				require.Equal("1964401a-a8b3-40c1-b86e-d8b9f75b5842", qp.Example.Value.String)
 			}
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("assets.Orders", body.Type)
-					if assert.Contains(body.Examples, "single-order") {
-						example := body.Examples["single-order"]
-						if assert.Contains(example.Value.Map, "orders") {
-							orders := example.Value.Map["orders"]
+					if example, ok := body.Examples["single-order"]; assert.True(ok) {
+						if orders, ok := example.Value.Map["orders"]; assert.True(ok) {
 							if assert.Len(orders.Array, 1) {
 								order := orders.Array[0]
-								if assert.Contains(order.Map, "order_id") {
-									orderID := order.Map["order_id"]
+								if orderID, ok := order.Map["order_id"]; assert.True(ok) {
 									require.Equal("ORDER-437563756", orderID.String)
 								}
-								if assert.Contains(order.Map, "creation_date") {
-									creationDate := order.Map["creation_date"]
+								if creationDate, ok := order.Map["creation_date"]; assert.True(ok) {
 									require.Equal("2016-03-30", creationDate.String)
 								}
-								if assert.Contains(order.Map, "items") {
-									items := order.Map["items"]
+								if items, ok := order.Map["items"]; assert.True(ok) {
 									if assert.Len(items.Array, 2) {
 										item := items.Array[1]
-										if assert.Contains(item.Map, "product_id") {
-											productID := item.Map["product_id"]
+										if productID, ok := item.Map["product_id"]; assert.True(ok) {
 											require.Equal("PRODUCT-2", productID.String)
 										}
-										if assert.Contains(item.Map, "quantity") {
-											quantity := item.Map["quantity"]
+										if quantity, ok := item.Map["quantity"]; assert.True(ok) {
 											require.EqualValues(2, quantity.Integer)
 										}
 									}
@@ -465,34 +394,26 @@ func Test_ParseTypesystemSimple(t *testing.T) {
 	require.NotZero(rootdoc)
 
 	require.Equal("API with Types", rootdoc.Title)
-	if assert.Contains(rootdoc.Types, "User") {
-		typ := rootdoc.Types["User"]
+	if typ, ok := rootdoc.Types["User"]; assert.True(ok) {
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties.Map(), "age") {
-			property := typ.Properties.Map()["age"]
+		if property, ok := typ.Properties.Map()["age"]; assert.True(ok) {
 			require.True(property.Required)
 			require.Equal(TypeNumber, property.Type)
 		}
-		if assert.Contains(typ.Properties.Map(), "firstName") {
-			property := typ.Properties.Map()["firstName"]
+		if property, ok := typ.Properties.Map()["firstName"]; assert.True(ok) {
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Properties.Map(), "lastName") {
-			property := typ.Properties.Map()["lastName"]
+		if property, ok := typ.Properties.Map()["lastName"]; assert.True(ok) {
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/users/{id}") {
-		resource := rootdoc.Resources["/users/{id}"]
+	if resource, ok := rootdoc.Resources["/users/{id}"]; assert.True(ok) {
 		require.Contains(resource.URIParameters, "id")
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("User", body.Type)
 				}
 			}
@@ -512,17 +433,14 @@ func Test_ParseAnnotationOnType(t *testing.T) {
 	rootdoc, err := parser.ParseFile("./test-examples/annotation-on-type.raml")
 	require.NoError(err)
 
-	if assert.Contains(rootdoc.AnnotationTypes, "AnnotationOnType") {
-		annotationType := rootdoc.AnnotationTypes["AnnotationOnType"]
+	if annotationType, ok := rootdoc.AnnotationTypes["AnnotationOnType"]; assert.True(ok) {
 		require.Equal("annotation on type", annotationType.Description)
 		require.Len(annotationType.AllowedTargets, 1)
 		require.Equal(TargetLocationTypeDeclaration, annotationType.AllowedTargets[0])
 		require.Equal(TypeString, annotationType.Type)
 	}
-	if assert.Contains(rootdoc.Types, "User") {
-		apiType := rootdoc.Types["User"]
-		if assert.Contains(apiType.Annotations, "AnnotationOnType") {
-			annotation := apiType.Annotations["AnnotationOnType"]
+	if apiType, ok := rootdoc.Types["User"]; assert.True(ok) {
+		if annotation, ok := apiType.Annotations["AnnotationOnType"]; assert.True(ok) {
 			require.Equal("something on annotation", annotation.String)
 			annotationType := annotation.AnnotationType
 			require.Equal("annotation on type", annotationType.Description)
@@ -531,15 +449,11 @@ func Test_ParseAnnotationOnType(t *testing.T) {
 			require.Equal(TypeString, annotationType.Type)
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/user") {
-		resource := rootdoc.Resources["/user"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Bodies, "application/json") {
-				body := method.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/user"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if body, ok := method.Bodies["application/json"]; assert.True(ok) {
 				require.Equal("User", body.Type)
-				if assert.Contains(body.Annotations, "AnnotationOnType") {
-					annotation := body.Annotations["AnnotationOnType"]
+				if annotation, ok := body.Annotations["AnnotationOnType"]; assert.True(ok) {
 					require.Equal("something on annotation", annotation.String)
 					annotationType := annotation.AnnotationType
 					require.Equal("annotation on type", annotationType.Description)
@@ -548,13 +462,10 @@ func Test_ParseAnnotationOnType(t *testing.T) {
 					require.Equal(TypeString, annotationType.Type)
 				}
 			}
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[HTTPCode(200)]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+			if response, ok := method.Responses[HTTPCode(200)]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("User", body.Type)
-					if assert.Contains(body.Annotations, "AnnotationOnType") {
-						annotation := body.Annotations["AnnotationOnType"]
+					if annotation, ok := body.Annotations["AnnotationOnType"]; assert.True(ok) {
 						require.Equal("something on annotation", annotation.String)
 						annotationType := annotation.AnnotationType
 						require.Equal("annotation on type", annotationType.Description)
@@ -608,10 +519,8 @@ func Test_ParseCheckUnusedAnnotation(t *testing.T) {
 	rootdoc, err := parser.ParseFile("./test-examples/check-unused-annotation.raml")
 	require.NoError(err)
 
-	if assert.Contains(rootdoc.Resources, "/get") {
-		resource := rootdoc.Resources["/get"]
-		if assert.Contains(resource.Annotations, "UsedAnnotation") {
-			annotation := resource.Annotations["UsedAnnotation"]
+	if resource, ok := rootdoc.Resources["/get"]; assert.True(ok) {
+		if annotation, ok := resource.Annotations["UsedAnnotation"]; assert.True(ok) {
 			require.Equal("used annotation", annotation.AnnotationType.Description)
 		}
 	}
@@ -645,17 +554,12 @@ func Test_ParseDefaultMediaType(t *testing.T) {
 
 	rootdoc, err := parser.ParseFile("./test-examples/default-mediaType.raml")
 	require.NoError(err)
-	if assert.Contains(rootdoc.Resources, "/user") {
-		resource := rootdoc.Resources["/user"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[HTTPCode(200)]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/user"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[HTTPCode(200)]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal(TypeObject, body.Example.Value.Type)
-					if assert.Contains(body.Example.Value.Map, "name") {
-						name := body.Example.Value.Map["name"]
+					if name, ok := body.Example.Value.Map["name"]; assert.True(ok) {
 						require.Equal(TypeString, name.Type)
 						require.Equal("Alice", name.String)
 					}
@@ -679,96 +583,70 @@ func Test_ParseExampleFromType(t *testing.T) {
 	require.NotZero(rootdoc)
 
 	require.Equal("Example from type", rootdoc.Title)
-	if assert.Contains(rootdoc.Types, "User") {
-		typ := rootdoc.Types["User"]
+	if typ, ok := rootdoc.Types["User"]; assert.True(ok) {
 		require.Equal(TypeObject, typ.Type)
-		if assert.Contains(typ.Properties.Map(), "name") {
-			property := typ.Properties.Map()["name"]
+		if property, ok := typ.Properties.Map()["name"]; assert.True(ok) {
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Properties.Map(), "email") {
-			property := typ.Properties.Map()["email"]
+		if property, ok := typ.Properties.Map()["email"]; assert.True(ok) {
 			require.True(property.Required)
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Contains(typ.Examples, "user1") {
-			example := typ.Examples["user1"]
-			if assert.Contains(example.Value.Map, "name") {
-				value := example.Value.Map["name"]
+		if example, ok := typ.Examples["user1"]; assert.True(ok) {
+			if value, ok := example.Value.Map["name"]; assert.True(ok) {
 				require.Equal("Alice", value.String)
 			}
-			if assert.Contains(example.Value.Map, "email") {
-				value := example.Value.Map["email"]
+			if value, ok := example.Value.Map["email"]; assert.True(ok) {
 				require.Equal("alice@example.com", value.String)
 			}
 		}
-		if assert.Contains(typ.Examples, "user2") {
-			example := typ.Examples["user2"]
-			if assert.Contains(example.Value.Map, "name") {
-				value := example.Value.Map["name"]
+		if example, ok := typ.Examples["user2"]; assert.True(ok) {
+			if value, ok := example.Value.Map["name"]; assert.True(ok) {
 				require.Equal("Bob", value.String)
 			}
-			if assert.Contains(example.Value.Map, "email") {
-				value := example.Value.Map["email"]
+			if value, ok := example.Value.Map["email"]; assert.True(ok) {
 				require.Equal("bob@example.com", value.String)
 			}
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/user") {
-		resource := rootdoc.Resources["/user"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/user"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("User", body.Type)
-					if assert.Contains(body.Example.Value.Map, "name") {
-						value := body.Example.Value.Map["name"]
+					if value, ok := body.Example.Value.Map["name"]; assert.True(ok) {
 						require.NotEmpty(value.String)
 					}
 				}
 			}
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/user/wrap") {
-		resource := rootdoc.Resources["/user/wrap"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/user/wrap"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal(TypeObject, body.Type)
-					if assert.Contains(body.Properties.Map(), "user") {
-						property := body.Properties.Map()["user"]
+					if property, ok := body.Properties.Map()["user"]; assert.True(ok) {
 						require.Equal("User", property.Type)
 					}
-					if assert.Contains(body.Example.Value.Map, "user") {
-						user := body.Example.Value.Map["user"]
-						if assert.Contains(user.Map, "name") {
-							value := user.Map["name"]
+					if user, ok := body.Example.Value.Map["user"]; assert.True(ok) {
+						if value, ok := user.Map["name"]; assert.True(ok) {
 							require.Equal(TypeString, value.Type)
 							require.NotEmpty(value.String)
 						}
-						if assert.Contains(user.Map, "email") {
-							value := user.Map["email"]
+						if value, ok := user.Map["email"]; assert.True(ok) {
 							require.Equal(TypeString, value.Type)
 							require.NotEmpty(value.String)
 						}
 					}
-					if assert.Contains(body.Examples, "autoGenerated") {
-						example := body.Examples["autoGenerated"]
-						if assert.Contains(example.Value.Map, "user") {
-							user := body.Example.Value.Map["user"]
-							if assert.Contains(user.Map, "name") {
-								value := user.Map["name"]
+					if example, ok := body.Examples["autoGenerated"]; assert.True(ok) {
+						if user, ok := example.Value.Map["user"]; assert.True(ok) {
+							if value, ok := user.Map["name"]; assert.True(ok) {
 								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
-							if assert.Contains(user.Map, "email") {
-								value := user.Map["email"]
+							if value, ok := user.Map["email"]; assert.True(ok) {
 								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
@@ -778,41 +656,32 @@ func Test_ParseExampleFromType(t *testing.T) {
 			}
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/users") {
-		resource := rootdoc.Resources["/users"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/users"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal("User[]", body.Type)
 					require.Len(body.Example.Value.Array, 2)
 					for _, user := range body.Example.Value.Array {
 						require.NotNil(user)
-						if assert.Contains(user.Map, "name") {
-							value := user.Map["name"]
+						if value, ok := user.Map["name"]; assert.True(ok) {
 							require.Equal(TypeString, value.Type)
 							require.NotEmpty(value.String)
 						}
-						if assert.Contains(user.Map, "email") {
-							value := user.Map["email"]
+						if value, ok := user.Map["email"]; assert.True(ok) {
 							require.Equal(TypeString, value.Type)
 							require.NotEmpty(value.String)
 						}
 					}
-					if assert.Contains(body.Examples, "autoGenerated") {
-						example := body.Examples["autoGenerated"]
+					if example, ok := body.Examples["autoGenerated"]; assert.True(ok) {
 						require.Len(example.Value.Array, 2)
 						for _, user := range example.Value.Array {
 							require.NotNil(user)
-							if assert.Contains(user.Map, "name") {
-								value := user.Map["name"]
+							if value, ok := user.Map["name"]; assert.True(ok) {
 								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
-							if assert.Contains(user.Map, "email") {
-								value := user.Map["email"]
+							if value, ok := user.Map["email"]; assert.True(ok) {
 								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
@@ -822,31 +691,23 @@ func Test_ParseExampleFromType(t *testing.T) {
 			}
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/users/wrap") {
-		resource := rootdoc.Resources["/users/wrap"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "application/json") {
-					body := response.Bodies["application/json"]
+	if resource, ok := rootdoc.Resources["/users/wrap"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["application/json"]; assert.True(ok) {
 					require.Equal(TypeObject, body.Type)
-					if assert.Contains(body.Properties.Map(), "users") {
-						property := body.Properties.Map()["users"]
+					if property, ok := body.Properties.Map()["users"]; assert.True(ok) {
 						require.Equal("User[]", property.Type)
 					}
-					if assert.Contains(body.Example.Value.Map, "users") {
-						users := body.Example.Value.Map["users"]
+					if users, ok := body.Example.Value.Map["users"]; assert.True(ok) {
 						require.Len(users.Array, 2)
 						for _, user := range users.Array {
 							require.NotNil(user)
-							if assert.Contains(user.Map, "name") {
-								value := user.Map["name"]
+							if value, ok := user.Map["name"]; assert.True(ok) {
 								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
-							if assert.Contains(user.Map, "email") {
-								value := user.Map["email"]
+							if value, ok := user.Map["email"]; assert.True(ok) {
 								require.Equal(TypeString, value.Type)
 								require.NotEmpty(value.String)
 							}
@@ -872,14 +733,10 @@ func Test_ParseExampleIncludeBinaryFile(t *testing.T) {
 	require.NotZero(rootdoc)
 
 	require.Equal("Example include binary file", rootdoc.Title)
-	if assert.Contains(rootdoc.Resources, "/binary") {
-		resource := rootdoc.Resources["/binary"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
-			if assert.Contains(method.Responses, HTTPCode(200)) {
-				response := method.Responses[200]
-				if assert.Contains(response.Bodies, "image/png") {
-					body := response.Bodies["image/png"]
+	if resource, ok := rootdoc.Resources["/binary"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
+			if response, ok := method.Responses[200]; assert.True(ok) {
+				if body, ok := response.Bodies["image/png"]; assert.True(ok) {
 					require.Equal(TypeFile, body.Type)
 					require.Len(body.FileTypes, 1)
 					require.Equal("*/*", body.FileTypes[0])
@@ -904,18 +761,17 @@ func Test_ParseObjectArray(t *testing.T) {
 	require.NoError(err)
 	require.NotZero(rootdoc)
 
-	if assert.Contains(rootdoc.Types, "UserList") {
-		apiType := rootdoc.Types["UserList"]
+	if apiType, ok := rootdoc.Types["UserList"]; assert.True(ok) {
 		require.Equal("object[]", apiType.Type)
-		if assert.Contains(apiType.Properties.Map(), "name") {
-			property := apiType.Properties.Map()["name"]
+		if property, ok := apiType.Properties.Map()["name"]; assert.True(ok) {
 			require.Equal(TypeString, property.Type)
 		}
-		if assert.Len(apiType.Example.Value.Array, 2) {
-			require.Contains(apiType.Example.Value.Array[0].Map, "name")
-			require.Equal("Alice", apiType.Example.Value.Array[0].Map["name"].String)
-			require.Contains(apiType.Example.Value.Array[1].Map, "name")
-			require.Equal("Bob", apiType.Example.Value.Array[1].Map["name"].String)
+		require.Len(apiType.Example.Value.Array, 2)
+		if value, ok := apiType.Example.Value.Array[0].Map["name"]; assert.True(ok) {
+			require.Equal("Alice", value.String)
+		}
+		if value, ok := apiType.Example.Value.Array[1].Map["name"]; assert.True(ok) {
+			require.Equal("Bob", value.String)
 		}
 	}
 }
@@ -933,22 +789,17 @@ func Test_ParseTrait(t *testing.T) {
 	require.NoError(err)
 	require.NotZero(rootdoc)
 
-	if assert.Contains(rootdoc.Traits, "RequireLogin") {
-		trait := rootdoc.Traits["RequireLogin"]
-		if assert.Contains(trait.Headers.Map(), "Authorization") {
-			header := trait.Headers.Map()["Authorization"]
+	if trait, ok := rootdoc.Traits["RequireLogin"]; assert.True(ok) {
+		if header, ok := trait.Headers.Map()["Authorization"]; assert.True(ok) {
 			require.Equal(TypeString, header.Type)
 		}
 	}
-	if assert.Contains(rootdoc.Resources, "/user") {
-		resource := rootdoc.Resources["/user"]
-		if assert.Contains(resource.Methods, "get") {
-			method := resource.Methods["get"]
+	if resource, ok := rootdoc.Resources["/user"]; assert.True(ok) {
+		if method, ok := resource.Methods["get"]; assert.True(ok) {
 			if assert.Len(method.Is, 1) {
 				trait := method.Is[0]
 				require.Equal(trait.String, "RequireLogin")
-				if assert.Contains(trait.Headers.Map(), "Authorization") {
-					header := trait.Headers.Map()["Authorization"]
+				if header, ok := trait.Headers.Map()["Authorization"]; assert.True(ok) {
 					require.Equal(TypeString, header.Type)
 				}
 			}
