@@ -1,9 +1,3 @@
 [submodule "parser/raml-examples"]
 	path = parser/raml-examples
 	url = https://github.com/raml-org/raml-examples
-[submodule "vendor/github.com/tsaikd/yaml"]
-	path = vendor/github.com/tsaikd/yaml
-	url = https://github.com/tsaikd/yaml
-[submodule "vendor/github.com/tsaikd/KDGoLib"]
-	path = vendor/github.com/tsaikd/KDGoLib
-	url = https://github.com/tsaikd/KDGoLib
