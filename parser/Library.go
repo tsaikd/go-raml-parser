@@ -100,6 +100,46 @@ func (t Library) Prefix() string {
 	return t.Name + "."
 }
 
+var _ fillBaseType = &Library{}
+
+func (t *Library) fillBaseType(library Library) (err error) {
+	if t == nil {
+		return
+	}
+
+	for name, apiType := range t.Types {
+		switch apiType.NativeType {
+		case TypeNull, TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
+		default:
+			var rootType *APIType
+			rootType, err = getAPIRootType(t.Types, apiType.NativeType)
+			if err != nil {
+				return
+			}
+			if apiType.Type != rootType.Type {
+				newType := *apiType
+				mergeAPIType(&newType, *rootType)
+				t.Types[name] = &newType
+			}
+		}
+	}
+
+	return
+}
+
+func getAPIRootType(apiTypes APITypes, name string) (rootType *APIType, err error) {
+	apiType, ok := apiTypes[name]
+	if !ok {
+		return nil, ErrorTypeUndefined1.New(nil, name)
+	}
+	switch apiType.NativeType {
+	case TypeNull, TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
+		return apiType, nil
+	default:
+		return getAPIRootType(apiTypes, apiType.NativeType)
+	}
+}
+
 var _ checkUnusedAnnotation = Library{}
 
 func (t Library) checkUnusedAnnotation(conf PostProcessConfig) (err error) {

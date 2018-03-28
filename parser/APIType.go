@@ -126,8 +126,30 @@ func (t *APIType) fillProperties(library Library) (err error) {
 
 	// fill Properties if possible
 	switch t.BaseType {
-	case "", TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeObject, TypeFile:
+	case "", TypeBoolean, TypeInteger, TypeNumber, TypeString, TypeFile:
 		// no more action for RAML built-in type
+		return
+	case TypeObject:
+		if isInlineAPIType(*t) {
+			// no more action if declared by JSON
+			return
+		}
+
+		for _, property := range t.Properties.Slice() {
+			if err = property.Annotations.fixEmptyAnnotation(); err != nil {
+				return
+			}
+			if err = property.Annotations.fixAnnotationBracket(); err != nil {
+				return
+			}
+			if err = property.Annotations.fillAnnotation(library); err != nil {
+				return
+			}
+			if err = property.APIType.fillProperties(library); err != nil {
+				return
+			}
+		}
+
 		return
 	default:
 		if isInlineAPIType(*t) {

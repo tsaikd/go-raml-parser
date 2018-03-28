@@ -61,6 +61,17 @@ func (t Annotations) fixAnnotationBracket() (err error) {
 	return
 }
 
+var _ fillAnnotation = &Annotations{}
+
+func (t Annotations) fillAnnotation(library Library) (err error) {
+	for _, annotation := range t {
+		if err = annotation.fillAnnotation(library); err != nil {
+			return
+		}
+	}
+	return
+}
+
 var _ checkUnusedAnnotation = Annotations{}
 
 func (t Annotations) checkUnusedAnnotation(conf PostProcessConfig) (err error) {

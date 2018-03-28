@@ -94,7 +94,7 @@ func (t Properties) Slice() []*Property {
 
 var _ fixRequiredBySyntax = &Properties{}
 
-func (t Properties) fixRequiredBySyntax() (err error) {
+func (t *Properties) fixRequiredBySyntax() (err error) {
 	for name, property := range t.mapdata {
 		if strings.HasSuffix(name, "?") {
 			property.Required = false
@@ -102,6 +102,22 @@ func (t Properties) fixRequiredBySyntax() (err error) {
 			property.Name = trimName
 			delete(t.mapdata, name)
 			t.mapdata[trimName] = property
+		}
+		if !property.Properties.IsEmpty() {
+			if err = property.Properties.fixRequiredBySyntax(); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+var _ checkUnusedAnnotation = Properties{}
+
+func (t Properties) checkUnusedAnnotation(conf PostProcessConfig) (err error) {
+	for _, property := range t.Slice() {
+		if err = property.Annotations.checkUnusedAnnotation(conf); err != nil {
+			return
 		}
 	}
 	return
