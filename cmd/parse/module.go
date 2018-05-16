@@ -27,30 +27,59 @@ var Module = cmder.NewModule("parse").
 			Destination: &checkRAMLVersion,
 		},
 		&cli.BoolFlag{
-			Name:        "allowIntToBeNum",
+			Name:        "ignoreUnusedAnnotation",
+			Usage:       "Ignore unused annotations",
+			Destination: &ignoreUnusedAnnotation,
+		},
+		&cli.BoolFlag{
+			Name:        "ignoreUnusedTrait",
+			Usage:       "Ignore unused traits",
+			Destination: &ignoreUnusedTrait,
+		},
+		&cli.BoolFlag{
+			Name:        "allowIntegerToBeNumber",
 			Usage:       "Allow integer type to be number type when checking",
-			Destination: &allowIntToBeNum,
+			Destination: &allowIntegerToBeNumber,
+		},
+		&cli.BoolFlag{
+			Name:        "allowArrayToBeNull",
+			Usage:       "Allow array type to be null",
+			Destination: &allowArrayToBeNull,
+		},
+		&cli.BoolFlag{
+			Name:        "allowRequiredPropertyToBeEmpty",
+			Usage:       "Allow required property to be empty value, but still should be existed",
+			Destination: &allowRequiredPropertyToBeEmpty,
 		},
 	).
 	SetAction(action)
 
 var ramlFile string
 var checkRAMLVersion bool
-var allowIntToBeNum bool
-
-var checkOptions = []parser.CheckValueOption{}
+var ignoreUnusedAnnotation bool
+var ignoreUnusedTrait bool
+var allowIntegerToBeNumber bool
+var allowArrayToBeNull bool
+var allowRequiredPropertyToBeEmpty bool
 
 func action(c *cli.Context) (err error) {
 	ramlParser := parser.NewParser()
 
-	if allowIntToBeNum {
-		checkOptions = append(checkOptions, parser.CheckValueOptionAllowIntegerToBeNumber(true))
-	}
-
 	if err = ramlParser.Config(parserConfig.CheckRAMLVersion, checkRAMLVersion); err != nil {
 		return
 	}
+	if err = ramlParser.Config(parserConfig.IgnoreUnusedAnnotation, ignoreUnusedAnnotation); err != nil {
+		return
+	}
+	if err = ramlParser.Config(parserConfig.IgnoreUnusedTrait, ignoreUnusedTrait); err != nil {
+		return
+	}
 
+	checkOptions := []parser.CheckValueOption{
+		parser.CheckValueOptionAllowIntegerToBeNumber(allowIntegerToBeNumber),
+		parser.CheckValueOptionAllowArrayToBeNull(allowArrayToBeNull),
+		parser.CheckValueOptionAllowRequiredPropertyToBeEmpty(allowRequiredPropertyToBeEmpty),
+	}
 	if err = ramlParser.Config(parserConfig.CheckValueOptions, checkOptions); err != nil {
 		return
 	}
